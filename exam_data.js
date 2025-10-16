@@ -224,7 +224,7 @@ const EXAM_DATA =
     "options": {
       "A": "Create a Network Load Balancer in the public subnet of the application's VPC to route the traffic to the appliance for packet inspection.",
       "B": "Create an Application Load Balancer in the public subnet of the application's VPC to route the traffic to the appliance for packet inspection.",
-      "C": "Deploy a transit gateway in the inspection VPConfigure route tables to route the incoming packets through the transit gateway.",
+      "C": "Deploy a transit gateway in the inspection VPC. Configure route tables to route the incoming packets through the transit gateway.",
       "D": "Deploy a Gateway Load Balancer in the inspection VPC. Create a Gateway Load Balancer endpoint to receive the incoming packets and forward the packets to the appliance."
     },
     "correct_answer": "D"
