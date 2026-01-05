@@ -110,6 +110,10 @@
             background: linear-gradient(90deg, #7c3aed, #a855f7);
         }
 
+        .exam-card.dva::before {
+            background: linear-gradient(90deg, #ea580c, #f59e0b);
+        }
+
         .exam-card:hover {
             transform: translateY(-5px);
             border-color: rgba(148, 163, 184, 0.2);
@@ -145,6 +149,11 @@
         .exam-card.mla .card-badge {
             background: rgba(124, 58, 237, 0.2);
             color: #c4b5fd;
+        }
+
+        .exam-card.dva .card-badge {
+            background: rgba(234, 88, 12, 0.2);
+            color: #fdba74;
         }
 
         .exam-card h2 {
@@ -213,6 +222,11 @@
 
         .exam-card.mla .exam-btn {
             background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+        }
+
+        .exam-card.dva .exam-btn {
+            background: linear-gradient(135deg, #ea580c 0%, #f59e0b 100%);
             color: white;
         }
 
@@ -398,6 +412,34 @@
                 </div>
                 
                 <a href="exam_simulator_mla.html" class="exam-btn">
+                    Start Practice Exam →
+                </a>
+            </div>
+
+            <!-- Developer Associate Card -->
+            <div class="exam-card dva">
+                <div class="card-icon">👨‍💻</div>
+                <span class="card-badge">Associate Level</span>
+                <h2>AWS Developer Associate</h2>
+                <div class="exam-code">DVA-C02</div>
+                <p>Build and deploy applications on AWS. Master Lambda, API Gateway, DynamoDB, CI/CD pipelines, and serverless development practices.</p>
+                
+                <div class="exam-stats">
+                    <div class="stat">
+                        <span class="stat-icon">📝</span>
+                        <span>65 Questions</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">⏱️</span>
+                        <span>130 Minutes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🎯</span>
+                        <span>720 Passing</span>
+                    </div>
+                </div>
+                
+                <a href="exam_simulator_dva.html" class="exam-btn">
                     Start Practice Exam →
                 </a>
             </div>
