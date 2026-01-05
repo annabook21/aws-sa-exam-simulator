@@ -832,10 +832,19 @@
                 flex-direction: column;
             }
 
+            .question-panel {
+                order: 1;
+                flex: 1;
+                min-height: 60vh;
+            }
+
             .sidebar {
+                order: 2;
                 width: 100%;
+                max-height: 40vh;
+                overflow-y: auto;
                 border-left: none;
-                border-top: 1px solid #fed7aa;
+                border-top: 1px solid var(--border-color);
             }
 
             .question-grid {
