@@ -192,6 +192,115 @@
             background: #64748b;
         }
 
+        .btn-review {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9em;
+        }
+
+        /* Review Bank Section */
+        .review-bank-section {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .review-bank-section h2 {
+            color: #e67e22;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .review-bank-info {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .review-bank-info strong {
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .review-bank-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .dark-mode .review-bank-section {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(230, 126, 34, 0.15) 100%);
+            border-color: #f39c12;
+        }
+
+        .dark-mode .review-bank-section h2 {
+            color: #f5a623;
+        }
+
+        .dark-mode .review-bank-info {
+            color: #a1a1aa;
+        }
+
+        .dark-mode .review-bank-info strong {
+            color: #e4e4e7;
+        }
+
+        /* Review Bank Notice in Results */
+        .review-bank-notice {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .review-bank-notice p {
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        .btn-add-incorrect {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-add-incorrect:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-add-incorrect:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .dark-mode .review-bank-notice {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(230, 126, 34, 0.15) 100%);
+        }
+
+        .dark-mode .review-bank-notice p {
+            color: #e4e4e7;
+        }
+
         /* Exam Screen */
         .exam-screen {
             display: none;
@@ -922,6 +1031,24 @@
                 </label>
             </div>
 
+            <!-- Review Bank Section -->
+            <div class="review-bank-section" id="reviewBankSection">
+                <h2>📌 Review Bank</h2>
+                <p class="review-bank-info">
+                    Questions you mark for review during exams are saved here for later practice.
+                    <br>
+                    <strong>Saved Questions: <span id="reviewBankCount">0</span></strong>
+                </p>
+                <div class="review-bank-buttons" id="reviewBankButtons" style="display: none;">
+                    <button class="btn btn-review" onclick="startReviewBankExam()">
+                        📚 Practice Review Bank
+                    </button>
+                    <button class="btn btn-secondary btn-small" onclick="clearReviewBank()">
+                        🗑️ Clear Bank
+                    </button>
+                </div>
+            </div>
+
             <button class="btn" onclick="startExam()">Begin Exam</button>
         </div>
 
@@ -1079,6 +1206,9 @@
                 </div>
             </div>
 
+            <!-- Review Bank Notice -->
+            <div class="review-bank-notice" id="reviewBankNotice" style="display: none;"></div>
+
             <div class="question-review" id="questionReviewList"></div>
 
             <div style="text-align: center; margin-top: 30px;">
@@ -1105,6 +1235,7 @@ This notepad persists throughout your exam session."></textarea>
 
     <script>
         let examData = [];
+        let originalExamData = [];
         let currentQuestionIndex = 0;
         let userAnswers = [];
         let markedQuestions = [];
@@ -1113,6 +1244,184 @@ This notepad persists throughout your exam session."></textarea>
         let timeRemaining = 0;
         let startTime;
         let testMode = 'exam';
+        let isReviewBankExam = false;
+        
+        // Review Bank Storage Key (unique per exam type)
+        const REVIEW_BANK_KEY = 'examSimulator_reviewBank_AIP'; // AI Practitioner
+
+        // ============================================
+        // REVIEW BANK FUNCTIONS
+        // ============================================
+        
+        function getReviewBank() {
+            try {
+                const saved = localStorage.getItem(REVIEW_BANK_KEY);
+                return saved ? JSON.parse(saved) : [];
+            } catch (e) {
+                console.error('Error reading review bank:', e);
+                return [];
+            }
+        }
+
+        function saveToReviewBank(questions) {
+            try {
+                const existing = getReviewBank();
+                const existingIds = new Set(existing.map(q => `${q.topic}-${q.number}`));
+                
+                questions.forEach(q => {
+                    const id = `${q.topic}-${q.number}`;
+                    if (!existingIds.has(id)) {
+                        existing.push(q);
+                    }
+                });
+                
+                localStorage.setItem(REVIEW_BANK_KEY, JSON.stringify(existing));
+                updateReviewBankUI();
+                return existing.length;
+            } catch (e) {
+                console.error('Error saving to review bank:', e);
+                return 0;
+            }
+        }
+
+        function removeFromReviewBank(questionIds) {
+            try {
+                const existing = getReviewBank();
+                const idsToRemove = new Set(questionIds);
+                const filtered = existing.filter(q => !idsToRemove.has(`${q.topic}-${q.number}`));
+                localStorage.setItem(REVIEW_BANK_KEY, JSON.stringify(filtered));
+                updateReviewBankUI();
+                return filtered.length;
+            } catch (e) {
+                console.error('Error removing from review bank:', e);
+                return 0;
+            }
+        }
+
+        function clearReviewBank() {
+            if (confirm('Are you sure you want to clear all saved review questions? This cannot be undone.')) {
+                localStorage.removeItem(REVIEW_BANK_KEY);
+                updateReviewBankUI();
+            }
+        }
+
+        function updateReviewBankUI() {
+            const bank = getReviewBank();
+            const count = bank.length;
+            const countEl = document.getElementById('reviewBankCount');
+            const btnContainer = document.getElementById('reviewBankButtons');
+            
+            if (countEl) {
+                countEl.textContent = count;
+            }
+            
+            if (btnContainer) {
+                btnContainer.style.display = count > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function addIncorrectToReviewBank() {
+            if (window.incorrectQuestionsToSave && window.incorrectQuestionsToSave.length > 0) {
+                const count = window.incorrectQuestionsToSave.length;
+                const totalCount = saveToReviewBank(window.incorrectQuestionsToSave);
+                
+                const notice = document.getElementById('reviewBankNotice');
+                if (notice) {
+                    const btn = notice.querySelector('.btn-add-incorrect');
+                    if (btn) {
+                        btn.textContent = '✓ Added!';
+                        btn.disabled = true;
+                    }
+                }
+                
+                window.incorrectQuestionsToSave = [];
+                console.log(`📌 Added ${count} incorrect questions to review bank (total: ${totalCount})`);
+            }
+        }
+
+        function removeCorrectFromReviewBank() {
+            if (window.correctQuestionsToRemove && window.correctQuestionsToRemove.length > 0) {
+                const questionIds = window.correctQuestionsToRemove.map(q => `${q.topic}-${q.number}`);
+                const count = questionIds.length;
+                const remainingCount = removeFromReviewBank(questionIds);
+                
+                const notice = document.getElementById('reviewBankNotice');
+                if (notice) {
+                    const btns = notice.querySelectorAll('button');
+                    btns.forEach(btn => {
+                        if (btn.textContent.includes('Remove')) {
+                            btn.textContent = '✓ Removed!';
+                            btn.disabled = true;
+                            btn.style.background = '#95a5a6';
+                        }
+                    });
+                    
+                    const infoSpan = notice.querySelector('span');
+                    if (infoSpan) {
+                        infoSpan.textContent = `${remainingCount} questions remaining in Review Bank`;
+                    }
+                }
+                
+                window.correctQuestionsToRemove = [];
+                console.log(`🗑️ Removed ${count} mastered questions from review bank (remaining: ${remainingCount})`);
+            }
+        }
+
+        function startReviewBankExam() {
+            const reviewBank = getReviewBank();
+            
+            if (reviewBank.length === 0) {
+                alert('Your review bank is empty. Mark questions for review during exams to add them here.');
+                return;
+            }
+
+            const timeLimitMinutes = parseInt(document.getElementById('timeLimit').value);
+            const randomizeQuestions = document.getElementById('randomizeQuestions').checked;
+            const randomizeOptions = document.getElementById('randomizeOptions').checked;
+            testMode = document.getElementById('testMode').value;
+
+            let selectedQuestions = [...reviewBank];
+            
+            if (randomizeQuestions) {
+                selectedQuestions = shuffle(selectedQuestions);
+            }
+
+            examQuestionsOriginal = selectedQuestions.map(q => ({...q}));
+
+            if (randomizeOptions) {
+                selectedQuestions = selectedQuestions.map(q => randomizeQuestionOptions(q));
+            }
+
+            examData = selectedQuestions;
+            isReviewBankExam = true;
+            
+            userAnswers = new Array(examData.length).fill(null);
+            markedQuestions = new Array(examData.length).fill(false);
+            eliminatedOptions = new Array(examData.length).fill(null).map(() => []);
+
+            if (testMode === 'exam' && timeLimitMinutes > 0) {
+                const adjustedTime = Math.ceil(timeLimitMinutes * 60 * (examData.length / 85));
+                timeRemaining = adjustedTime;
+                startTimer();
+            } else if (testMode === 'study') {
+                document.getElementById('timeRemaining').textContent = 'Unlimited';
+            }
+
+            startTime = Date.now();
+
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('examScreen').style.display = 'flex';
+
+            buildQuestionGrid();
+            currentQuestionIndex = 0;
+            loadQuestion(0);
+            
+            console.log('📚 Started Review Bank exam with', examData.length, 'questions');
+        }
+
+        // Track original questions for review bank
+        let examQuestionsOriginal = [];
 
         // Dark mode toggle function
         function toggleDarkMode() {
@@ -1136,6 +1445,7 @@ This notepad persists throughout your exam session."></textarea>
             
             if (typeof EXAM_DATA !== 'undefined' && EXAM_DATA.length > 0) {
                 examData = EXAM_DATA;
+                originalExamData = [...EXAM_DATA];
                 document.getElementById('totalQuestions').textContent = examData.length;
                 console.log('✅ AI Practitioner exam data loaded successfully:', examData.length, 'questions');
             } else {
@@ -1143,6 +1453,9 @@ This notepad persists throughout your exam session."></textarea>
                 alert('Error: Exam data not loaded. Please ensure exam_data2.js is in the same folder as this file.');
                 console.error('EXAM_DATA not found. Files should be in the same directory.');
             }
+            
+            // Initialize Review Bank UI
+            updateReviewBankUI();
             
             // Hide time limit selector when study mode is selected
             const testModeSelect = document.getElementById('testMode');
@@ -1174,11 +1487,15 @@ This notepad persists throughout your exam session."></textarea>
                 selectedQuestions = selectedQuestions.slice(0, parseInt(questionCount));
             }
 
+            // Store original questions BEFORE option randomization (for review bank)
+            examQuestionsOriginal = selectedQuestions.map(q => ({...q}));
+
             if (randomizeOptions) {
                 selectedQuestions = selectedQuestions.map(q => randomizeQuestionOptions(q));
             }
 
             examData = selectedQuestions;
+            isReviewBankExam = false; // Regular exam, not review bank
             
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
@@ -1498,6 +1815,19 @@ This notepad persists throughout your exam session."></textarea>
 
             clearInterval(timerInterval);
 
+            // Save marked questions to review bank
+            const markedQuestionsToSave = [];
+            markedQuestions.forEach((isMarked, index) => {
+                if (isMarked && examQuestionsOriginal[index]) {
+                    markedQuestionsToSave.push(examQuestionsOriginal[index]);
+                }
+            });
+            
+            if (markedQuestionsToSave.length > 0) {
+                const savedCount = saveToReviewBank(markedQuestionsToSave);
+                console.log(`📌 Saved ${markedQuestionsToSave.length} marked questions to review bank (total: ${savedCount})`);
+            }
+
             let correct = 0;
             let incorrect = 0;
             let notAnswered = 0;
@@ -1544,6 +1874,63 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('incorrectCount').textContent = incorrect;
             document.getElementById('notAnsweredCount').textContent = notAnswered;
             document.getElementById('timeSpent').textContent = timeSpentFormatted;
+
+            // Collect questions for review bank actions
+            const questionsToOffer = [];
+            const correctlyAnsweredQuestions = [];
+            detailedResults.forEach((result, idx) => {
+                if (!result.isCorrect && result.userAnswer !== null) {
+                    questionsToOffer.push(examQuestionsOriginal[idx]);
+                }
+                if (result.isCorrect && examQuestionsOriginal[idx]) {
+                    correctlyAnsweredQuestions.push(examQuestionsOriginal[idx]);
+                }
+            });
+
+            // Show review bank notice
+            const reviewBankNotice = document.getElementById('reviewBankNotice');
+            if (reviewBankNotice) {
+                let noticeHtml = '';
+                
+                if (isReviewBankExam && correctlyAnsweredQuestions.length > 0) {
+                    noticeHtml += `
+                        <p>🎉 You answered <strong>${correctlyAnsweredQuestions.length}</strong> question${correctlyAnsweredQuestions.length !== 1 ? 's' : ''} correctly!</p>
+                        <p style="margin-top: 10px;">
+                            <button class="btn-add-incorrect" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);" onclick="removeCorrectFromReviewBank()">
+                                ✓ Remove from Review Bank
+                            </button>
+                            <span style="font-size: 0.85em; color: #7f8c8d; margin-left: 10px;">Questions you've mastered</span>
+                        </p>
+                    `;
+                    window.correctQuestionsToRemove = correctlyAnsweredQuestions;
+                } else {
+                    const markedCount = markedQuestionsToSave.length;
+                    const incorrectCount = questionsToOffer.length;
+                    
+                    if (markedCount > 0) {
+                        noticeHtml += `<p>📌 <strong>${markedCount}</strong> marked question${markedCount !== 1 ? 's' : ''} saved to your Review Bank.</p>`;
+                    }
+                    
+                    if (incorrectCount > 0) {
+                        noticeHtml += `
+                            <p style="margin-top: 10px;">
+                                You got <strong>${incorrectCount}</strong> question${incorrectCount !== 1 ? 's' : ''} wrong.
+                                <button class="btn-add-incorrect" onclick="addIncorrectToReviewBank()">
+                                    ➕ Add to Review Bank
+                                </button>
+                            </p>
+                        `;
+                        window.incorrectQuestionsToSave = questionsToOffer;
+                    }
+                }
+                
+                if (noticeHtml) {
+                    reviewBankNotice.innerHTML = noticeHtml;
+                    reviewBankNotice.style.display = 'block';
+                } else {
+                    reviewBankNotice.style.display = 'none';
+                }
+            }
 
             const reviewList = document.getElementById('questionReviewList');
             reviewList.innerHTML = '<h2>Question by Question Review</h2>';
