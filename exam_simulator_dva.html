@@ -409,14 +409,27 @@
         }
 
         .option:hover {
-            background: #fff7ed;
-            border-color: #f59e0b;
+            background: var(--bg-tertiary);
+            border-color: var(--accent-color);
+        }
+
+        .dark-mode .option:hover {
+            background: rgba(234, 88, 12, 0.1);
+            border-color: #fb923c;
         }
 
         .option.selected {
-            background: var(--bg-tertiary);
+            background: linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(245, 158, 11, 0.2) 100%);
             border-color: var(--accent-color);
+            border-width: 3px;
             font-weight: 500;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+
+        .dark-mode .option.selected {
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.25) 0%, rgba(234, 88, 12, 0.3) 100%);
+            border-color: #fb923c;
+            box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2);
         }
 
         .option.eliminated {

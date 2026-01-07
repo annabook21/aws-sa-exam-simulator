@@ -426,14 +426,27 @@
         }
 
         .option:hover {
-            background: #faf5ff;
-            border-color: #a855f7;
+            background: var(--bg-tertiary);
+            border-color: var(--accent-color);
+        }
+
+        .dark-mode .option:hover {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: #a78bfa;
         }
 
         .option.selected {
-            background: var(--bg-tertiary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(168, 85, 247, 0.2) 100%);
             border-color: var(--accent-color);
+            border-width: 3px;
             font-weight: 500;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+
+        .dark-mode .option.selected {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(124, 58, 237, 0.3) 100%);
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
         }
 
         .option.eliminated {
