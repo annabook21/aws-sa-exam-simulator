@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS Certification Exam Simulators</title>
+    <title>Certification Exam Simulators</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -114,6 +114,10 @@
             background: linear-gradient(90deg, #ea580c, #f59e0b);
         }
 
+        .exam-card.cissp::before {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+        }
+
         .exam-card:hover {
             transform: translateY(-5px);
             border-color: rgba(148, 163, 184, 0.2);
@@ -154,6 +158,11 @@
         .exam-card.dva .card-badge {
             background: rgba(234, 88, 12, 0.2);
             color: #fdba74;
+        }
+
+        .exam-card.cissp .card-badge {
+            background: rgba(30, 58, 138, 0.3);
+            color: #93c5fd;
         }
 
         .exam-card h2 {
@@ -227,6 +236,11 @@
 
         .exam-card.dva .exam-btn {
             background: linear-gradient(135deg, #ea580c 0%, #f59e0b 100%);
+            color: white;
+        }
+
+        .exam-card.cissp .exam-btn {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             color: white;
         }
 
@@ -327,8 +341,8 @@
     <div class="container">
         <header>
             <div class="logo">☁️</div>
-            <h1>AWS Certification Exam Simulators</h1>
-            <p class="subtitle">Professional practice tests to help you prepare for AWS certification exams with realistic questions and exam conditions</p>
+            <h1>Certification Exam Simulators</h1>
+            <p class="subtitle">Professional practice tests to help you prepare for certification exams with realistic questions and exam conditions</p>
         </header>
 
         <div class="exam-grid">
@@ -443,6 +457,34 @@
                     Start Practice Exam →
                 </a>
             </div>
+
+            <!-- CISSP Card -->
+            <div class="exam-card cissp">
+                <div class="card-icon">🔒</div>
+                <span class="card-badge">Advanced Level</span>
+                <h2>CISSP</h2>
+                <div class="exam-code">Certified Information Systems Security Professional</div>
+                <p>Master the eight domains of information security including risk management, asset security, security architecture, and security operations.</p>
+
+                <div class="exam-stats">
+                    <div class="stat">
+                        <span class="stat-icon">📝</span>
+                        <span>125 Questions</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">⏱️</span>
+                        <span>180 Minutes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🎯</span>
+                        <span>700 Passing</span>
+                    </div>
+                </div>
+
+                <a href="exam_simulator_cissp.html" class="exam-btn">
+                    Start Practice Exam →
+                </a>
+            </div>
         </div>
 
         <section class="features">
@@ -487,7 +529,7 @@
         </section>
 
         <footer>
-            <p>Built for exam preparation purposes only. Not affiliated with Amazon Web Services.</p>
+            <p>Built for exam preparation purposes only. Not affiliated with Amazon Web Services or (ISC)².</p>
             <p style="margin-top: 10px;">
                 <a href="https://github.com/annabook21/aws-sa-exam-simulator" target="_blank">View on GitHub</a>
             </p>
