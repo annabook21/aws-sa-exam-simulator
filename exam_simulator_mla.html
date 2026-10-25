@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS ML Associate Exam Simulator (MLA-C01)</title>
+    <title>AWS ML Associate Exam Simulator (MLA-C02 Beta)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -993,6 +993,22 @@
         }
 
         /* Study Mode Feedback */
+        .question-origin {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .explanation {
+            margin-top: 12px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            line-height: 1.5;
+        }
+
         .study-feedback {
             margin-top: 20px;
             padding: 15px;
@@ -1143,16 +1159,17 @@
                 <span class="theme-icon-dark">☀️</span>
             </button>
             <h1>🧠 AWS ML Associate Exam Simulator</h1>
-            <div class="subtitle">MLA-C01 Practice Test Environment</div>
+            <div class="subtitle">MLA-C02 Beta Practice Test Environment</div>
             <p>Master Machine Learning concepts and services on AWS</p>
             
             <div class="exam-info">
                 <h2>Exam Information</h2>
                 <ul>
                     <li>Total Questions Available: <span id="totalQuestions">Loading...</span></li>
-                    <li>Real Exam: 65 Questions in 130 Minutes</li>
-                    <li>Question Formats: Multiple Choice, Multiple Select, Hotspot (Matching & Ordering)</li>
-                    <li>Domains: Data Engineering, ML Development, ML Operations, Responsible AI</li>
+                    <li>Real Exam (MLA-C02 Beta): 85 Questions in 170 Minutes, multiple choice and multiple response only</li>
+                    <li>Includes 99 practice questions written from the official MLA-C02 exam guide, covering every skill it lists, each with a plain-English explanation, labeled under each question</li>
+                    <li>Question Formats: Multiple Choice, Multiple Response (ordering/matching questions from MLA-C01 are hidden by default)</li>
+                    <li>Domains: Data Preparation (28%), ML and Foundation Model Development (24%), Deployment and Orchestration (24%), Operating, Monitoring and Securing (24%)</li>
                     <li>Features: Timer, Question Review, Progress Tracking, Study Mode</li>
                 </ul>
             </div>
@@ -1164,7 +1181,8 @@
                         <option value="10">10 Questions (Quick Test)</option>
                         <option value="25">25 Questions (Practice)</option>
                         <option value="50">50 Questions (Half Exam)</option>
-                        <option value="65" selected>65 Questions (Full Exam)</option>
+                        <option value="65">65 Questions (MLA-C01 length)</option>
+                        <option value="85" selected>85 Questions (MLA-C02 Beta)</option>
                         <option value="all">All Questions</option>
                     </select>
                 </label>
@@ -1176,7 +1194,8 @@
                         <option value="30">30 Minutes</option>
                         <option value="60">60 Minutes</option>
                         <option value="90">90 Minutes</option>
-                        <option value="130" selected>130 Minutes (Full Exam)</option>
+                        <option value="130">130 Minutes (MLA-C01 length)</option>
+                        <option value="170" selected>170 Minutes (MLA-C02 Beta)</option>
                         <option value="0">No Time Limit</option>
                     </select>
                 </label>
@@ -1191,6 +1210,10 @@
 
                 <label>
                     <input type="checkbox" id="randomizeQuestions" checked> Randomize Questions
+                </label>
+
+                <label>
+                    <input type="checkbox" id="includeRetired"> Include ordering/matching questions (retired, not on MLA-C02)
                 </label>
             </div>
 
@@ -1223,7 +1246,7 @@
         <!-- Exam Screen -->
         <div class="exam-screen" id="examScreen">
             <div class="exam-header">
-                <div class="exam-title">AWS ML Associate (MLA-C01) Practice Exam</div>
+                <div class="exam-title">AWS ML Associate (MLA-C02 Beta) Practice Exam</div>
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
                         <span class="theme-icon-light">🌙</span>
@@ -1252,6 +1275,7 @@
                     </div>
 
                     <div class="question-text" id="questionText"></div>
+                    <div class="question-origin" id="questionOrigin" hidden></div>
 
                     <div class="options" id="optionsContainer"></div>
 
@@ -1398,6 +1422,8 @@ This notepad persists throughout your exam session."></textarea>
 
     <!-- Load exam data from external JS file -->
     <script src="exam_data3.js"></script>
+    <script src="exam_data3_c02.js"></script>
+    <script src="exam_data3_c02b.js"></script>
 
     <script>
         let examData = [];
@@ -1566,7 +1592,7 @@ This notepad persists throughout your exam session."></textarea>
             eliminatedOptions = new Array(examData.length).fill(null).map(() => []);
 
             if (testMode === 'exam' && timeLimitMinutes > 0) {
-                const adjustedTime = Math.ceil(timeLimitMinutes * 60 * (examData.length / 65));
+                const adjustedTime = Math.ceil(timeLimitMinutes * 60 * (examData.length / 85));
                 timeRemaining = adjustedTime;
                 startTimer();
             } else if (testMode === 'study') {
@@ -1643,6 +1669,10 @@ This notepad persists throughout your exam session."></textarea>
             testMode = document.getElementById('testMode').value;
 
             let selectedQuestions = [...examData];
+
+            if (!document.getElementById('includeRetired').checked) {
+                selectedQuestions = selectedQuestions.filter(q => !q.question_type);
+            }
             
             if (randomizeQuestions) {
                 selectedQuestions = shuffle(selectedQuestions);
@@ -1746,6 +1776,9 @@ This notepad persists throughout your exam session."></textarea>
                 `Question ${index + 1} of ${examData.length}`;
 
             document.getElementById('questionText').textContent = question.question;
+            const originEl = document.getElementById('questionOrigin');
+            originEl.textContent = question.origin === 'written' ? 'Practice question written from the official MLA-C02 exam guide (not from AWS)' : '';
+            originEl.hidden = question.origin !== 'written';
             document.getElementById('markForReview').checked = markedQuestions[index];
 
             // Update question type badge
@@ -2210,6 +2243,13 @@ This notepad persists throughout your exam session."></textarea>
             }
         }
 
+        function explanationHtml(question) {
+            if (!question.explanation) return '';
+            const div = document.createElement('div');
+            div.textContent = question.explanation;
+            return `<div class="explanation"><strong>💡 Plain English:</strong> ${div.innerHTML}</div>`;
+        }
+
         function getCorrectAnswerArray(question) {
             const answer = question.correct_answer;
             if (Array.isArray(answer)) return answer;
@@ -2359,6 +2399,7 @@ This notepad persists throughout your exam session."></textarea>
                     <h4>Question ${result.index + 1}${typeLabel}</h4>
                     <p style="margin: 10px 0; color: #555;">${result.question.question}</p>
                     ${answerHtml}
+                    ${explanationHtml(result.question)}
                 `;
 
                 reviewList.appendChild(div);
@@ -2578,7 +2619,7 @@ This notepad persists throughout your exam session."></textarea>
             feedback.className = 'study-feedback ' + (isCorrect ? 'correct' : 'incorrect');
             
             if (isCorrect) {
-                feedback.innerHTML = '<strong style="color: #10b981;">✅ Correct!</strong>';
+                feedback.innerHTML = '<strong style="color: #10b981;">✅ Correct!</strong>' + explanationHtml(question);
             } else {
                 let correctInfo = '';
                 
@@ -2609,6 +2650,7 @@ This notepad persists throughout your exam session."></textarea>
                         <strong style="color: #10b981;">Correct answer:</strong><br>
                         <span style="color: #10b981;">${correctInfo}</span>
                     </div>
+                    ${explanationHtml(question)}
                 `;
             }
         }
