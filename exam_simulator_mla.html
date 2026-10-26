@@ -1201,6 +1201,19 @@
                 </label>
 
                 <label>
+                    Focus Area:
+                    <select id="focusArea">
+                        <option value="all" selected>All domains</option>
+                        <option value="2,4">Domains 2 &amp; 4 (Needs Improvement on your score report)</option>
+                        <option value="1">Domain 1: Data Preparation for ML and AI</option>
+                        <option value="2">Domain 2: ML Model and Foundation Model Development</option>
+                        <option value="3">Domain 3: Deployment and Orchestration</option>
+                        <option value="4">Domain 4: Operating, Monitoring, and Securing</option>
+                    </select>
+                    <span style="display:block;font-size:0.8em;color:#6b7280;margin-top:4px;">Questions 146+ are tagged by exam-guide skill. Tags on the original bank (1-145) are approximate.</span>
+                </label>
+
+                <label>
                     Testing Mode:
                     <select id="testMode">
                         <option value="exam">Exam Mode (No feedback, timed)</option>
@@ -1396,6 +1409,8 @@
                 </div>
             </div>
 
+            <div class="domain-breakdown" id="domainBreakdown"></div>
+
             <!-- Review Bank Notice -->
             <div class="review-bank-notice" id="reviewBankNotice" style="display: none;"></div>
 
@@ -1425,6 +1440,7 @@ This notepad persists throughout your exam session."></textarea>
     <script src="exam_data3_c02.js"></script>
     <script src="exam_data3_c02b.js"></script>
     <script src="exam_data3_c02c.js"></script>
+    <script src="exam_domains.js"></script>
 
     <script>
         let examData = [];
@@ -1673,6 +1689,12 @@ This notepad persists throughout your exam session."></textarea>
 
             if (!document.getElementById('includeRetired').checked) {
                 selectedQuestions = selectedQuestions.filter(q => !q.question_type);
+            }
+
+            const focusArea = document.getElementById('focusArea').value;
+            if (focusArea !== 'all') {
+                const domains = focusArea.split(',').map(Number);
+                selectedQuestions = selectedQuestions.filter(q => domains.includes(q.domain));
             }
             
             if (randomizeQuestions) {
@@ -2244,6 +2266,25 @@ This notepad persists throughout your exam session."></textarea>
             }
         }
 
+        function renderDomainBreakdown(results) {
+            const names = {1: 'Data Preparation for ML and AI', 2: 'ML Model and FM Development', 3: 'Deployment and Orchestration', 4: 'Operating, Monitoring, and Securing'};
+            const stats = {};
+            results.forEach(r => {
+                const d = r.question.domain;
+                if (!d) return;
+                stats[d] = stats[d] || {correct: 0, total: 0};
+                stats[d].total++;
+                if (r.isCorrect) stats[d].correct++;
+            });
+            const rows = Object.keys(stats).sort().map(d => {
+                const s = stats[d];
+                const pct = Math.round((s.correct / s.total) * 100);
+                const color = pct >= 72 ? '#10b981' : '#ef4444';
+                return `<tr><td style="padding:6px 10px;">Domain ${d}: ${names[d]}</td><td style="padding:6px 10px;text-align:right;">${s.correct} / ${s.total}</td><td style="padding:6px 10px;text-align:right;color:${color};font-weight:bold;">${pct}%</td></tr>`;
+            }).join('');
+            document.getElementById('domainBreakdown').innerHTML = rows ? `<h3 style="margin:20px 0 8px;">Score by exam domain</h3><table style="width:100%;border-collapse:collapse;">${rows}</table><p style="font-size:0.8em;color:#6b7280;margin-top:6px;">Green means 72% or higher in that domain. Domain tags on the original bank questions (1-145) are approximate.</p>` : '';
+        }
+
         function explanationHtml(question) {
             if (!question.explanation) return '';
             const div = document.createElement('div');
@@ -2323,6 +2364,7 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('incorrectCount').textContent = incorrect;
             document.getElementById('notAnsweredCount').textContent = notAnswered;
             document.getElementById('timeSpent').textContent = timeSpentFormatted;
+            renderDomainBreakdown(detailedResults);
 
             // Collect questions for review bank actions
             const questionsToOffer = [];
