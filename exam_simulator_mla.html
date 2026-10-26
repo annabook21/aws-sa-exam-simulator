@@ -1167,7 +1167,7 @@
                 <ul>
                     <li>Total Questions Available: <span id="totalQuestions">Loading...</span></li>
                     <li>Real Exam (MLA-C02 Beta): 85 Questions in 170 Minutes, multiple choice and multiple response only</li>
-                    <li>Includes 104 practice questions written from the official MLA-C02 exam guide, covering every skill it lists, each with a plain-English explanation, labeled under each question</li>
+                    <li>Includes 143 practice questions written from the official MLA-C02 exam guide and AWS documentation, each with a plain-English explanation. Coverage status: see COVERAGE.md in the repository, labeled under each question</li>
                     <li>Question Formats: Multiple Choice, Multiple Response (ordering/matching questions from MLA-C01 are hidden by default)</li>
                     <li>Domains: Data Preparation (28%), ML and Foundation Model Development (24%), Deployment and Orchestration (24%), Operating, Monitoring and Securing (24%)</li>
                     <li>Features: Timer, Question Review, Progress Tracking, Study Mode</li>
@@ -1424,6 +1424,7 @@ This notepad persists throughout your exam session."></textarea>
     <script src="exam_data3.js"></script>
     <script src="exam_data3_c02.js"></script>
     <script src="exam_data3_c02b.js"></script>
+    <script src="exam_data3_c02c.js"></script>
 
     <script>
         let examData = [];
@@ -2247,7 +2248,13 @@ This notepad persists throughout your exam session."></textarea>
             if (!question.explanation) return '';
             const div = document.createElement('div');
             div.textContent = question.explanation;
-            return `<div class="explanation"><strong>💡 Plain English:</strong> ${div.innerHTML}</div>`;
+            let src = '';
+            if (question.source && /^https:\/\/docs\.aws\.amazon\.com\//.test(question.source)) {
+                const a = document.createElement('a');
+                a.href = question.source; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'AWS documentation for this question';
+                src = `<div style="margin-top:8px;font-size:0.9em;">📄 ${a.outerHTML}</div>`;
+            }
+            return `<div class="explanation"><strong>💡 Plain English:</strong> ${div.innerHTML}${src}</div>`;
         }
 
         function getCorrectAnswerArray(question) {
