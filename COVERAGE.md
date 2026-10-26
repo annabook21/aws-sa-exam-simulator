@@ -161,3 +161,16 @@ These distinctions come from public C02 study guides: SaveMyCert's MLA-C02 compa
 | RAG evaluation metrics (faithfulness, citation precision/coverage) | 0 | Not covered |
 
 RAG evaluation metric definitions are not covered by a verified question, because the AWS page that defines them couldn't be fetched.
+
+## Questions per exam domain
+
+Used by the simulator's Focus Area option. Retired ordering and matching questions are excluded by default.
+
+| Domain | Questions |
+|---|---|
+| 1. Data Preparation for ML and AI | 74 |
+| 2. ML Model and Foundation Model Development | 93 |
+| 3. Deployment and Orchestration | 66 |
+| 4. Operating, Monitoring, and Securing | 75 |
+
+Questions 146 and up are tagged from the exam-guide skill each was written for. Tags on the original bank (1–145) were assigned by reading each question against the guide's task statements, so treat them as approximate.
