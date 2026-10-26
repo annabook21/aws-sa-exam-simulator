@@ -1,6 +1,6 @@
 # MLA-C02 coverage report
 
-Generated from the 288 questions in this repository (exam_data3.js plus the exam_data3_c02 files), checked against AWS's official [MLA-C02 in-scope services list](https://docs.aws.amazon.com/aws-certification/latest/machine-learning-engineer-associate-02/mla-02-in-scope-services.html).
+Generated from the 308 questions in this repository (exam_data3.js plus the exam_data3_c02 files), checked against AWS's official [MLA-C02 in-scope services list](https://docs.aws.amazon.com/aws-certification/latest/machine-learning-engineer-associate-02/mla-02-in-scope-services.html).
 
 **How to read this:** a question counts if the service is mentioned anywhere in it (question, options or explanation). A mention as a wrong answer still counts, so a number shows you've *seen* the service, not that every feature is covered. **0 means it never appears. Study it from the AWS docs before your exam.**
 
@@ -9,9 +9,9 @@ Generated from the 288 questions in this repository (exam_data3.js plus the exam
 | Analytics | Amazon Athena | 20 | Covered |
 | Analytics | Amazon Data Firehose | 6 | Covered |
 | Analytics | Amazon EMR | 8 | Covered |
-| Analytics | AWS Glue | 35 | Covered |
-| Analytics | AWS Glue DataBrew | 10 | Covered |
-| Analytics | AWS Glue Data Quality | 3 | Covered |
+| Analytics | AWS Glue | 36 | Covered |
+| Analytics | AWS Glue DataBrew | 11 | Covered |
+| Analytics | AWS Glue Data Quality | 4 | Covered |
 | Analytics | Amazon Kinesis | 7 | Covered |
 | Analytics | AWS Lake Formation | 2 | Thin (1–2) |
 | Analytics | Amazon Managed Service for Apache Flink | 5 | Covered |
@@ -20,32 +20,32 @@ Generated from the 288 questions in this repository (exam_data3.js plus the exam
 | Analytics | Amazon Redshift | 7 | Covered |
 | Application Integration | Amazon EventBridge | 11 | Covered |
 | Application Integration | Amazon MWAA | 2 | Thin (1–2) |
-| Application Integration | Amazon SNS | 6 | Covered |
+| Application Integration | Amazon SNS | 8 | Covered |
 | Application Integration | Amazon SQS | 5 | Covered |
 | Application Integration | AWS Step Functions | 5 | Covered |
 | Cloud Financial Management | AWS Billing and Cost Management | 1 | Thin (1–2) |
-| Cloud Financial Management | AWS Budgets | 3 | Covered |
-| Cloud Financial Management | AWS Cost Explorer | 2 | Thin (1–2) |
+| Cloud Financial Management | AWS Budgets | 5 | Covered |
+| Cloud Financial Management | AWS Cost Explorer | 4 | Covered |
 | Compute | AWS Batch | 8 | Covered |
-| Compute | Amazon EC2 | 23 | Covered |
-| Compute | AWS Lambda | 55 | Covered |
-| Containers | Amazon ECR | 8 | Covered |
+| Compute | Amazon EC2 | 25 | Covered |
+| Compute | AWS Lambda | 57 | Covered |
+| Containers | Amazon ECR | 9 | Covered |
 | Containers | Amazon ECS | 11 | Covered |
 | Containers | Amazon EKS | 5 | Covered |
 | Database | Amazon DocumentDB | 1 | Thin (1–2) |
 | Database | Amazon DynamoDB | 10 | Covered |
 | Database | Amazon ElastiCache | 2 | Thin (1–2) |
 | Database | Amazon Neptune | 3 | Covered |
-| Database | Amazon RDS | 9 | Covered |
+| Database | Amazon RDS | 10 | Covered |
 | Developer Tools | AWS CDK | 1 | Thin (1–2) |
 | Developer Tools | AWS CodeArtifact | 2 | Thin (1–2) |
-| Developer Tools | AWS CodeBuild | 3 | Covered |
+| Developer Tools | AWS CodeBuild | 4 | Covered |
 | Developer Tools | AWS CodeCommit | 1 | Thin (1–2) |
 | Developer Tools | AWS CodeConnections | 1 | Thin (1–2) |
 | Developer Tools | AWS CodeDeploy | 3 | Covered |
 | Developer Tools | AWS CodePipeline | 6 | Covered |
 | Developer Tools | AWS X-Ray | 3 | Covered |
-| Machine Learning and AI | Amazon Bedrock | 63 | Covered |
+| Machine Learning and AI | Amazon Bedrock | 68 | Covered |
 | Machine Learning and AI | Amazon Bedrock AgentCore | 7 | Covered |
 | Machine Learning and AI | Amazon CodeGuru | 3 | Covered |
 | Machine Learning and AI | Amazon Comprehend | 14 | Covered |
@@ -56,35 +56,35 @@ Generated from the 288 questions in this repository (exam_data3.js plus the exam
 | Machine Learning and AI | Amazon Personalize | 2 | Thin (1–2) |
 | Machine Learning and AI | Amazon Polly | 1 | Thin (1–2) |
 | Machine Learning and AI | Amazon Rekognition | 5 | Covered |
-| Machine Learning and AI | Amazon SageMaker AI | 158 | Covered |
+| Machine Learning and AI | Amazon SageMaker AI | 167 | Covered |
 | Machine Learning and AI | Amazon Textract | 3 | Covered |
 | Machine Learning and AI | Amazon Transcribe | 2 | Thin (1–2) |
 | Machine Learning and AI | Amazon Translate | 2 | Thin (1–2) |
 | Management and Governance | AWS Auto Scaling | 11 | Covered |
-| Management and Governance | AWS CloudFormation | 6 | Covered |
+| Management and Governance | AWS CloudFormation | 7 | Covered |
 | Management and Governance | AWS CloudTrail | 13 | Covered |
-| Management and Governance | Amazon CloudWatch | 24 | Covered |
+| Management and Governance | Amazon CloudWatch | 26 | Covered |
 | Management and Governance | AWS Compute Optimizer | 4 | Covered |
 | Management and Governance | AWS Config | 5 | Covered |
-| Management and Governance | AWS Organizations | 3 | Covered |
+| Management and Governance | AWS Organizations | 4 | Covered |
 | Management and Governance | AWS Service Catalog | 2 | Thin (1–2) |
-| Management and Governance | AWS Systems Manager | 3 | Covered |
-| Management and Governance | AWS Trusted Advisor | 2 | Thin (1–2) |
+| Management and Governance | AWS Systems Manager | 4 | Covered |
+| Management and Governance | AWS Trusted Advisor | 3 | Covered |
 | Media | Amazon Kinesis Video Streams | 1 | Thin (1–2) |
 | Migration and Transfer | AWS DataSync | 3 | Covered |
 | Networking and Content Delivery | Amazon API Gateway | 8 | Covered |
 | Networking and Content Delivery | Amazon CloudFront | 2 | Thin (1–2) |
 | Networking and Content Delivery | AWS Direct Connect | 2 | Thin (1–2) |
 | Networking and Content Delivery | Amazon VPC | 13 | Covered |
-| Security, Identity, and Compliance | IAM | 20 | Covered |
-| Security, Identity, and Compliance | Amazon Inspector | 4 | Covered |
+| Security, Identity, and Compliance | IAM | 21 | Covered |
+| Security, Identity, and Compliance | Amazon Inspector | 5 | Covered |
 | Security, Identity, and Compliance | AWS KMS | 11 | Covered |
-| Security, Identity, and Compliance | Amazon Macie | 6 | Covered |
-| Security, Identity, and Compliance | AWS Secrets Manager | 2 | Thin (1–2) |
+| Security, Identity, and Compliance | Amazon Macie | 8 | Covered |
+| Security, Identity, and Compliance | AWS Secrets Manager | 3 | Covered |
 | Storage | Amazon EBS | 1 | Thin (1–2) |
 | Storage | Amazon EFS | 5 | Covered |
 | Storage | Amazon FSx | 5 | Covered |
-| Storage | Amazon S3 | 92 | Covered |
+| Storage | Amazon S3 | 93 | Covered |
 | Storage | Amazon S3 Glacier | 5 | Covered |
 | Storage | AWS Storage Gateway | 1 | Thin (1–2) |
 
@@ -92,12 +92,11 @@ Generated from the 288 questions in this repository (exam_data3.js plus the exam
 
 - None
 
-## Thin coverage, 1–2 questions (24)
+## Thin coverage, 1–2 questions (21)
 
 - AWS Lake Formation (#10, #42)
 - Amazon MWAA (#79, #272)
 - AWS Billing and Cost Management (#83)
-- AWS Cost Explorer (#53, #269)
 - Amazon DocumentDB (#286)
 - Amazon ElastiCache (#74, #123)
 - AWS CDK (#285)
@@ -111,11 +110,9 @@ Generated from the 288 questions in this repository (exam_data3.js plus the exam
 - Amazon Transcribe (#31, #288)
 - Amazon Translate (#31, #288)
 - AWS Service Catalog (#225, #285)
-- AWS Trusted Advisor (#257, #270)
 - Amazon Kinesis Video Streams (#259)
 - Amazon CloudFront (#65, #118)
 - AWS Direct Connect (#64, #120)
-- AWS Secrets Manager (#59, #240)
 - Amazon EBS (#83)
 - AWS Storage Gateway (#287)
 
@@ -125,3 +122,42 @@ Generated from the 288 questions in this repository (exam_data3.js plus the exam
 - A service mention doesn't prove feature-level coverage. For example, SageMaker AI appears in most questions, but individual SageMaker AI features may still be thin.
 - The original 145-question bank appears to be community-sourced, and some of its answers may be wrong. Questions 146 and up were written from the official exam guide, and questions 250 and up each cite the AWS documentation page they were written from.
 - ElastiCache vector search and semantic caching have no verified question, because the AWS documentation page couldn't be fetched when these questions were written.
+
+## Researched C02 distinctions
+
+These distinctions come from public C02 study guides: SaveMyCert's MLA-C02 comparisons (CC BY 4.0) and a published exam-experience blog. Each one is checked here against the question data.
+
+| Distinction | Questions | Status |
+|---|---|---|
+| Robust vs standard vs min-max scaling | 2 | Thin |
+| Glue Data Quality row-level outcomes vs DataBrew rulesets | 1 | Thin |
+| Reinforcement fine-tuning | 1 | Thin |
+| Warm start types | 2 | Thin |
+| Local SHAP vs partial dependence | 2 | Thin |
+| L1/L2 regularization (alpha/lambda) | 1 | Thin |
+| Ensembling / stacking / boosting | 1 | Thin |
+| InvocationLatency vs TimeToFirstToken | 1 | Thin |
+| SageMaker AI vs Compute Savings Plans | 1 | Thin |
+| Bedrock service tiers (Flex, Priority, Reserved, Standard) | 2 | Thin |
+| Budgets actions vs Cost Anomaly Detection | 2 | Thin |
+| Inspector SBOM Generator vs ECR scanning | 1 | Thin |
+| TargetVariant vs UpdateEndpointWeightsAndCapacities | 2 | Thin |
+| CloudFormation dynamic references | 1 | Thin |
+| HNSW vs IVFFlat | 1 | Thin |
+| MCP vs A2A | 1 | Thin |
+| Network isolation vs VPC configuration | 3 | Covered |
+| Data drift vs concept drift | 3 | Covered |
+| Shadow vs production variant | 6 | Covered |
+| Bedrock on-demand / Provisioned / cross-Region / batch | 4 | Covered |
+| Retrieve vs RetrieveAndGenerate | 2 | Thin |
+| AgentCore Memory short vs long term | 2 | Thin |
+| SageMaker deployment guardrails vs CodeDeploy | 3 | Covered |
+| Data parallel vs model parallel | 2 | Thin |
+| Bayesian / random / grid / Hyperband | 2 | Thin |
+| Inferentia vs Trainium vs Graviton | 1 | Thin |
+| Enhanced fan-out vs retention | 2 | Thin |
+| CloudTrail vs invocation logging vs Config | 3 | Covered |
+| Bedrock API keys vs IAM roles | 3 | Covered |
+| RAG evaluation metrics (faithfulness, citation precision/coverage) | 0 | Not covered |
+
+RAG evaluation metric definitions are not covered by a verified question, because the AWS page that defines them couldn't be fetched.
