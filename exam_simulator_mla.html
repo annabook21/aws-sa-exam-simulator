@@ -1201,6 +1201,15 @@
                 </label>
 
                 <label>
+                    Exam Version:
+                    <select id="examVersion">
+                        <option value="c02" selected>MLA-C02 (all 308 questions)</option>
+                        <option value="c01">MLA-C01 (original 145-question bank, 65 questions / 130 minutes)</option>
+                    </select>
+                    <span style="display:block;font-size:0.8em;color:#6b7280;margin-top:4px;">C01 mode uses only the original bank, including ordering and matching questions, which C01 still uses. Its answer key is community-sourced.</span>
+                </label>
+
+                <label>
                     Focus Area:
                     <select id="focusArea">
                         <option value="all" selected>All domains</option>
@@ -1441,6 +1450,7 @@ This notepad persists throughout your exam session."></textarea>
     <script src="exam_data3_c02b.js"></script>
     <script src="exam_data3_c02c.js"></script>
     <script src="exam_domains.js"></script>
+    <script src="exam_c01_explanations.js"></script>
 
     <script>
         let examData = [];
@@ -1687,7 +1697,10 @@ This notepad persists throughout your exam session."></textarea>
 
             let selectedQuestions = [...examData];
 
-            if (!document.getElementById('includeRetired').checked) {
+            const examVersion = document.getElementById('examVersion').value;
+            if (examVersion === 'c01') {
+                selectedQuestions = selectedQuestions.filter(q => q.c01);
+            } else if (!document.getElementById('includeRetired').checked) {
                 selectedQuestions = selectedQuestions.filter(q => !q.question_type);
             }
 
@@ -1800,8 +1813,14 @@ This notepad persists throughout your exam session."></textarea>
 
             document.getElementById('questionText').textContent = question.question;
             const originEl = document.getElementById('questionOrigin');
-            originEl.textContent = question.origin === 'written' ? 'Practice question written from the official MLA-C02 exam guide (not from AWS)' : '';
-            originEl.hidden = question.origin !== 'written';
+            if (question.origin === 'written') {
+                originEl.textContent = 'Practice question written from the official MLA-C02 exam guide (not from AWS)';
+            } else if (question.c01) {
+                originEl.textContent = 'Original MLA-C01 bank question (community-sourced answer key)' + (question.answerCaution ? ' ⚠ This answer is disputed; see the explanation.' : '');
+            } else {
+                originEl.textContent = '';
+            }
+            originEl.hidden = !originEl.textContent;
             document.getElementById('markForReview').checked = markedQuestions[index];
 
             // Update question type badge
@@ -2265,6 +2284,17 @@ This notepad persists throughout your exam session."></textarea>
                 return JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const versionSelect = document.getElementById('examVersion');
+            if (!versionSelect) return;
+            versionSelect.addEventListener('change', () => {
+                const c01 = versionSelect.value === 'c01';
+                document.getElementById('questionCount').value = c01 ? '65' : '85';
+                document.getElementById('timeLimit').value = c01 ? '130' : '170';
+                document.getElementById('includeRetired').checked = c01;
+            });
+        });
 
         function renderDomainBreakdown(results) {
             const names = {1: 'Data Preparation for ML and AI', 2: 'ML Model and FM Development', 3: 'Deployment and Orchestration', 4: 'Operating, Monitoring, and Securing'};
