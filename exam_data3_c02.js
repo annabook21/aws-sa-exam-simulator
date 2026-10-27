@@ -228,7 +228,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 2 - C02 Additions",
     "origin": "written",
-    "number": 162,
+    "number": 162, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models.html",
     "question": "A company wants to deploy a popular open-source large language model on Amazon SageMaker AI as quickly as possible, with minimal setup. Which solution will meet these requirements?",
     "options": {
       "A": "Download the weights, build a custom inference container with a model server, and push it to Amazon ECR.",
@@ -425,7 +425,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 2 - C02 Additions",
     "origin": "written",
-    "number": 176,
+    "number": 176, "concept": true,
     "question": "A healthcare company's training dataset has 98% healthy patients and 2% patients with a rare condition. The model predicts 'healthy' for nearly everyone. The company cannot collect more patient data. Which solution should the ML engineer use FIRST?",
     "options": {
       "A": "Increase the number of training epochs so the model sees the rare cases more times.",
@@ -439,7 +439,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 2 - C02 Additions",
     "origin": "written",
-    "number": 177,
+    "number": 177, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-data-quality.html",
     "question": "A model on a SageMaker AI real-time endpoint was accurate at launch. After 4 months, prediction quality has dropped because customer behavior changed. The company wants automatic alerts when the statistical properties of live input data move away from the training data. Which solution meets these requirements with the LEAST operational overhead?",
     "options": {
       "A": "Schedule SageMaker Clarify bias drift monitoring on the endpoint.",
@@ -481,7 +481,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 2 - C02 Additions",
     "origin": "written",
-    "number": 180,
+    "number": 180, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/pipeline-eventbridge.html",
     "question": "An ML engineer needs to retrain and redeploy a model automatically every time new labeled data arrives in an Amazon S3 bucket. Only models that pass an evaluation step may be registered for deployment. Which solution meets these requirements with the LEAST operational overhead?",
     "options": {
       "A": "Schedule an Amazon EventBridge rule that starts the training job every night, and have a data scientist review the results before registering the model.",
@@ -537,7 +537,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 2 - C02 Additions",
     "origin": "written",
-    "number": 184,
+    "number": 184, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
     "question": "A company's text classification model performs well, but stakeholders need to understand which words most influenced each prediction before approving it for production. Which solution should the ML engineer use?",
     "options": {
       "A": "SageMaker Clarify pre-training bias metrics",
@@ -664,7 +664,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 2 - C02 Additions",
     "origin": "written",
-    "number": 193,
+    "number": 193, "concept": true,
     "question": "After a company fine-tunes a foundation model on a narrow set of insurance claim examples, the model handles claims well but now performs poorly on general questions it used to answer correctly. What is this problem, and how can the company reduce it?",
     "options": {
       "A": "Concept drift; retrain on the newest claims only",

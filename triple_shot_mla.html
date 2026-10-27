@@ -309,7 +309,7 @@ function qualCaught(qual) { return markedRanges().some(r => r.s < qual.e && r.e 
 
 function originLine(q) {
   if (q.origin === 'written-c01') return 'Written for an MLA-C01 exam-guide gap (not from AWS). The answer comes from the AWS page linked below.';
-  if (q.origin === 'written') return 'Written from the official MLA-C02 exam guide (not from AWS).' + (q.c01 ? ' Also tests an MLA-C01 skill.' : '');
+  if (q.origin === 'written') return 'Written from the official MLA-C02 exam guide (not from AWS).' + (q.c01 ? ' Also tests an MLA-C01 skill.' : '') + (q.source ? ' Answer checked against the AWS page linked above.' : q.concept ? ' Standard ML concept.' : ' Answer not yet checked against AWS docs.');
   if (q.c01) return 'Original MLA-C01 bank question (community-sourced answer key)' + ({ doc: ' · answer checked against AWS docs', concept: ' · standard ML concept', unchecked: ' · answer not yet checked against AWS docs' }[q.checkStatus] || '') + (q.answerCaution ? ' · ⚠ has a documented issue, see below' : '');
   return '';
 }
