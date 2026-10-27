@@ -148,8 +148,83 @@ const C01_EXPLANATIONS = {
  "144": "Stop SageMaker AI from collecting usage and error metadata during training → set the OPT_OUT_TRACKING opt-out on each training job submitted through the CLI, Boto3 or the SageMaker Python SDK. Option C invents a domain setting that doesn't exist. Training jobs created in the console already have metadata collection off by default. IAM roles that deny CloudWatch don't control this collection.",
  "145": "DPL of +0.9 means the 40–45 age group gets far more positive labels than other groups → undersample that group's positive class to bring it back in line. Oversampling it makes the imbalance worse."
 };
-const C01_CAUTION = [35, 142];
+const C01_CAUTION = [35, 142, 106];
 const C01_DOC_NOTES = {
+ "31": {
+  "verdict": "Answer confirmed, with a note",
+  "source": "https://docs.aws.amazon.com/transcribe/latest/dg/what-is.html",
+  "note": "Transcribe turns audio (and the audio in video) into text, Translate turns Spanish into English, and a Bedrock text model summarizes. The other options use the wrong tool: Rekognition analyzes images and video, Comprehend can't transcribe audio, and Stable Diffusion generates images. Note: AI21's Jurassic models may no longer be offered on Bedrock. On the exam, focus on the pipeline (Transcribe \u2192 Translate \u2192 Bedrock text model), not on the model name."
+ },
+ "73": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/pre-built-containers-frameworks-deep-learning.html",
+  "note": "SageMaker provides prebuilt PyTorch and TensorFlow images, and the Python SDK runs your own training script inside them (script mode). That keeps the custom Python and the domain logic with the least effort. Building your own container (C) is for needs the prebuilt images can't meet, and built-in algorithms (A) would mean rewriting the model."
+ },
+ "124": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/crypto-cli.html",
+  "note": "The AWS Encryption CLI encrypts files at the command line with envelope encryption, using a KMS key as the wrapping key. Who can use the key is controlled by the KMS key policy and IAM, which meets the 'control which applications have access to the key' requirement. SSH keys and API Gateway API keys aren't encryption keys. C only grants a permission; it never creates the key you control."
+ },
+ "24": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/kendra/latest/dg/what-is-kendra.html",
+  "note": "Kendra is a managed search service that ranks by semantic and contextual similarity rather than keywords, and it connects to sources such as S3. Textract only extracts text, and Glue and Feature Store aren't vector search engines. Side note: Kendra is now closed to new customers (AWS points to Bedrock Knowledge Bases), but C01 lists it in scope."
+ },
+ "25": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/autopilot-automate-model-development.html",
+  "note": "Autopilot analyzes the data, explores algorithms, tunes hyperparameters, and ranks candidates by performance, all from a tabular dataset and a target column. That's the least effort for checking whether the target is predictable. Macie finds sensitive data, and Bedrock foundation models aren't meant for tabular prediction."
+ },
+ "33": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/comprehend/latest/dg/comprehend-general.html",
+  "note": "Comprehend's pre-trained sentiment insight returns positive, neutral, negative or mixed with no training data, and AWS's own example is 'find out how customers feel about your products'. Training Naive Bayes or random forests takes longer, and Rekognition analyzes images and video, not text."
+ },
+ "53": {
+  "verdict": "Answer confirmed (alerting part)",
+  "source": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html",
+  "note": "AWS Budgets sends notifications by email or SNS when costs exceed, or are forecast to exceed, a threshold. That eliminates both Cost Explorer options. Not checked: whether tags on the SageMaker domain user profile propagate to the resources it creates. The Budgets half alone is enough to rule out A and C."
+ },
+ "64": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html",
+  "note": "An S3 gateway endpoint gives private S3 access with no internet gateway or NAT. Bucket policies can grant access to principals from other AWS accounts. AWS also says gateway endpoints can't be used through VPC peering, a transit gateway or Direct Connect, which rules out the peering and transit-gateway options."
+ },
+ "68": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/comprehend/latest/dg/comprehend-general.html",
+  "note": "Comprehend's key-phrase insight extracts important phrases with a pre-trained model, and custom entity recognition handles your own terms. Both are managed APIs, so they have the least operational overhead compared with NLTK on EC2, BlazingText plus TF-IDF, or Lambda scripts."
+ },
+ "92": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html",
+  "note": "AWS's CreateTrainingJob execution-role page says that if the input is SSE-KMS encrypted you add kms:Decrypt, and if you specify a KMS key for output you add kms:Encrypt. The permissions go on the execution role, not on the user who started the job (that rules out D). kms:CreateGrant is only for a volume KMS key."
+ },
+ "100": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html",
+  "note": "An S3 gateway endpoint lets resources in private subnets reach S3 'without requiring an internet gateway or NAT device'. A NAT gateway (A) sends traffic out to the internet, which is the opposite of isolation. Strictest version: also set EnableNetworkIsolation on the training job."
+ },
+ "102": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-ds.html",
+  "note": "Bedrock knowledge bases take S3 as a data source and list .csv and .doc/.docx as supported formats. Bedrock manages ingestion and retrieval, which gives the least overhead."
+ },
+ "106": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/comprehend-medical/latest/dev/comprehendmedical-welcome.html",
+  "note": "Comprehend Medical detects medical entities (conditions, medications, PHI) in clinical text and links them to RxNorm, ICD-10-CM and SNOMED CT. It doesn't write summaries, despite the option's wording. It's still the only no-training managed medical NLP option offered, so B is the best answer for 'insight with least effort'. On the exam, pick Comprehend Medical for medical text insight, and pick a foundation model when a true summary is required."
+ },
+ "120": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/bedrock/latest/userguide/vpc-interface-endpoints.html",
+  "note": "AWS says PrivateLink interface endpoints let you access Bedrock 'without the use of an internet gateway, NAT device, VPN connection, or Direct Connect connection'. Instances don't need public IPs. The endpoint service for model calls is bedrock-runtime."
+ },
+ "135": {
+  "verdict": "Answer confirmed, with a note",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html",
+  "note": "SageMaker Experiments automatically tracks the inputs, parameters, configurations and results of each iteration as runs, and lets you compare them. AWS now recommends SageMaker AI with MLflow for new work in the updated Studio. On C01, 'track and compare training iterations' = Experiments; Model Registry is for versioning approved models."
+ },
  "35": {
   "verdict": "Question flawed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/ll_hyperparameters.html",
