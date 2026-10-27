@@ -198,7 +198,7 @@ const C01_DOC_NOTES = {
  "39": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/debugger-built-in-actions.html",
-  "note": "Debugger built-in actions can stop a training job automatically when a rule finds an issue such as non-convergence, which saves compute. Note: AWS says SageMaker Debugger is no longer open to new customers. Existing customers can keep using it."
+  "note": "Debugger built-in actions can stop a training job automatically when a rule finds an issue such as non-convergence, which saves compute. Exam note: the MLA-C01 exam guide names SageMaker Debugger directly (Task 2.3, debugging model convergence), so study it fully. AWS has since closed Debugger to new customers, but that doesn't change what C01 tests."
  },
  "42": {
   "verdict": "Answer confirmed",
@@ -213,7 +213,7 @@ const C01_DOC_NOTES = {
  "48": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/debugger-built-in-actions.html",
-  "note": "Debugger built-in rules can trigger actions automatically: StopTraining, email or SMS through SNS. Note: AWS says SageMaker Debugger is no longer open to new customers. Existing customers can keep using it."
+  "note": "Debugger built-in rules can trigger actions automatically: StopTraining, email or SMS through SNS. Exam note: the MLA-C01 exam guide names SageMaker Debugger directly (Task 2.3, debugging model convergence), so study it fully. AWS has since closed Debugger to new customers, but that doesn't change what C01 tests."
  },
  "49": {
   "verdict": "Answer confirmed",
@@ -233,7 +233,7 @@ const C01_DOC_NOTES = {
  "55": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/guardrails-global-controls.html",
-  "note": "Q Business global controls include blocked phrases, so chat responses don't include those words. Note: AWS says Amazon Q Business is no longer open to new customers and points to Amazon Quick instead."
+  "note": "Q Business global controls include blocked phrases, so chat responses don't include those words. Exam note: Amazon Q is on the MLA-C01 in-scope services list. AWS has since closed Q Business to new customers in favor of Amazon Quick, but that doesn't change what C01 tests."
  },
  "56": {
   "verdict": "Answer confirmed",
@@ -253,32 +253,32 @@ const C01_DOC_NOTES = {
  "66": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-create-baseline.html",
-  "note": "The baseline (statistics and constraints) is the standard that drift is measured against, and it's usually built from the training dataset. When the model and its data change, create a new baseline from the latest dataset. Note: AWS says SageMaker Model Monitor is no longer open to new customers. Existing customers can keep using it, and exams written earlier may still test it."
+  "note": "The baseline (statistics and constraints) is the standard that drift is measured against, and it's usually built from the training dataset. When the model and its data change, create a new baseline from the latest dataset. Exam note: the MLA-C01 exam guide names SageMaker Model Monitor directly (Task 4.1, monitoring models in production), so study it fully. AWS has since closed Model Monitor to new customers, but that doesn't change what C01 tests."
  },
  "95": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-create-baseline.html",
-  "note": "Model Monitor compares live data with baseline statistics and constraints built from the training dataset, which detects drift. Note: AWS says SageMaker Model Monitor is no longer open to new customers. Existing customers can keep using it, and exams written earlier may still test it."
+  "note": "Model Monitor compares live data with baseline statistics and constraints built from the training dataset, which detects drift. Exam note: the MLA-C01 exam guide names SageMaker Model Monitor directly (Task 4.1, monitoring models in production), so study it fully. AWS has since closed Model Monitor to new customers, but that doesn't change what C01 tests."
  },
  "116": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-create-baseline.html",
-  "note": "Model Monitor checks production data against a baseline and emits CloudWatch metrics that can drive alarms. Note: AWS says SageMaker Model Monitor is no longer open to new customers. Existing customers can keep using it, and exams written earlier may still test it."
+  "note": "Model Monitor checks production data against a baseline and emits CloudWatch metrics that can drive alarms. Exam note: the MLA-C01 exam guide names SageMaker Model Monitor directly (Task 4.1, monitoring models in production), so study it fully. AWS has since closed Model Monitor to new customers, but that doesn't change what C01 tests."
  },
  "4": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
-  "note": "Clarify provides bias and explainability analysis. Running a Clarify job from Lambda makes the check on demand. Note: AWS says SageMaker Clarify is no longer open to new customers. Existing customers can keep using it."
+  "note": "Clarify provides bias and explainability analysis. Running a Clarify job from Lambda makes the check on demand. Exam note: the MLA-C01 exam guide names SageMaker Clarify directly in Tasks 1.3 (bias in data), 2.3 (interpreting model outputs) and 4.1 (data distribution changes), so it's core C01 material. AWS has since closed Clarify to new customers, but that doesn't change what C01 tests."
  },
  "71": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
-  "note": "Clarify uses SHAP feature attributions to explain why a model made a prediction. Note: AWS says SageMaker Clarify is no longer open to new customers. Existing customers can keep using it."
+  "note": "Clarify uses SHAP feature attributions to explain why a model made a prediction. Exam note: the MLA-C01 exam guide names SageMaker Clarify directly in Tasks 1.3 (bias in data), 2.3 (interpreting model outputs) and 4.1 (data distribution changes), so it's core C01 material. AWS has since closed Clarify to new customers, but that doesn't change what C01 tests."
  },
  "96": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
-  "note": "Clarify detects bias and explains predictions, which surfaces trends that skew results across groups. Note: AWS says SageMaker Clarify is no longer open to new customers. Existing customers can keep using it."
+  "note": "Clarify detects bias and explains predictions, which surfaces trends that skew results across groups. Exam note: the MLA-C01 exam guide names SageMaker Clarify directly in Tasks 1.3 (bias in data), 2.3 (interpreting model outputs) and 4.1 (data distribution changes), so it's core C01 material. AWS has since closed Clarify to new customers, but that doesn't change what C01 tests."
  },
  "74": {
   "verdict": "Answer confirmed",
