@@ -1821,7 +1821,7 @@ This notepad persists throughout your exam session."></textarea>
             if (question.origin === 'written-c01') {
                 originEl.textContent = 'Practice question written for an MLA-C01 exam-guide gap (not from AWS) · Answer based on the AWS documentation linked in the explanation';
             } else if (question.origin === 'written') {
-                originEl.textContent = 'Practice question written from the official MLA-C02 exam guide (not from AWS)' + (question.c01 ? ' · Also tests an MLA-C01 skill' : '');
+                originEl.textContent = 'Practice question written from the official MLA-C02 exam guide (not from AWS)' + (question.c01 ? ' · Also tests an MLA-C01 skill' : '') + (question.source ? ' · Answer checked against the linked AWS documentation' : question.concept ? ' · Standard ML concept (no AWS-specific page)' : ' · Answer not yet checked against AWS documentation');
             } else if (question.c01) {
                 const statusText = {doc: ' · Answer checked against AWS documentation', concept: ' · Standard ML concept (no AWS-specific page)', unchecked: ' · Answer not yet checked against AWS documentation'}[question.checkStatus] || '';
                 originEl.textContent = 'Original MLA-C01 bank question (community-sourced answer key)' + statusText + (question.answerCaution ? ' ⚠ This question has a documented issue; see the explanation.' : '');

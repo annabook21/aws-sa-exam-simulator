@@ -5,7 +5,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 197,
+    "number": 197, "source": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/S3DataExport.HowItWorks.html",
     "skill": "1.1.1",
     "question": "A recommendation team needs a daily copy of a 4 TB Amazon DynamoDB table in Amazon S3 for model training. The table serves a live shopping app, and the export must not consume the table's read capacity or slow down the app. Which solution meets these requirements with the LEAST operational overhead?",
     "options": {
@@ -35,7 +35,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 199,
+    "number": 199, "source": "https://docs.aws.amazon.com/streams/latest/dev/how-do-i-size-a-stream.html",
     "skill": "1.1.3",
     "question": "Clickstream records are ingested through an Amazon Kinesis data stream in provisioned mode. During a marketing event, producers receive ProvisionedThroughputExceededException errors and records are dropped. Traffic is unpredictable. Which solution will fix the issue with the LEAST ongoing management?",
     "options": {
@@ -95,7 +95,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 203,
+    "number": 203, "concept": true,
     "skill": "1.2.4",
     "question": "A health insurer's model uses customer age as a feature. Exploratory analysis shows that risk changes in steps (under 25, 25–40, 41–60, over 60) rather than smoothly, and the business wants these groups visible in the model. Which feature engineering technique fits?",
     "options": {
@@ -110,7 +110,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 204,
+    "number": 204, "concept": true,
     "skill": "1.2.4",
     "question": "An ML engineer trains a k-nearest neighbors model on two features: annual income (values from 20,000 to 500,000) and number of children (values from 0 to 6). The model ignores the number of children almost completely. What should the engineer do?",
     "options": {
@@ -185,7 +185,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 209,
+    "number": 209, "source": "https://docs.aws.amazon.com/glue/latest/dg/data-quality-gs-studio-notebooks.html",
     "skill": "1.3.1",
     "question": "An AWS Glue ETL job prepares training data each night. Sometimes upstream systems send files with missing customer IDs or negative prices, which corrupts the training data. The team wants the job to check these rules automatically and stop bad data before it is written. Which solution meets these requirements with the LEAST development effort?",
     "options": {
@@ -200,7 +200,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 210,
+    "number": 210, "concept": true,
     "skill": "1.3.3",
     "question": "A dataset for a loan approval model contains 90% approved and 10% rejected applications. After a random 80/20 split, the test set happens to contain almost no rejected applications, so the evaluation results are misleading. What should the ML engineer do?",
     "options": {
@@ -230,7 +230,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 212,
+    "number": 212, "concept": true,
     "skill": "1.3.7",
     "question": "A dataset of house prices has 8% missing values in the 'lot_size' column. The column also contains a few extreme values from mansions. The ML engineer wants to fill in the missing values without letting the extreme values distort them. Which imputation method is MOST appropriate?",
     "options": {
@@ -260,7 +260,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 214,
+    "number": 214, "concept": true,
     "skill": "2.1.3",
     "question": "A bank's credit model must be approved by regulators, who require a clear explanation of how each input affects every decision. A deep neural network is 1% more accurate than simpler models but cannot be explained easily. Which model should the ML engineer choose?",
     "options": {
@@ -275,7 +275,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 215,
+    "number": 215, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html",
     "skill": "2.1.6",
     "question": "A team trains a large model for 30 hours each week on SageMaker AI. Training can be paused and resumed. The team wants to reduce training cost as much as possible. Which solution meets these requirements?",
     "options": {
@@ -290,7 +290,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 216,
+    "number": 216, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-parallel-intro.html",
     "skill": "2.2.4",
     "question": "An ML engineer is training a model that is too large to fit in the memory of a single GPU, even with a batch size of 1. Which training approach will allow the job to run?",
     "options": {
@@ -305,7 +305,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 217,
+    "number": 217, "concept": true,
     "skill": "2.2.5",
     "question": "A model scores poorly on both the training data and the validation data, and both scores are similar. What is the MOST likely problem, and what should the ML engineer try?",
     "options": {
@@ -320,7 +320,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 218,
+    "number": 218, "concept": true,
     "skill": "2.2.6",
     "question": "An ML engineer has three trained models: XGBoost, a random forest and a neural network. Each makes different kinds of mistakes, and none meets the accuracy target alone. Which approach is MOST likely to improve accuracy?",
     "options": {
@@ -335,7 +335,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 219,
+    "number": 219, "concept": true,
     "skill": "2.2.7",
     "question": "A GPU training job fails immediately with a CUDA out-of-memory error. The model fits on the GPU, but the job was configured with a very large batch size. Which change should the ML engineer make FIRST?",
     "options": {
@@ -365,7 +365,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 221,
+    "number": 221, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/a2i-use-augmented-ai-a2i-human-review-loops.html",
     "skill": "2.3.7",
     "question": "A model extracts amounts from scanned invoices. Most extractions are correct, but low-confidence extractions must be reviewed by a person before payment. The company wants this review loop with the LEAST development effort. Which solution meets these requirements?",
     "options": {
@@ -440,7 +440,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 226,
+    "number": 226, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/endpoint-auto-scaling-add-code-define.html",
     "skill": "3.2.6",
     "question": "A SageMaker AI real-time endpoint must add instances when traffic rises. The model's latency grows as each instance receives more requests per minute. Which metric should the ML engineer use for a target tracking scaling policy?",
     "options": {
@@ -485,7 +485,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 229,
+    "number": 229, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/deployment-guardrails-blue-green.html",
     "skill": "3.3.1",
     "question": "A team deploys a new model to a SageMaker AI endpoint. It wants a small slice of traffic to go to the new model first, and automatic rollback if error rates rise. Which deployment configuration meets these requirements?",
     "options": {
@@ -500,7 +500,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 230,
+    "number": 230, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/deployment-guardrails-blue-green.html",
     "skill": "3.3.1",
     "question": "A company wants to shift traffic to a new model version gradually, in equal steps of 20% every 10 minutes, with automatic rollback if alarms fire. Which SageMaker AI deployment guardrail option fits?",
     "options": {
@@ -515,7 +515,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 231,
+    "number": 231, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-access-training-data.html",
     "skill": "3.3.3",
     "question": "A SageMaker AI training job reads 5 TB of image files from Amazon S3 in the default File input mode and waits almost an hour for the download before training starts. The training script opens files by using normal file paths and must not be modified. Which change will remove the delay with the LEAST effort?",
     "options": {
@@ -530,7 +530,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 232,
+    "number": 232, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-access-training-data.html",
     "skill": "3.3.3",
     "question": "A distributed training job runs on 10 instances. Each instance should train on a different tenth of the dataset in Amazon S3, but currently every instance downloads the entire dataset. Which channel setting should the ML engineer change?",
     "options": {
@@ -590,7 +590,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 236,
+    "number": 236, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/inference-recommender.html",
     "skill": "4.2.1",
     "question": "A team is unsure which instance type to use for a new SageMaker AI endpoint. It needs the lowest-cost instance that still meets a 100 ms latency target at its expected traffic. Which solution provides this evidence with the LEAST effort?",
     "options": {
@@ -636,7 +636,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 239,
+    "number": 239, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/interface-vpc-endpoint.html",
     "skill": "3.2.4",
     "question": "A SageMaker AI endpoint and the application that calls it both run in private subnets with no internet access. The application's calls to InvokeEndpoint time out. What should the ML engineer do?",
     "options": {
@@ -666,7 +666,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 241,
+    "number": 241, "source": "https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-endpoint-configuration-kms-key-configured.html",
     "skill": "4.3.4",
     "question": "A compliance team must be alerted automatically if anyone creates a SageMaker AI endpoint configuration that does not use an AWS KMS key for encryption. Which solution meets this requirement with the LEAST effort?",
     "options": {
@@ -697,7 +697,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 243,
+    "number": 243, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-detect-data-bias.html",
     "skill": "1.3.4",
     "question": "A company is training an image model to screen job applicants' profile photos for a professional appearance score. Before training, it must check whether the training images under-represent certain demographic groups. Which solution provides these bias metrics with the LEAST custom code?",
     "options": {
@@ -712,7 +712,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 244,
+    "number": 244, "source": "https://docs.aws.amazon.com/athena/latest/ug/columnar-storage.html",
     "skill": "1.1.5",
     "question": "Analysts query a 2 TB training dataset in Amazon S3 with Amazon Athena, usually selecting only 3 of its 120 columns. The data is stored as CSV, and queries are slow and expensive. Which change will improve performance and reduce cost the MOST?",
     "options": {
@@ -727,7 +727,7 @@ EXAM_DATA.push(...[
   {
     "topic": "Topic 3 - C02 Guide Coverage",
     "origin": "written",
-    "number": 245,
+    "number": 245, "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store.html",
     "skill": "Well-Architected ML Lens: feature consistency",
     "question": "A fraud model performed well in testing but makes poor predictions in production. Investigation shows that the training pipeline computed 'average transaction amount over 30 days' in Spark, while the production application computes the same feature with different Python code that rounds values and handles time zones differently. Which solution will prevent this problem with the LEAST ongoing effort?",
     "options": {

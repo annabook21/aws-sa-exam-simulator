@@ -150,6 +150,56 @@ const C01_EXPLANATIONS = {
 };
 const C01_CAUTION = [35, 142, 106, 32, 78, 87, 111, 122];
 const C01_DOC_NOTES = {
+ "6": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store.html",
+  "note": "AWS's order: 'To ingest features into Feature Store, you must first define the feature group', then ingest records (streaming PutRecord or batch), then use the offline store for 'model training and batch inference' datasets."
+ },
+ "27": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+  "note": "Macie discovers sensitive data in S3 and publishes findings to EventBridge, which 'can route findings data to targets such as AWS Lambda functions' that do the removal. Macie finds the data; your Lambda removes it."
+ },
+ "37": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints.html",
+  "note": "Real-time inference is 'ideal for inference workloads where you have real-time, interactive, low latency requirements'. The endpoints are fully managed and support autoscaling for unpredictable bursts. Payloads of 1 KB to 3 MB fit real-time."
+ },
+ "40": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/pipeline-eventbridge.html",
+  "note": "Pipelines chains processing steps that can run for hours, which is too long for Lambda's 15-minute limit. EventBridge supports SageMaker Pipelines as a target to automate runs."
+ },
+ "52": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/endpoint-auto-scaling-add-code-define.html",
+  "note": "Endpoint auto scaling with target tracking, for example on SageMakerVariantInvocationsPerInstance, adds and removes instances as traffic changes. A static ECS task count or fixed Lambda concurrency doesn't adapt."
+ },
+ "79": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/pipeline-eventbridge.html",
+  "note": "'Amazon SageMaker Pipelines is supported as a target in Amazon EventBridge', and AWS's examples of triggering events include 'a new file being uploaded to your Amazon S3 bucket'. No Lambda polling needed."
+ },
+ "82": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/lineage-tracking.html",
+  "note": "Pipelines gives DAG visualization in Studio. Lineage Tracking lets you 'keep a running history of model discovery experiments' and 'establish model governance by tracking model lineage artifacts for auditing and compliance verification'. That's almost word for word the question, which is why C beats D."
+ },
+ "85": {
+  "verdict": "Answer confirmed, with a note",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-ab-testing.html",
+  "note": "Production variants on the same endpoint split traffic by weight, and each variant gets its weight divided by the sum of all weights. Weight 0.1 for the new model gives exactly 10% only if the existing variant is 0.9; with the existing variant at 1, it's about 9%. The idea is right: a small weight on a new variant, monitored in CloudWatch."
+ },
+ "115": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/docker-containers-adapt-your-own.html",
+  "note": "A custom image in ECR, extended from or adapted to SageMaker, can be reused by processing jobs, training jobs and pipelines alike. Manual installs don't persist, and notebook instances don't host jobs."
+ },
+ "126": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints.html",
+  "note": "Minimize response latency for an interactive app \u2192 real-time inference endpoint. Serverless adds cold starts, async queues requests, and batch transform is offline."
+ },
  "1": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/canvas-register-model.html",
