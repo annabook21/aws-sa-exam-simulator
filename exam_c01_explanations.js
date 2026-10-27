@@ -148,8 +148,53 @@ const C01_EXPLANATIONS = {
  "144": "Stop SageMaker AI from collecting usage and error metadata during training → set the OPT_OUT_TRACKING opt-out on each training job submitted through the CLI, Boto3 or the SageMaker Python SDK. Option C invents a domain setting that doesn't exist. Training jobs created in the console already have metadata collection off by default. IAM roles that deny CloudWatch don't control this collection.",
  "145": "DPL of +0.9 means the 40–45 age group gets far more positive labels than other groups → undersample that group's positive class to bring it back in line. Oversampling it makes the imbalance worse."
 };
-const C01_CAUTION = [35, 142, 106, 32, 78, 87, 111, 122];
+const C01_CAUTION = [35, 142, 106, 32, 78, 87, 111, 122, 7, 28, 62, 136, 141];
 const C01_DOC_NOTES = {
+ "5": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/glue/latest/dg/add-crawler.html",
+  "note": "A Glue crawler's classifiers 'infer the format and schema of your data' and write tables to the Data Catalog, with a built-in CSV classifier. Athena can't infer a schema; it queries tables that already exist. Then a DataBrew recipe job cleans the data, and the output goes back to S3. Batch transform is for predictions, not cleaning."
+ },
+ "7": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-S3.html",
+  "note": "The order (trigger, then retrain, then deploy to the endpoint) is right. Strictly, AWS says an S3 source action triggers the pipeline through an EventBridge rule that CodePipeline creates when the source bucket changes, not through a classic S3 event notification. An S3 Lifecycle rule can never start a pipeline. On the exam, choose the 'S3 event' option over the Lifecycle one."
+ },
+ "94": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/athena/latest/ug/what-is.html",
+  "note": "S3 stores the data. Glue is the 'serverless data integration service' for transforming it. Athena is 'an interactive query service that makes it easy to analyze data directly in Amazon S3 using standard SQL'. Kinesis Data Streams is for streaming, which isn't needed for historical data."
+ },
+ "28": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+  "note": "Glue is the serverless service for building ETL and ingestion pipelines from S3. Firehose is for streaming, Athena only queries, and Redshift ML builds models in SQL. For deployment, the intended tool is SageMaker Pipelines in Studio. Note: Studio Classic, as named in the option, no longer takes new users, so the same pipelines now live in the new Studio."
+ },
+ "62": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/canvas-register-model.html",
+  "note": "Supported: Model Registry is the bridge between Studio and Canvas (Canvas shows registered model versions and their approval status), and Canvas's managed policy only reads S3 buckets named with 'sagemaker' or tagged SageMaker=true, so the Canvas user needs access to the artifact bucket. I couldn't find a single AWS page that describes bringing an outside model into Canvas, so B+C is the best-supported pair, not a documented checklist."
+ },
+ "109": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html",
+  "note": "Glue is serverless, runs Spark ETL jobs on a schedule, and connects to sources such as S3 and Aurora (over JDBC) with built-in connections. A transient EMR cluster or Batch on EC2 means managing compute, and Lambda doesn't run Spark."
+ },
+ "123": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/streams/latest/dev/how-do-i-size-a-stream.html",
+  "note": "Kinesis Data Streams scales 'to handle gigabytes of write and read throughput per minute', so 5 GB per minute fits. Managed Service for Apache Flink transforms streams in real time, and DynamoDB serves fast key-value queries. EventBridge, SQS and SNS are messaging services, not high-throughput stream processing."
+ },
+ "136": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-ds.html",
+  "note": "Bedrock (A) plus Lambda and API Gateway (D) is clearly serverless. JumpStart and EC2 mean running instances. 'S3 to store vector database dumps' (E) is the community key and better than RDS, but the modern serverless pattern is a Bedrock knowledge base with S3 as the document source and a managed vector store. Pick A+D+E here, and expect 'knowledge base' options on newer questions."
+ },
+ "141": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/pre-built-containers-frameworks-deep-learning.html",
+  "note": "SageMaker provides prebuilt scikit-learn and TensorFlow containers that run your existing training scripts, so rebuilding the models in SageMaker and registering them is the least work. BYOC (C) is for needs the prebuilt images can't meet. B is vague: Model Registry stores versions and metadata, it doesn't 'run' models. D's wording is loose, but it's the intended answer."
+ },
  "6": {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store.html",
@@ -721,5 +766,5 @@ const C01_DOC_NOTES = {
   "note": "Lifecycle configuration scripts run when a notebook instance is created or whenever it starts. The auto-stop check has to be set up on every start."
  }
 };
-const C01_CONCEPT_ONLY = [8, 15, 17, 18, 21, 23, 30, 44, 61, 65, 69, 72, 81, 88, 98, 16, 26, 50, 77, 104, 138];
+const C01_CONCEPT_ONLY = [8, 15, 17, 18, 21, 23, 30, 44, 61, 65, 69, 72, 81, 88, 98, 16, 26, 50, 77, 104, 138, 9];
 EXAM_DATA.forEach(q => { if (q.number <= 145 && !q.origin) { q.c01 = true; if (C01_EXPLANATIONS[q.number]) q.explanation = C01_EXPLANATIONS[q.number]; if (C01_CAUTION.includes(q.number)) q.answerCaution = true; if (C01_DOC_NOTES[q.number]) q.docNote = C01_DOC_NOTES[q.number]; q.checkStatus = C01_DOC_NOTES[q.number] ? 'doc' : (C01_CONCEPT_ONLY.includes(q.number) ? 'concept' : 'unchecked'); } });
