@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS ML Associate Exam Simulator (MLA-C02 Beta)</title>
+    <title>AWS ML Associate Exam Simulator (MLA-C01 / MLA-C02)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1160,7 +1160,7 @@
             </button>
             <h1>🧠 AWS ML Associate Exam Simulator</h1>
             <p style="margin:6px 0 0;"><a href="triple_shot_mla.html" style="color:inherit;font-weight:600;">☕ Try Triple Shot</a>: 3 questions at a time. Spot the constraints, eliminate options with reasons, defend your pick, and track why you miss.</p>
-            <div class="subtitle">MLA-C02 Beta Practice Test Environment</div>
+            <div class="subtitle">MLA-C01 and MLA-C02 Practice Test Environment</div>
             <p>Master Machine Learning concepts and services on AWS</p>
             
             <div class="exam-info">
@@ -1269,7 +1269,7 @@
         <!-- Exam Screen -->
         <div class="exam-screen" id="examScreen">
             <div class="exam-header">
-                <div class="exam-title">AWS ML Associate (MLA-C02 Beta) Practice Exam</div>
+                <div class="exam-title" id="examTitle">AWS ML Associate Practice Exam</div>
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
                         <span class="theme-icon-light">🌙</span>
@@ -1457,6 +1457,7 @@ This notepad persists throughout your exam session."></textarea>
     <script>
         let examData = [];
         let originalExamData = [];
+        let currentExamVersion = 'c02';
         let currentQuestionIndex = 0;
         let userAnswers = [];
         let markedQuestions = [];
@@ -1700,6 +1701,10 @@ This notepad persists throughout your exam session."></textarea>
             let selectedQuestions = [...examData];
 
             const examVersion = document.getElementById('examVersion').value;
+            currentExamVersion = examVersion;
+            document.getElementById('examTitle').textContent = examVersion === 'c01'
+                ? 'AWS ML Associate (MLA-C01) Practice Exam'
+                : 'AWS ML Associate (MLA-C02 Beta) Practice Exam';
             if (examVersion === 'c01') {
                 selectedQuestions = selectedQuestions.filter(q => q.c01);
             } else {
@@ -2301,11 +2306,21 @@ This notepad persists throughout your exam session."></textarea>
                 document.getElementById('questionCount').value = c01 ? '65' : '85';
                 document.getElementById('timeLimit').value = c01 ? '130' : '170';
                 document.getElementById('includeRetired').checked = c01;
+                try { localStorage.setItem('mlaExamVersion', versionSelect.value); } catch (e) {}
             });
+            // Remember the last exam version chosen on this device.
+            let saved = null;
+            try { saved = localStorage.getItem('mlaExamVersion'); } catch (e) {}
+            if (saved && saved !== versionSelect.value && [...versionSelect.options].some(o => o.value === saved)) {
+                versionSelect.value = saved;
+                versionSelect.dispatchEvent(new Event('change'));
+            }
         });
 
         function renderDomainBreakdown(results) {
-            const names = {1: 'Data Preparation for ML and AI', 2: 'ML Model and FM Development', 3: 'Deployment and Orchestration', 4: 'Operating, Monitoring, and Securing'};
+            const names = currentExamVersion === 'c01'
+                ? {1: 'Data Preparation for ML', 2: 'ML Model Development', 3: 'Deployment and Orchestration of ML Workflows', 4: 'ML Solution Monitoring, Maintenance, and Security'}
+                : {1: 'Data Preparation for ML and AI', 2: 'ML Model and FM Development', 3: 'Deployment and Orchestration', 4: 'Operating, Monitoring, and Securing'};
             const stats = {};
             results.forEach(r => {
                 const d = r.question.domain;
