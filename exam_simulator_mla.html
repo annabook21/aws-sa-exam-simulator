@@ -1816,7 +1816,7 @@ This notepad persists throughout your exam session."></textarea>
             if (question.origin === 'written') {
                 originEl.textContent = 'Practice question written from the official MLA-C02 exam guide (not from AWS)';
             } else if (question.c01) {
-                originEl.textContent = 'Original MLA-C01 bank question (community-sourced answer key)' + (question.answerCaution ? ' ⚠ This answer is disputed; see the explanation.' : '');
+                originEl.textContent = 'Original MLA-C01 bank question (community-sourced answer key)' + (question.answerCaution ? ' ⚠ This question has a documented issue; see the explanation.' : '');
             } else {
                 originEl.textContent = '';
             }
@@ -2325,7 +2325,17 @@ This notepad persists throughout your exam session."></textarea>
                 a.href = question.source; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'AWS documentation for this question';
                 src = `<div style="margin-top:8px;font-size:0.9em;">📄 ${a.outerHTML}</div>`;
             }
-            return `<div class="explanation"><strong>💡 Plain English:</strong> ${div.innerHTML}${src}</div>`;
+            let note = '';
+            if (question.docNote && /^https:\/\/docs\.aws\.amazon\.com\//.test(question.docNote.source)) {
+                const n = document.createElement('div');
+                n.textContent = question.docNote.note;
+                const l = document.createElement('a');
+                l.href = question.docNote.source; l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'AWS documentation';
+                const v = document.createElement('strong');
+                v.textContent = 'Documentation check: ' + question.docNote.verdict + '.';
+                note = `<div style="margin-top:10px;padding:10px;border-left:4px solid #f59e0b;background:#fffbeb;color:#78350f;">📘 ${v.outerHTML} ${n.innerHTML} (${l.outerHTML})</div>`;
+            }
+            return `<div class="explanation"><strong>💡 Plain English:</strong> ${div.innerHTML}${src}${note}</div>`;
         }
 
         function getCorrectAnswerArray(question) {
