@@ -148,8 +148,248 @@ const C01_EXPLANATIONS = {
  "144": "Stop SageMaker AI from collecting usage and error metadata during training → set the OPT_OUT_TRACKING opt-out on each training job submitted through the CLI, Boto3 or the SageMaker Python SDK. Option C invents a domain setting that doesn't exist. Training jobs created in the console already have metadata collection off by default. IAM roles that deny CloudWatch don't control this collection.",
  "145": "DPL of +0.9 means the 40–45 age group gets far more positive labels than other groups → undersample that group's positive class to bring it back in line. Oversampling it makes the imbalance worse."
 };
-const C01_CAUTION = [35, 142, 106];
+const C01_CAUTION = [35, 142, 106, 32, 78, 87, 111, 122];
 const C01_DOC_NOTES = {
+ "1": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/canvas-register-model.html",
+  "note": "Model Registry tracks every version of a model inside a model group and manages each version's approval status. ECR only stores container images; it isn't a model catalog."
+ },
+ "3": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry-approve.html",
+  "note": "Model versions are registered as PendingManualApproval. A reviewer changes the status to Approved (in Studio, or through the SDK's update_model_package), and with SageMaker project templates that change starts CI/CD deployment. Experiments, Lineage Tracking and Model Monitor don't manage approvals."
+ },
+ "10": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html",
+  "note": "Lake Formation brings S3 data and databases (including on-premises databases over JDBC) into one governed data lake with a central catalog. Kinesis streams records and DynamoDB is a database, so neither aggregates these sources. EMR Spark could work, but you'd have to build it."
+ },
+ "11": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-wrangler-data-insights.html",
+  "note": "Data Wrangler's Data Quality and Insights report detects anomalous samples with an isolation forest, counts outliers and duplicates, and visualizes the results. Athena and Redshift Spectrum only run queries, and AWS Batch only runs jobs."
+ },
+ "12": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-wrangler-transform.html",
+  "note": "Data Wrangler's Encode categorical transform (one-hot or ordinal) turns categories into numbers without code, which is the least overhead. Turning numbers into categories throws information away."
+ },
+ "13": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-wrangler-transform.html",
+  "note": "Data Wrangler's Balance data operation offers random oversampling, random undersampling and SMOTE as built-in transforms."
+ },
+ "19": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/athena/latest/ug/ctas.html",
+  "note": "A CTAS query creates a new table from query results in one step and can partition the data and convert it to Parquet or ORC. That's less work than replication, a Glue job, or Firehose plus Lambda."
+ },
+ "20": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/glue/latest/dg/machine-learning.html",
+  "note": "FindMatches finds duplicate or matching records 'even when the records do not have a common unique identifier and no fields match exactly'. AWS says it 'will not require writing any code'."
+ },
+ "22": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/comprehend/latest/dg/custom-copy.html",
+  "note": "Account A attaches an IAM resource policy to the model version, and account B imports it with ImportModel into the same Region. No retraining and no copying of training data."
+ },
+ "29": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/modelcollections.html",
+  "note": "Model Registry Collections group model groups (for example NLP-models and CV-models) into nested hierarchies. AWS says operations on collections 'do not affect the integrity of the individual Model Groups', so the artifacts in S3 and ECR aren't modified."
+ },
+ "32": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/kinesisanalytics/latest/sqlref/sqlrf-random-cut-forest.html",
+  "note": "RANDOM_CUT_FOREST is a built-in anomaly function of the legacy Kinesis Data Analytics for SQL service, not of Apache Flink itself, so the option's wording is dated. A is still the intended answer, because it's the only managed streaming option with built-in anomaly detection. Remember: streaming anomaly detection = Random Cut Forest."
+ },
+ "36": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/firehose/latest/dev/create-configure-backup.html",
+  "note": "Firehose lets the buffer interval go down to 0 seconds for OpenSearch (range 0 to 900). With zero buffering, AWS says Firehose 'will not buffer data and will deliver data within a few seconds'. Raising the interval (C) makes latency worse."
+ },
+ "41": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-sagemaker-model.html",
+  "note": "AWS::SageMaker::Model creates 'a model to host at an Amazon SageMaker endpoint'. The Endpoint and EndpointConfig resources come after it, in that order."
+ },
+ "43": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/canvas-importing-data.html",
+  "note": "Canvas imports tabular data as CSV or Parquet. Parquet is columnar and compressed, so it's the format that minimizes processing for complex data. AWS's page lists the formats but doesn't make the speed claim itself."
+ },
+ "46": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/build-and-manage-steps-types.html",
+  "note": "Pipelines has no Glue step. AWS says the Callback step adds 'processes and AWS services into your workflow that aren't directly provided by Amazon SageMaker Pipelines'. The pipeline posts a token to SQS, waits, and continues when the Glue job reports success."
+ },
+ "47": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/redshift/latest/dg/t_ddm.html",
+  "note": "Redshift dynamic data masking changes 'how Amazon Redshift shows sensitive data to the user at query time, without transforming it in the database', using policies for each user or role."
+ },
+ "51": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor.html",
+  "note": "Real-time inference fixes the async delay. Model Monitor watches model quality and 'can set alerts that notify you when there are deviations in the model quality'. Inference Recommender only picks instance types."
+ },
+ "54": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-wrangler-transform.html",
+  "note": "Data Wrangler's Manage columns transforms drop columns with no code, which is the least effort for a 50 MB file."
+ },
+ "57": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/serverless-endpoints.html",
+  "note": "Serverless Inference scales to 0 between requests, and a 3 MB payload under one minute fits its limits. Async endpoints and real-time endpoints can't be configured the way options B and C describe, and multi-model endpoints aren't supported on serverless."
+ },
+ "58": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-wrangler-transform.html",
+  "note": "Data Wrangler's built-in image transforms include CorruptImage (along with EnhanceImage and ResizeImage), built on imgaug. Adding noise is augmentation: it teaches the model to handle lower-quality camera images, and it's faster than collecting new data."
+ },
+ "60": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-wrangler-transform.html",
+  "note": "Data Wrangler joins and concatenates datasets and has built-in transforms for missing values, duplicates and outliers. Ground Truth is for labeling, not cleaning."
+ },
+ "67": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/async-inference.html",
+  "note": "Asynchronous Inference is 'ideal for requests with large payload sizes (up to 1GB), long processing times (up to one hour)' and scales with a scaling policy. 50 MB rules out real-time and serverless."
+ },
+ "70": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/serverless-endpoints.html",
+  "note": "AWS says 'Serverless Inference with provisioned concurrency is a cost-effective option when you have predictable bursts in your traffic', keeping endpoints warm while AWS manages scaling."
+ },
+ "75": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/databrew/latest/dg/recipe-actions.pii.html",
+  "note": "DataBrew has PII recipe steps (masking, encryption, hashing, substitution), so you can mask values while keeping the column. Macie only finds sensitive data; it doesn't change it."
+ },
+ "76": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor.html",
+  "note": "Model Monitor supports 'continuous monitoring with a batch transform job that runs regularly' and sends alerts on deviations. Batch transform is the asynchronous option for large datasets."
+ },
+ "78": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-access-training-data.html",
+  "note": "AWS's training-data page lists S3, EFS and FSx for Lustre as training inputs; FSx for ONTAP isn't listed. Mounting ONTAP over NFS is something you set up yourself. Of the options, A is the only workable one (Mountpoint for S3 can't link to FSx, and Data Wrangler doesn't connect to it). If FSx for Lustre is offered on your exam, that's the documented choice."
+ },
+ "84": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry-ram.html",
+  "note": "Model Registry shares model package groups across accounts with resource policies (through AWS RAM), which gives you one central catalog. ECR replication copies images, not model metadata."
+ },
+ "87": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/databrew/latest/dg/supported-data-file-sources.html",
+  "note": "Confirmed: 'If you are importing a folder, all files in the folder must be of the same file type', so the file types have to be separated (which rules out A and B). Caveat: DataBrew also offers an 'AWS Glue Parquet' output format, so D isn't clearly wrong. Apache Parquet (C) is the community-keyed answer."
+ },
+ "91": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints-deploy-models.html",
+  "note": "Inference components let each model have its own copy count and scaling, plus 'a minimum number of copies to ensure that the model loads'. Setting the minimum to at least 1 avoids cold starts. Serverless has no GPUs, and multi-model endpoints load models on demand, which causes cold starts."
+ },
+ "101": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/canvas-register-model.html",
+  "note": "Model Registry adds each registered model as a new version in its model group automatically."
+ },
+ "103": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/async-inference.html",
+  "note": "Payloads up to 1 GB with processing up to one hour = Asynchronous Inference. Real-time and serverless can't take 100 to 300 MB payloads."
+ },
+ "105": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/glue/latest/dg/detect-PII.html",
+  "note": "Glue's Detect PII transform can 'detect, mask, or remove' entities, including credit card numbers, with redact, partial-redact or hash actions. No regex to write. Macie discovers sensitive data but doesn't mask it."
+ },
+ "111": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html",
+  "note": "AWS says the real-time DetectPiiEntities call locates PII (type and character offsets). Redaction is done by an asynchronous batch job. So option A's wording is loose, but its approach (Comprehend removes PII, then S3 feeds training) is still the most efficient option. Macie only discovers PII, and S3 isn't 'mounted' to training instances."
+ },
+ "112": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/notebook-lifecycle-config.html",
+  "note": "Lifecycle configuration scripts run when a notebook instance is created or started. That's the built-in hook for installing scripts, with the least overhead."
+ },
+ "113": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/managed-flink/latest/java/how-zeppelin.html",
+  "note": "Managed Service for Apache Flink Studio notebooks (Apache Zeppelin) support SQL, Python and Scala for interactive analysis and visualization of streaming data. That covers the SQL plus notebook requirement, with MSK for ingestion."
+ },
+ "114": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html",
+  "note": "Comprehend detects and redacts general PII. Comprehend Medical detects PHI in clinical text (see its docs). Encrypting the data (D) doesn't keep the data out of training."
+ },
+ "117": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-access-training-data.html",
+  "note": "Fast file mode streams S3 objects on demand, so training starts without downloading 300 GB, and the data stays in S3 Standard where the dashboard already reads it. Express One Zone, EFS and FSx would all add storage cost. AWS's page doesn't compare costs; that part is reasoning."
+ },
+ "122": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/lexv2/latest/dg/what-is.html",
+  "note": "JumpStart (A) is clearly right for deploying an open-source LLM. For the interface, the community key picks Lex (E), which builds conversational voice and text interfaces. Option C (API Gateway WebSocket plus Lambda plus your own HTML) also works, but it's more to build. Expect A plus a managed conversational front end on the exam."
+ },
+ "125": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store-feature-processing.html",
+  "note": "Feature Store Feature Processing transforms raw data into features and ingests them into feature groups, and Feature Store manages the infrastructure. Model Monitor and batch transform don't do feature engineering."
+ },
+ "127": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/batch-ingestion-spark-connector-setup.html",
+  "note": "By default the Feature Store Spark connector writes to the online store with PutRecord, keeping the latest record, and also fills the offline store when both are enabled. It runs on EMR."
+ },
+ "128": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/multi-container-endpoints.html",
+  "note": "Multi-container endpoints host containers with different frameworks on one endpoint, and each container can be invoked directly to optimize cost. Multi-model endpoints need models that share one framework or container."
+ },
+ "130": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-private.html",
+  "note": "A Ground Truth private workforce is 'a group of workers that you choose', such as your own employees or subject-matter experts. Mechanical Turk is a public crowd (and it has now closed)."
+ },
+ "131": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/serverless-endpoints.html",
+  "note": "Serverless Inference scales to 0 when there are no requests, and provisioned concurrency keeps it warm during busy hours. This model runs on CPU, which serverless supports (no GPUs)."
+ },
+ "132": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-private.html",
+  "note": "Ground Truth labeling job plus a private workforce of employees. Mechanical Turk must not see confidential data, and Rekognition's automatic labels are less accurate than expert humans."
+ },
+ "133": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/databrew/latest/dg/jobs.recipe.html",
+  "note": "'Use a DataBrew recipe job to clean and normalize the data.' Profile jobs only analyze data quality and statistics. You point at S3 by path; JDBC is for databases."
+ },
+ "134": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-pyspark-transforms-Relationalize.html",
+  "note": "Relationalize 'flattens a nested schema in a DynamicFrame and pivots out array columns', turning nested JSON into tables with a built-in transform."
+ },
+ "137": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/async-inference.html",
+  "note": "Processing time of several minutes with payloads of up to 100 MB = Asynchronous Inference (up to 1 GB and 1 hour). It's managed, so less overhead than EC2 or ECS. Real-time has a 60-second timeout."
+ },
+ "145": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-data-bias-metric-true-label-imbalance.html",
+  "note": "DPL = qa \u2212 qd. A positive value means facet a (ages 40 to 45 here) has a much higher share of positive labels than everyone else. To bring it down, reduce positives in that facet: undersample the positive class for ages 40 to 45 (B)."
+ },
  "31": {
   "verdict": "Answer confirmed, with a note",
   "source": "https://docs.aws.amazon.com/transcribe/latest/dg/what-is.html",
@@ -431,5 +671,5 @@ const C01_DOC_NOTES = {
   "note": "Lifecycle configuration scripts run when a notebook instance is created or whenever it starts. The auto-stop check has to be set up on every start."
  }
 };
-const C01_CONCEPT_ONLY = [8, 15, 17, 18, 21, 23, 30, 44, 61, 65, 69, 72, 81, 88, 98, 16];
+const C01_CONCEPT_ONLY = [8, 15, 17, 18, 21, 23, 30, 44, 61, 65, 69, 72, 81, 88, 98, 16, 26, 50, 77, 104, 138];
 EXAM_DATA.forEach(q => { if (q.number <= 145 && !q.origin) { q.c01 = true; if (C01_EXPLANATIONS[q.number]) q.explanation = C01_EXPLANATIONS[q.number]; if (C01_CAUTION.includes(q.number)) q.answerCaution = true; if (C01_DOC_NOTES[q.number]) q.docNote = C01_DOC_NOTES[q.number]; q.checkStatus = C01_DOC_NOTES[q.number] ? 'doc' : (C01_CONCEPT_ONLY.includes(q.number) ? 'concept' : 'unchecked'); } });
