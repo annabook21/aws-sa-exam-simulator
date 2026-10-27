@@ -174,3 +174,41 @@ Used by the simulator's Focus Area option. Retired ordering and matching questio
 | 4. Operating, Monitoring, and Securing | 75 |
 
 Questions 146 and up are tagged from the exam-guide skill each was written for. Tags on the original bank (1–145) were assigned by reading each question against the guide's task statements, so treat them as approximate.
+
+## MLA-C01 coverage (added 2026-10-27)
+
+Checked against the official MLA-C01 exam guide. AWS's English pages are gone, but the Korean, Japanese and Chinese editions are still live, for example
+https://docs.aws.amazon.com/ko_kr/aws-certification/latest/machine-learning-engineer-associate-01/mla-01-in-scope-services.html.
+
+**What the original 145-question bank never tested:** 20 of the 86 in-scope services and 10 skills the guide names.
+
+**What fills the gaps now:**
+- Questions #309–340 (`exam_data3_c01gap.js`) were written by Claude, each from the AWS page linked in its `source` field. They cover:
+  - Neo (compilation and quantization)
+  - Role Manager
+  - Lambda Insights, Logs Insights
+  - S3 Transfer Acceleration
+  - RecordIO-protobuf
+  - EBS Provisioned IOPS
+  - Gitflow / GitHub Flow
+  - AUC/ROC, confusion matrix, stacking
+  - Step Functions .sync
+  - BYOC
+  - Lambda provisioned concurrency
+  - AWS Chatbot
+  - Serverless Application Repository
+  - Service Catalog
+  - DataSync, Direct Connect
+  - Secrets Manager rotation
+  - Lake Formation
+  - Textract, Comprehend Medical, Transcribe, Translate, Lex
+  - Kendra, Mechanical Turk, Fraud Detector, Lookout
+- Already-written questions that also match C01 skills are tagged `c01` through the `C01_ALSO` list (78 questions). They cover CodeBuild/CodeDeploy, Personalize, Polly, Trusted Advisor, Config, Organizations, X-Ray, CDK, DocumentDB, Storage Gateway, HealthLake, Kinesis Video Streams, DevOps Guru, CodeGuru, catastrophic forgetting, ensembles, blue/green/canary/linear, and more.
+
+**C01 mode pool:** 253 questions (145 bank + 32 gap + 76 overlap). By domain: D1 70, D2 69, D3 59, D4 55.
+
+**Still thin:** Each gap service has 1–2 questions. Tokenization and Reserved Instances are touched only lightly. Lookout for Vision and Lookout for Metrics are named in an explanation, but no question tests them.
+
+**Availability notes from AWS docs** (these services are still in the C01 guide):
+- Closed to new customers: Fraud Detector (2025-11-07), Kendra, Role Manager.
+- Shut down: Mechanical Turk (2026-09-30), Lookout for Equipment (2026-10-07).
