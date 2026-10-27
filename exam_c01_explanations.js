@@ -179,6 +179,182 @@ const C01_DOC_NOTES = {
   "verdict": "Answer confirmed",
   "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/deployment-guardrails-rolling.html",
   "note": "AWS recommends rolling deployments for accelerated instances that are in high demand, because they need fewer extra instances than blue/green. The rolling batch size can be 5–50% of the fleet. 1 of 10 instances is 10%, which fits the single spare Reserved Instance."
+ },
+ "2": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/train-warm-pools.html",
+  "note": "Warm pools keep provisioned training infrastructure after a job ends, so matching consecutive jobs start faster. (Warm pools can't be used with Spot Instances, which is one more reason Spot doesn't fit this question.)"
+ },
+ "34": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-parameters.html",
+  "note": "A lower temperature leads to more deterministic responses, and a lower Top K means fewer candidate tokens. Lowering both reduces randomness."
+ },
+ "38": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-instances-guidelines.html",
+  "note": "AWS's own table for data-critical workloads: primary node On-Demand, core nodes On-Demand, task nodes Spot. Core nodes store HDFS data, so terminating one risks data loss. Task nodes hold no persistent data."
+ },
+ "39": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/debugger-built-in-actions.html",
+  "note": "Debugger built-in actions can stop a training job automatically when a rule finds an issue such as non-convergence, which saves compute. Note: AWS says SageMaker Debugger is no longer open to new customers. Existing customers can keep using it."
+ },
+ "42": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/lake-formation/latest/dg/tag-based-access-control.html",
+  "note": "AWS recommends LF-Tag-based access control when there are many Data Catalog resources, because tagging resources and granting tags needs far fewer grants than granting each resource by name."
+ },
+ "45": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/logging-using-cloudtrail.html",
+  "note": "Confirmed, with a detail the question leaves out: CloudTrail records InvokeEndpoint as a data event. Data events aren't logged by default and cost extra, so you have to configure data event logging on a trail."
+ },
+ "48": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/debugger-built-in-actions.html",
+  "note": "Debugger built-in rules can trigger actions automatically: StopTraining, email or SMS through SNS. Note: AWS says SageMaker Debugger is no longer open to new customers. Existing customers can keep using it."
+ },
+ "49": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/shadow-tests.html",
+  "note": "In a shadow test, SageMaker AI sends a copy of live requests to the shadow variant, and only the production variant's responses are returned to the caller, so users aren't affected."
+ },
+ "118": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/shadow-tests.html",
+  "note": "Shadow tests compare a new variant on live traffic within the same endpoint. Only production responses reach users."
+ },
+ "143": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/shadow-tests.html",
+  "note": "A shadow variant receives copies of requests while callers only get the production variant's responses, so v2 can be checked on 100% of traffic with no risk to users."
+ },
+ "55": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/guardrails-global-controls.html",
+  "note": "Q Business global controls include blocked phrases, so chat responses don't include those words. Note: AWS says Amazon Q Business is no longer open to new customers and points to Amazon Quick instead."
+ },
+ "56": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/autopilot-llms-finetuning-models.html",
+  "note": "Autopilot can fine-tune large language models from SageMaker JumpStart through an AutoML job."
+ },
+ "59": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html",
+  "note": "Secrets Manager supports automatic rotation schedules, using a Lambda function for custom rotation."
+ },
+ "63": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/automatic-model-tuning-how-it-works.html",
+  "note": "Hyperband reallocates resources and stops underperforming jobs early, which AWS says can significantly speed up tuning compared with random search and Bayesian optimization."
+ },
+ "66": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-create-baseline.html",
+  "note": "The baseline (statistics and constraints) is the standard that drift is measured against, and it's usually built from the training dataset. When the model and its data change, create a new baseline from the latest dataset. Note: AWS says SageMaker Model Monitor is no longer open to new customers. Existing customers can keep using it, and exams written earlier may still test it."
+ },
+ "95": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-create-baseline.html",
+  "note": "Model Monitor compares live data with baseline statistics and constraints built from the training dataset, which detects drift. Note: AWS says SageMaker Model Monitor is no longer open to new customers. Existing customers can keep using it, and exams written earlier may still test it."
+ },
+ "116": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-create-baseline.html",
+  "note": "Model Monitor checks production data against a baseline and emits CloudWatch metrics that can drive alarms. Note: AWS says SageMaker Model Monitor is no longer open to new customers. Existing customers can keep using it, and exams written earlier may still test it."
+ },
+ "4": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
+  "note": "Clarify provides bias and explainability analysis. Running a Clarify job from Lambda makes the check on demand. Note: AWS says SageMaker Clarify is no longer open to new customers. Existing customers can keep using it."
+ },
+ "71": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
+  "note": "Clarify uses SHAP feature attributions to explain why a model made a prediction. Note: AWS says SageMaker Clarify is no longer open to new customers. Existing customers can keep using it."
+ },
+ "96": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-model-explainability.html",
+  "note": "Clarify detects bias and explains predictions, which surfaces trends that skew results across groups. Note: AWS says SageMaker Clarify is no longer open to new customers. Existing customers can keep using it."
+ },
+ "74": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/model-access-training-data.html",
+  "note": "FSx for Lustre gives high throughput with low-latency file retrieval and mounts quickly regardless of dataset size. It needs VPC setup."
+ },
+ "80": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/xgboost_hyperparameters.html",
+  "note": "AWS: increasing max_depth makes the model more complex and likely to overfit, so decreasing it reduces overfitting."
+ },
+ "83": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html",
+  "note": "Compute Optimizer analyzes utilization and gives rightsizing and idle-resource recommendations for EC2, EBS volumes, Amazon SageMaker and more."
+ },
+ "86": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html",
+  "note": "Object detection identifies objects and their bounding boxes. Image classification only labels the whole image."
+ },
+ "139": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html",
+  "note": "AWS's algorithm table: Random Cut Forest for anomaly detection, Semantic Segmentation for tagging every pixel, Sequence-to-Sequence for translation."
+ },
+ "140": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html",
+  "note": "Factorization Machines is designed to capture interactions between features in high-dimensional sparse datasets."
+ },
+ "14": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html",
+  "note": "LightGBM is a gradient-boosted tree algorithm for tabular classification and regression. Tree ensembles capture feature interactions that linear models miss."
+ },
+ "89": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/train-encrypt.html",
+  "note": "Enable inter-container traffic encryption (EnableInterContainerTrafficEncryption) to protect data passed between instances in distributed training."
+ },
+ "90": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/timeseries-objective-metric.html",
+  "note": "RMSE and weighted quantile loss (wQL) are listed time-series forecasting metrics. Recall and LogLoss are classification metrics."
+ },
+ "93": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-services.html",
+  "note": "SageMaker AI usage is covered by SageMaker AI Savings Plans."
+ },
+ "99": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/security_iam_id-based-policy-examples.html",
+  "note": "AWS documents the sagemaker:RootAccess condition key for blocking notebook instances that allow root access."
+ },
+ "107": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/comprehend/latest/dg/idp-inputs-sync.html",
+  "note": "Amazon Comprehend can take PDF documents directly for custom entity recognition. It uses its own parser for digital PDFs and calls Textract itself for scanned files."
+ },
+ "108": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/security_iam_id-based-policy-examples.html",
+  "note": "AWS's example restricts presigned URL creation to listed IP ranges with the aws:SourceIp condition key."
+ },
+ "121": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-foundation-model-evaluate-overview.html",
+  "note": "FMEval task types: open-ended generation, text summarization, question answering and classification. That matches each use case to its task."
+ },
+ "129": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/notebook-lifecycle-config.html",
+  "note": "Lifecycle configuration scripts run when a notebook instance is created or whenever it starts. The auto-stop check has to be set up on every start."
  }
 };
-EXAM_DATA.forEach(q => { if (q.number <= 145 && !q.origin) { q.c01 = true; if (C01_EXPLANATIONS[q.number]) q.explanation = C01_EXPLANATIONS[q.number]; if (C01_CAUTION.includes(q.number)) q.answerCaution = true; if (C01_DOC_NOTES[q.number]) q.docNote = C01_DOC_NOTES[q.number]; } });
+const C01_CONCEPT_ONLY = [8, 15, 17, 18, 21, 23, 30, 44, 61, 65, 69, 72, 81, 88, 98, 16];
+EXAM_DATA.forEach(q => { if (q.number <= 145 && !q.origin) { q.c01 = true; if (C01_EXPLANATIONS[q.number]) q.explanation = C01_EXPLANATIONS[q.number]; if (C01_CAUTION.includes(q.number)) q.answerCaution = true; if (C01_DOC_NOTES[q.number]) q.docNote = C01_DOC_NOTES[q.number]; q.checkStatus = C01_DOC_NOTES[q.number] ? 'doc' : (C01_CONCEPT_ONLY.includes(q.number) ? 'concept' : 'unchecked'); } });
