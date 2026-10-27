@@ -1,5 +1,6 @@
 // Plain-English explanations for the original MLA-C01 question bank (questions 1-145).
-// The answer key is community-sourced; questions listed in C01_CAUTION have answers that couldn't be confirmed.
+// The answer key is community-sourced. C01_DOC_NOTES records answers checked against AWS documentation;
+// C01_CAUTION lists questions whose keyed answer is flawed or comes with a caveat.
 const C01_EXPLANATIONS = {
  "1": "A central model registry that keeps every model version organized → SageMaker Model Registry with model groups. A model group is a folder holding every version of one model. ECR repositories store containers, not versioned model records. Unique tags inside the registry still skip the built-in grouping.",
  "2": "Back-to-back training jobs that waste time starting up → managed warm pools, which keep the training instances warm after a job ends so the next job starts right away. Spot training saves money but can make startup slower. Training Compiler speeds up the math inside a job. Data parallelism splits training across GPUs. None of those three fixes the startup wait.",
@@ -35,7 +36,7 @@ const C01_EXPLANATIONS = {
  "32": "Real-time anomaly detection on thousands of records per second, least overhead → Kinesis Data Streams plus the built-in RANDOM_CUT_FOREST function in Managed Service for Apache Flink. Self-managed Kafka on EC2 is more work. SQS FIFO has limited throughput and no analytics.",
  "33": "Quick sentiment analysis of chat text → Amazon Comprehend, ready-made sentiment analysis. Rekognition is for images. Naive Bayes and random forests require building and training your own model.",
  "34": "Make answers more consistent → lower both temperature and top_k. Both control randomness in word choice, so turning both down makes answers more predictable.",
- "35": "Minimize false positives → raise the precision target. Answer-key caution: Linear Learner's target_precision setting only takes effect for a binary classifier with the recall_at_target_precision selection criterion, but this question says multiclass_classifier. The concept to remember is still right: reduce false positives by raising the precision target. The question itself is flawed.",
+ "35": "Minimize false positives → raise the precision target, so the model only says 'weed present' when it's very sure. See the documentation check below: this question is flawed as written.",
  "36": "Sub-second latency through Firehose → zero buffering on the Firehose stream, plus a tuned PutRecordBatch batch size. Firehose waits to fill a buffer, so a 60-second buffer means up to 60 seconds of delay. A longer buffer makes it worse. DataSync and SQS aren't real-time delivery to OpenSearch.",
  "37": "Highly available, low latency, unpredictable bursts, scaling with demand → a SageMaker AI real-time endpoint with auto scaling. ECS or EKS means managing more yourself. A Spot fleet can be interrupted, which a production endpoint can't afford.",
  "38": "EMR batch processing where losing data is unacceptable, most cost-effective → primary and core nodes On-Demand, task nodes on Spot. Core nodes store data in HDFS, so losing one loses data. Task nodes only compute, so Spot interruptions are safe there.",
@@ -142,10 +143,42 @@ const C01_EXPLANATIONS = {
  "139": "Matching question on algorithms. Detect anomalies → Random Cut Forest. Label every pixel → semantic segmentation. Translate text → seq2seq.",
  "140": "Recommendations from high-dimensional sparse data → Factorization Machines, designed to capture interactions in sparse data. k-NN, PCA and seq2seq aren't built for sparse recommendation data.",
  "141": "Models built on laptops with scikit-learn and TensorFlow, to be rebuilt on SageMaker AI and registered, least overhead → rebuild them in SageMaker AI with its built-in framework support, and register them in Model Registry. Bring-your-own-container and API Gateway with Lambda wrappers are more work.",
- "142": "Train and deploy an LLM on SageMaker AI → the answer key says SageMaker Training Compiler for training, then real-time inference. Answer-key caution: I couldn't confirm Training Compiler's current status for LLM training from AWS documentation. The safe concept: a live conversational engine needs real-time inference, not async or batch. That's what rules out options C and D.",
+ "142": "A live conversational engine needs instant answers → real-time inference, which rules out asynchronous inference and batch transform (options C and D). Option B is wrong because large model inference containers are for serving models, not training them. That leaves A. See the documentation check below about Training Compiler's status.",
  "143": "Test v2 on production traffic with no disruption before switching → a shadow variant that samples 100% of requests while users keep getting v1, with outputs logged to S3, then promote v2. Production variants at 1% or 10% expose some users to v2.",
- "144": "Stop SageMaker AI from collecting usage and error metadata during training → the answer key says set the opt-out parameter on each training job submitted through the CLI, Boto3 or the Python SDK. Answer-key caution: option C (also turning off the domain setting for console jobs) may be the more complete answer. I couldn't confirm which one AWS intends. The concept to remember: opting out is a setting per training job.",
+ "144": "Stop SageMaker AI from collecting usage and error metadata during training → set the OPT_OUT_TRACKING opt-out on each training job submitted through the CLI, Boto3 or the SageMaker Python SDK. Option C invents a domain setting that doesn't exist. Training jobs created in the console already have metadata collection off by default. IAM roles that deny CloudWatch don't control this collection.",
  "145": "DPL of +0.9 means the 40–45 age group gets far more positive labels than other groups → undersample that group's positive class to bring it back in line. Oversampling it makes the imbalance worse."
 };
-const C01_CAUTION = [35, 142, 144];
-EXAM_DATA.forEach(q => { if (q.number <= 145 && !q.origin) { q.c01 = true; if (C01_EXPLANATIONS[q.number]) q.explanation = C01_EXPLANATIONS[q.number]; if (C01_CAUTION.includes(q.number)) q.answerCaution = true; } });
+const C01_CAUTION = [35, 142];
+const C01_DOC_NOTES = {
+ "35": {
+  "verdict": "Question flawed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/ll_hyperparameters.html",
+  "note": "AWS's Linear Learner hyperparameter reference says target_precision only takes effect when binary_classifier_model_selection_criteria is recall_at_target_precision, which is a binary-classifier setting. Because this question sets predictor_type to multiclass_classifier, target_precision would have no effect. Option C is the intended answer only if the model were a binary classifier. Remember the concept: to cut false positives in Linear Learner, use a binary classifier with recall_at_target_precision and raise target_precision."
+ },
+ "142": {
+  "verdict": "Answer stands, with a caveat",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/training-compiler.html",
+  "note": "AWS states there will be no new releases or versions of SageMaker Training Compiler, and its Deep Learning Containers no longer get patches. Training Compiler speeds up deep learning training on GPU instances and doesn't change the final model. Among these four options, A is still the best match. For new LLM training work, today you would look at SageMaker AI distributed training or HyperPod."
+ },
+ "144": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-privacy.html",
+  "note": "AWS documentation: opting out of metadata collection is set per training job in the CreateTrainingJob call (OPT_OUT_TRACKING=1 through the CLI, Boto3 or the SageMaker Python SDK), and it can't be done inside a training script. Jobs created in the console have metadata collection off by default. That confirms D. (An earlier version of this simulator wrongly flagged this answer as disputed.)"
+ },
+ "119": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/data-privacy.html",
+  "note": "AWS documentation: you must opt out of metadata collection for each training job you submit, through the API call (OPT_OUT_TRACKING=1). Private subnets, KMS keys and Nitro instances don't affect it."
+ },
+ "110": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/monitoring-cloudwatch.html",
+  "note": "AWS defines ModelSetupTime as the time it takes to launch new compute resources for a serverless endpoint. ModelLoadingWaitTime is a multi-model endpoint metric. That confirms C."
+ },
+ "97": {
+  "verdict": "Answer confirmed",
+  "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/deployment-guardrails-rolling.html",
+  "note": "AWS recommends rolling deployments for accelerated instances that are in high demand, because they need fewer extra instances than blue/green. The rolling batch size can be 5–50% of the fleet. 1 of 10 instances is 10%, which fits the single spare Reserved Instance."
+ }
+};
+EXAM_DATA.forEach(q => { if (q.number <= 145 && !q.origin) { q.c01 = true; if (C01_EXPLANATIONS[q.number]) q.explanation = C01_EXPLANATIONS[q.number]; if (C01_CAUTION.includes(q.number)) q.answerCaution = true; if (C01_DOC_NOTES[q.number]) q.docNote = C01_DOC_NOTES[q.number]; } });
