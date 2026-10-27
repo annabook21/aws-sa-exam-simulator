@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triple Shot · MLA</title>
+<style>
+:root {
+  --bg: #f6f5f1; --card: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e4e2dc;
+  --accent: #5b4bdb; --accent-soft: #ecebfd; --good: #1f8a4c; --good-soft: #e5f5ec;
+  --bad: #c2410c; --bad-soft: #fdeee5; --warn: #a16207; --warn-soft: #fef6e0;
+  --mark: #ffe58a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17171a; --card: #222226; --ink: #ececef; --muted: #a0a0a8; --line: #36363c;
+    --accent: #a59bff; --accent-soft: #2e2b4a; --good: #5fd08f; --good-soft: #1d3326;
+    --bad: #ff9a66; --bad-soft: #3a2519; --warn: #f2c35b; --warn-soft: #3a3019;
+    --mark: #6b5a12;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 18px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 80px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+header h1 { font-size: 1.3em; margin: 0; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+header nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+.muted { color: var(--muted); font-size: 0.85em; }
+button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 16px; }
+button:focus-visible, .word:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+button.small { padding: 6px 12px; font-size: 0.85em; }
+button.ghost { background: transparent; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.spacer { flex: 1; }
+.dots { display: flex; gap: 8px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); }
+.dot.now { border-color: var(--accent); }
+.dot.good { background: var(--good); border-color: var(--good); }
+.dot.part { background: var(--warn); border-color: var(--warn); }
+.dot.bad { background: var(--bad); border-color: var(--bad); }
+.steps { display: flex; gap: 6px; font-size: 0.8em; color: var(--muted); flex-wrap: wrap; }
+.steps b { color: var(--accent); }
+.qtext { font-size: 1.05em; }
+.word { border-radius: 4px; padding: 0 1px; cursor: pointer; }
+.word:hover { background: var(--accent-soft); }
+.word.on { background: var(--mark); }
+.qtext.locked .word { cursor: default; }
+.qtext.locked .word:hover { background: transparent; }
+.qtext.locked .word.on:hover { background: var(--mark); }
+.qual { display: inline-block; margin: 4px 6px 0 0; padding: 4px 10px; border-radius: 999px; font-size: 0.85em; border: 1px solid var(--line); }
+.qual.caught { background: var(--good-soft); border-color: var(--good); }
+.qual.missed { background: var(--warn-soft); border-color: var(--warn); }
+.opt { border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 10px 0; display: flex; gap: 12px; align-items: flex-start; }
+.opt .letter { font-weight: 700; min-width: 1.4em; }
+.opt .body { flex: 1; }
+.opt.picked { border-color: var(--accent); background: var(--accent-soft); }
+.opt.out .text { text-decoration: line-through; color: var(--muted); }
+.opt.correct { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt .why { font-size: 0.8em; color: var(--muted); margin-top: 4px; }
+.opt .tools { display: flex; gap: 6px; flex-direction: column; }
+.reasons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.reasons button { padding: 5px 10px; font-size: 0.8em; border-radius: 999px; }
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 14px; border-radius: 8px; margin: 12px 0; }
+.callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+.callout.good { border-color: var(--good); background: var(--good-soft); }
+.callout.bad { border-color: var(--bad); background: var(--bad-soft); }
+.explain { margin-top: 12px; }
+.explain a { color: var(--accent); }
+.bar { height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); }
+table.stats { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+table.stats td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+label.field { display: block; margin: 12px 0; }
+label.field span { display: block; font-size: 0.85em; color: var(--muted); margin-bottom: 4px; }
+.big { font-size: 2.4em; text-align: center; margin: 4px 0; }
+.center { text-align: center; }
+.tag { display: inline-block; font-size: 0.75em; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-bottom: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .card { animation: in 0.25s ease-out; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  .card { padding: 18px; }
+  .opt { flex-wrap: wrap; }
+  .opt .tools { flex-direction: row; width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>☕ <span>Triple Shot</span> · MLA</h1>
+    <nav>
+      <button class="small ghost" id="navStats">Stats</button>
+      <button class="small ghost" id="navSettings">Settings</button>
+      <a href="exam_simulator_mla.html"><button class="small ghost">Full exam mode</button></a>
+    </nav>
+  </header>
+  <div id="app"></div>
+</div>
+
+<script src="exam_data3.js"></script>
+<script src="exam_data3_c02.js"></script>
+<script src="exam_data3_c02b.js"></script>
+<script src="exam_data3_c02c.js"></script>
+<script src="exam_data3_c01gap.js"></script>
+<script src="exam_domains.js"></script>
+<script src="exam_c01_explanations.js"></script>
+<script>
+(function () {
+'use strict';
+
+const ROUND_SIZE = 3;
+const STORE_KEY = 'tripleShot.mla.v1';
+const ELIM_REASONS = ['Breaks a constraint', 'Wrong tool for the job', 'More work than needed', "Wouldn't work technically", 'Gut feeling'];
+const MISS_REASONS = [
+  ['misread', 'Misread the question'],
+  ['confused', 'Confused two services'],
+  ['qualifier', 'Missed a qualifier (LEAST, MOST, must…)'],
+  ['unknown', "Didn't know the topic"],
+  ['careless', 'Rushed / changed my mind']
+];
+
+// Phrases that usually decide the answer. Detected automatically, so this list is a heuristic, not an answer key.
+const QUALIFIERS = [
+  /\b(LEAST|MOST|LOWEST|HIGHEST|FEWEST|MINIMUM|MAXIMUM)\b[^.,?]{0,40}/g,
+  /\bmost cost[- ]effective\b/gi,
+  /\b(operational overhead|operational effort|development effort|implementation effort|amount of time|management overhead)\b/gi,
+  /(?<![-\w])(must not|must|cannot|can't|without|no longer)\b [^.,?]{3,40}/g,
+  /\b(real[- ]time|near[- ]real[- ]time|sub-second|low latency|minimum latency|cold start)\b/gi,
+  /\b(serverless|fully managed|managed)\b/gi,
+  /\b(private subnet|public internet|internet access|network isolation|public IPv4|VPC)\b/gi,
+  /\b(sensitive|PII|personally identifiable|PHI|encrypt\w*|customer managed keys?|compliance|least[- ]privilege)\b/gi,
+  /\b(automatically|automated|manual approval|on a schedule|every (day|night|week))\b/gi,
+  /\b(unpredictable|spiky|bursts?|inconsistent|predictable|sustained|intermittent)\b[^.,?]{0,25}/gi,
+  /\b(highly available|scalable|scale)\b/gi,
+  /\b(cross-account|another account|on premises|on-premises|hybrid)\b/gi,
+  /\b\d+(\.\d+)?\s?(KB|MB|GB|TB|seconds?|minutes?|hours?|days?|%)\b/g,
+  /\b(Choose|Select) (two|three|TWO|THREE)\b/g,
+  /\b(existing|already)\b [^.,?]{3,30}/gi,
+  /\b(GPU|accelerated|edge devices?)\b/gi
+];
+
+// Service and feature terms used to find "similar scenario" questions.
+const TERMS = ['Model Monitor', 'Clarify', 'Debugger', 'Data Wrangler', 'DataBrew', 'Feature Store', 'Pipelines', 'Model Registry',
+  'Autopilot', 'Canvas', 'JumpStart', 'Ground Truth', 'Augmented AI', 'A2I', 'Experiments', 'Neo', 'Inference Recommender',
+  'Serverless Inference', 'serverless', 'Asynchronous Inference', 'asynchronous', 'batch transform', 'real-time', 'multi-model',
+  'inference component', 'production variant', 'shadow', 'auto scaling', 'Spot', 'processing job', 'script mode', 'bring your own container',
+  'Bedrock', 'knowledge base', 'guardrail', 'agents', 'fine-tun*', 'RAG', 'embedding', 'Comprehend Medical', 'Comprehend', 'Kendra',
+  'Textract', 'Transcribe', 'Translate', 'Rekognition', 'Polly', 'Lex', 'Personalize', 'Glue', 'Athena', 'Redshift', 'EMR', 'Lake Formation',
+  'Kinesis', 'Firehose', 'Flink', 'Kafka', 'DynamoDB', 'Aurora', 'RDS', 'Parquet', 'EventBridge', 'Step Functions', 'Lambda',
+  'CodePipeline', 'CodeBuild', 'CodeDeploy', 'CloudFormation', 'CDK', 'ECR', 'ECS', 'EKS', 'KMS', 'Secrets Manager', 'Macie', 'IAM policy', 'execution role',
+  'VPC endpoint', 'PrivateLink', 'gateway endpoint', 'NAT gateway', 'CloudWatch', 'CloudTrail', 'X-Ray', 'AWS Config', 'Budgets', 'Cost Explorer',
+  'Savings Plan', 'Trusted Advisor', 'Organizations', 'XGBoost', 'Linear Learner', 'K-means', 'PCA', 'Random Cut Forest', 'DeepAR',
+  'BlazingText', 'oversampl*', 'SMOTE', 'one-hot', 'normaliz*', 'recall', 'precision', 'F1', 'AUC', 'RMSE', 'overfit*', 'underfit*',
+  'regulariz*', 'early stopping', 'hyperparameter*', 'drift', 'bias'];
+// Whole-word matching; a trailing * means "word starting with".
+const TERM_RES = TERMS.map(t => [t.replace('*', ''), new RegExp('(?<![A-Za-z0-9])' + t.replace('*', '').replace(/[.*+?^${}()|[\]\\-]/g, '\\$&') + (t.endsWith('*') ? '' : '(?![A-Za-z0-9])'), 'i')]);
+
+const $app = document.getElementById('app');
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return n;
+};
+
+// ---------- storage ----------
+function freshStore() {
+  return { settings: { pool: 'c01', focus: 'all' }, round: 0, hist: {}, queue: [], totals: { answered: 0, firstTry: 0, recovered: 0, missed: 0, qualCaught: 0, qualTotal: 0, elimRight: 0, elimTotal: 0, elimCorrectByMistake: 0 } };
+}
+let store;
+try { store = Object.assign(freshStore(), JSON.parse(localStorage.getItem(STORE_KEY) || 'null') || {}); } catch (e) { store = freshStore(); }
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* private mode: keep going in memory */ } }
+
+// ---------- question pool ----------
+const ALL = (typeof EXAM_DATA !== 'undefined' ? EXAM_DATA : []).filter(q => !q.question_type && q.options && Object.keys(q.options).length >= 2 && q.correct_answer);
+const answerOf = q => Array.isArray(q.correct_answer) ? q.correct_answer.slice() : String(q.correct_answer).split('');
+const termsOf = q => {
+  const text = q.question + ' ' + answerOf(q).map(k => q.options[k] || '').join(' ');
+  return new Set(TERM_RES.filter(([, re]) => re.test(text)).map(([t]) => t));
+};
+function pool() {
+  const s = store.settings;
+  let p = s.pool === 'c01' ? ALL.filter(q => q.c01) : ALL.filter(q => q.origin !== 'written-c01');
+  if (s.focus !== 'all') { const ds = s.focus.split(',').map(Number); p = p.filter(q => ds.includes(q.domain)); }
+  return p;
+}
+const byNum = n => ALL.find(q => q.number === n);
+
+function similarTo(q, exclude) {
+  const a = termsOf(q);
+  if (!a.size) return null;
+  let best = null, bestScore = 0;
+  for (const c of pool()) {
+    if (c.number === q.number || exclude.has(c.number)) continue;
+    const b = termsOf(c);
+    let shared = 0; a.forEach(t => { if (b.has(t)) shared++; });
+    if (!shared) continue;
+    const h = store.hist[c.number];
+    const score = shared / (a.size + b.size - shared) + (c.domain === q.domain ? 0.15 : 0) - (h ? 0.3 : 0) + Math.random() * 0.05;
+    if (score > bestScore) { bestScore = score; best = c; }
+  }
+  return best && bestScore > 0.12 ? best : null;
+}
+
+function buildRound() {
+  const p = pool();
+  const picked = [], used = new Set();
+  // Up to 2 review items that are due this round.
+  const due = store.queue.filter(it => it.due <= store.round);
+  for (const it of due) {
+    if (picked.length >= 2) break;
+    let q = null, kind = it.kind;
+    if (it.kind === 'similar') { const base = byNum(it.num); q = base && similarTo(base, used); if (!q) { q = base; kind = 'repeat'; } }
+    else q = byNum(it.num);
+    if (q && p.includes(q) && !used.has(q.number)) { picked.push({ q, kind, about: it.num }); used.add(q.number); }
+    store.queue.splice(store.queue.indexOf(it), 1);
+  }
+  const unseen = p.filter(q => !store.hist[q.number] && !used.has(q.number));
+  const seen = p.filter(q => store.hist[q.number] && !used.has(q.number)).sort((x, y) => (store.hist[x.number].last || 0) - (store.hist[y.number].last || 0));
+  const shuffled = unseen.sort(() => Math.random() - 0.5).concat(seen);
+  for (const q of shuffled) { if (picked.length >= ROUND_SIZE) break; picked.push({ q, kind: 'new' }); used.add(q.number); }
+  return picked.sort(() => Math.random() - 0.5);
+}
+
+// ---------- session state ----------
+let round = null;   // { items:[{q,kind,about}], i, results:[] }
+let cur = null;     // per-question state
+
+function startRound() {
+  const items = buildRound();
+  if (!items.length) { renderEmpty(); return; }
+  store.round++; save();
+  round = { items, i: 0, results: [] };
+  startQuestion();
+}
+
+function startQuestion() {
+  const { q } = round.items[round.i];
+  cur = { q, step: 'spot', marks: new Set(), quals: detectQuals(q.question), elim: {}, picks: new Set(), attempts: 0, challengeChoice: null, wrongPicks: [] };
+  render();
+}
+
+function detectQuals(text) {
+  const found = [];
+  for (const re of QUALIFIERS) {
+    re.lastIndex = 0; let m;
+    while ((m = re.exec(text))) {
+      const s = m.index, e = m.index + m[0].trim().length;
+      if (!found.some(f => s < f.e && e > f.s)) found.push({ s, e, text: m[0].trim() });
+      if (m[0].length === 0) re.lastIndex++;
+    }
+  }
+  return found.sort((a, b) => a.s - b.s);
+}
+
+// ---------- rendering ----------
+function header() {
+  const dots = el('div', { class: 'dots', 'aria-label': `Question ${round.i + 1} of ${round.items.length}` },
+    round.items.map((_, k) => el('span', { class: 'dot ' + (round.results[k] || (k === round.i ? 'now' : '')) })));
+  const item = round.items[round.i];
+  const steps = ['spot', 'eliminate', 'commit', 'reveal'];
+  const names = { spot: '1 Spot constraints', eliminate: '2 Eliminate', commit: '3 Commit', reveal: '4 Learn' };
+  const si = steps.indexOf(cur.step === 'challenge' || cur.step === 'retry' ? 'commit' : cur.step);
+  return el('div', { class: 'row', style: 'margin-bottom:14px' }, dots,
+    el('span', { class: 'spacer' }),
+    el('div', { class: 'steps' }, steps.map((s, k) => k === si ? el('b', {}, names[s]) : el('span', {}, names[s])).reduce((a, x, k) => k ? a.concat(['→', x]) : [x], [])),
+    item.kind !== 'new' ? el('div', { style: 'width:100%' }, el('span', { class: 'tag' }, item.kind === 'similar' ? `🔁 Similar scenario to #${item.about}: a different question that tests the same thing` : `🔁 Back again: you missed this one earlier`)) : null);
+}
+
+function questionText(q, interactive) {
+  const box = el('div', { class: 'qtext' + (interactive ? '' : ' locked') });
+  const re = /\S+/g; let m, last = 0, idx = 0;
+  while ((m = re.exec(q.question))) {
+    box.append(q.question.slice(last, m.index));
+    const wi = idx++, s = m.index, e = m.index + m[0].length;
+    const w = el('span', { class: 'word' + (cur.marks.has(wi) ? ' on' : ''), 'data-s': s, 'data-e': e }, m[0]);
+    if (interactive) {
+      w.tabIndex = 0; w.setAttribute('role', 'button');
+      const toggle = () => { cur.marks.has(wi) ? cur.marks.delete(wi) : cur.marks.add(wi); w.classList.toggle('on'); updateSpotBtn(); };
+      w.addEventListener('click', toggle);
+      w.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(); } });
+    }
+    box.append(w); last = m.index + m[0].length;
+  }
+  box.append(q.question.slice(last));
+  return box;
+}
+
+function markedRanges() {
+  const re = /\S+/g; let m, idx = 0; const out = [];
+  while ((m = re.exec(cur.q.question))) { if (cur.marks.has(idx)) out.push({ s: m.index, e: m.index + m[0].length }); idx++; }
+  return out;
+}
+function qualCaught(qual) { return markedRanges().some(r => r.s < qual.e && r.e > qual.s); }
+
+function originLine(q) {
+  if (q.origin === 'written-c01') return 'Written for an MLA-C01 exam-guide gap (not from AWS). The answer comes from the AWS page linked below.';
+  if (q.origin === 'written') return 'Written from the official MLA-C02 exam guide (not from AWS).' + (q.c01 ? ' Also tests an MLA-C01 skill.' : '');
+  if (q.c01) return 'Original MLA-C01 bank question (community-sourced answer key)' + ({ doc: ' · answer checked against AWS docs', concept: ' · standard ML concept', unchecked: ' · answer not yet checked against AWS docs' }[q.checkStatus] || '') + (q.answerCaution ? ' · ⚠ has a documented issue, see below' : '');
+  return '';
+}
+
+let spotBtn = null;
+function updateSpotBtn() { if (spotBtn) spotBtn.textContent = cur.marks.size ? `Lock in ${cur.marks.size} word${cur.marks.size > 1 ? 's' : ''} →` : 'Skip (no highlights) →'; }
+
+function render() {
+  $app.replaceChildren();
+  if (cur.step === 'spot') return renderSpot();
+  return renderOptions();
+}
+
+function renderSpot() {
+  const q = cur.q;
+  spotBtn = el('button', { class: 'primary', onclick: () => { cur.step = 'eliminate'; render(); } });
+  updateSpotBtn();
+  $app.append(el('div', { class: 'card' }, header(),
+    el('div', { class: 'callout' }, el('strong', {}, 'Before you see the options: '), 'tap the words that limit the answer. Think about cost, effort, speed, security, “must”, “without”, and sizes or times.'),
+    questionText(q, true),
+    el('div', { class: 'row', style: 'margin-top:18px' }, el('span', { class: 'muted' }, 'The options stay hidden until you lock in.'), el('span', { class: 'spacer' }), spotBtn)));
+}
+
+function constraintSummary() {
+  if (!cur.quals.length) return el('div', { class: 'muted', style: 'margin-top:8px' }, 'No standard qualifiers were detected automatically. Rely on your own highlights.');
+  return el('div', { style: 'margin-top:8px' },
+    el('div', { class: 'muted' }, 'Detected automatically (a heuristic, not the answer key): ✓ = you caught it'),
+    cur.quals.map(ql => el('span', { class: 'qual ' + (qualCaught(ql) ? 'caught' : 'missed') }, (qualCaught(ql) ? '✓ ' : '○ ') + ql.text)));
+}
+
+function renderOptions() {
+  const q = cur.q, ans = answerOf(q), need = ans.length, revealed = cur.step === 'reveal';
+  const card = el('div', { class: 'card' }, header(), questionText(q, false), constraintSummary());
+  if (need > 1) card.append(el('div', { class: 'callout warn' }, `Choose ${need}.`));
+
+  const keys = Object.keys(q.options);
+  for (const k of keys) {
+    const out = cur.elim[k];
+    const cls = ['opt'];
+    if (out) cls.push('out');
+    if (cur.picks.has(k)) cls.push('picked');
+    if (revealed) { if (ans.includes(k)) cls.push('correct'); else if (cur.picks.has(k) || cur.wrongPicks.includes(k)) cls.push('wrong'); }
+    const body = el('div', { class: 'body' }, el('div', { class: 'text' }, q.options[k]));
+    if (out && out.reason) body.append(el('div', { class: 'why' }, `Eliminated: ${out.reason}`));
+    if (revealed && out && ans.includes(k)) body.append(el('div', { class: 'why', style: 'color:var(--bad)' }, `⚠ You eliminated a correct answer (“${out.reason || 'no reason'}”). Re-read the explanation for this option.`));
+    if (revealed && out && !ans.includes(k)) body.append(el('div', { class: 'why', style: 'color:var(--good)' }, '✓ Good elimination'));
+    if (out && out.choosing) {
+      body.append(el('div', { class: 'reasons' }, el('span', { class: 'muted' }, 'Why is it out?'),
+        ELIM_REASONS.map(r => el('button', { onclick: () => { cur.elim[k] = { reason: r }; render(); } }, r))));
+    }
+    const tools = el('div', { class: 'tools' });
+    if (!revealed && cur.step !== 'challenge') {
+      if (!out) {
+        tools.append(el('button', { class: 'small', 'aria-label': `Eliminate option ${k}`, onclick: () => { cur.picks.delete(k); cur.elim[k] = { choosing: true }; render(); } }, '✕ Eliminate'));
+        tools.append(el('button', { class: 'small' + (cur.picks.has(k) ? ' primary' : ''), 'aria-label': `Pick option ${k}`, onclick: () => pick(k, need) }, cur.picks.has(k) ? '● Picked' : '○ Pick'));
+      } else {
+        tools.append(el('button', { class: 'small ghost', onclick: () => { delete cur.elim[k]; render(); } }, '↺ Undo'));
+      }
+    }
+    card.append(el('div', { class: cls.join(' ') }, el('span', { class: 'letter' }, k), body, tools));
+  }
+
+  if (cur.step === 'eliminate' || cur.step === 'retry') {
+    const ready = cur.picks.size === need && !Object.values(cur.elim).some(e => e.choosing);
+    const nElim = Object.values(cur.elim).filter(e => e.reason).length;
+    if (cur.step === 'retry') card.append(el('div', { class: 'callout warn' }, 'Not quite. Your wrong pick is now eliminated. Check each remaining option against the constraints above, then pick again.', cur.retryHint ? el('div', { style: 'margin-top:6px' }, cur.retryHint) : null));
+    card.append(el('div', { class: 'row', style: 'margin-top:12px' },
+      el('span', { class: 'muted' }, nElim ? `${nElim} eliminated` : 'Tip: eliminate at least one option first, with a reason.'),
+      el('span', { class: 'spacer' }),
+      el('button', { class: 'primary', disabled: !ready, onclick: commit }, 'Commit →')));
+  }
+  if (cur.step === 'challenge') card.append(renderChallenge());
+  if (revealed) card.append(renderReveal());
+  $app.append(card);
+}
+
+function pick(k, need) {
+  if (cur.picks.has(k)) cur.picks.delete(k);
+  else { if (need === 1) cur.picks.clear(); if (cur.picks.size < need) cur.picks.add(k); }
+  render();
+}
+
+function commit() {
+  const nElim = Object.values(cur.elim).filter(e => e.reason).length;
+  if (cur.attempts === 0 && cur.challengeChoice === null) {
+    // Ask the user to justify the pick before grading it.
+    cur.step = 'challenge'; cur.lowElim = nElim === 0; render(); return;
+  }
+  grade();
+}
+
+function renderChallenge() {
+  const opts = [];
+  const seen = new Set();
+  for (const ql of cur.quals) if (!seen.has(ql.text.toLowerCase())) { seen.add(ql.text.toLowerCase()); opts.push(ql.text); }
+  for (const r of markedRanges()) { const t = cur.q.question.slice(r.s, r.e).replace(/[.,?]$/, ''); if (!opts.some(o => o.toLowerCase().includes(t.toLowerCase()))) opts.push(t); }
+  const picks = [...cur.picks].join(' + ');
+  return el('div', { class: 'callout' },
+    el('strong', {}, `Defend your pick (${picks}): `), 'which constraint does it meet better than the others?',
+    cur.lowElim ? el('div', { class: 'muted', style: 'margin-top:6px' }, 'You didn’t eliminate anything. On the real exam, ruling out two options first makes the last choice much easier.') : null,
+    el('div', { class: 'reasons', style: 'margin-top:10px' },
+      opts.slice(0, 10).map(o => el('button', { onclick: () => { cur.challengeChoice = o; grade(); } }, o)),
+      el('button', { onclick: () => { cur.challengeChoice = '(none, it just looked right)'; grade(); } }, 'None, it just looked right'),
+      el('button', { class: 'ghost', onclick: () => { cur.step = 'eliminate'; render(); } }, '← Rethink')));
+}
+
+function grade() {
+  const ans = answerOf(cur.q);
+  const right = cur.picks.size === ans.length && ans.every(k => cur.picks.has(k));
+  cur.attempts++;
+  if (right) { finish(cur.attempts === 1 ? 'good' : 'part'); return; }
+  if (cur.attempts === 1) {
+    // One retry: the wrong picks become eliminated and the user tries again before seeing the explanation.
+    for (const k of cur.picks) { if (!ans.includes(k)) { cur.elim[k] = { reason: 'Your first pick, which was wrong' }; cur.wrongPicks.push(k); } }
+    // Keep correct partial picks in multi-select.
+    cur.picks = new Set([...cur.picks].filter(k => ans.includes(k)));
+    cur.step = 'retry';
+    const anyRightElim = Object.entries(cur.elim).some(([k, e]) => ans.includes(k) && e.reason && e.reason !== 'Your first pick, which was wrong');
+    cur.retryHint = anyRightElim ? 'One of the options you eliminated earlier deserves another look.' : null;
+    render();
+    return;
+  }
+  for (const k of cur.picks) if (!ans.includes(k)) cur.wrongPicks.push(k);
+  finish('bad');
+}
+
+function finish(result) {
+  const q = cur.q, ans = answerOf(q), t = store.totals;
+  cur.result = result; cur.step = 'reveal';
+  t.answered++;
+  if (result === 'good') t.firstTry++; else if (result === 'part') t.recovered++; else t.missed++;
+  t.qualTotal += cur.quals.length; t.qualCaught += cur.quals.filter(qualCaught).length;
+  for (const [k, e] of Object.entries(cur.elim)) {
+    if (!e.reason || e.reason === 'Your first pick, which was wrong') continue;
+    t.elimTotal++; if (ans.includes(k)) t.elimCorrectByMistake++; else t.elimRight++;
+  }
+  const h = store.hist[q.number] || { seen: 0, good: 0, miss: 0, reasons: {} };
+  h.seen++; h.last = store.round; if (result === 'good') h.good++; else h.miss++;
+  store.hist[q.number] = h;
+  if (result !== 'good') {
+    // Bring the idea back: first as a different question on the same services, later as this exact question.
+    store.queue = store.queue.filter(it => it.num !== q.number);
+    store.queue.push({ num: q.number, kind: 'similar', due: store.round + 2 }, { num: q.number, kind: 'repeat', due: store.round + 5 });
+  }
+  round.results[round.i] = result;
+  save();
+  render();
+}
+
+function explanationBlock(q) {
+  const box = el('div', { class: 'explain' });
+  if (q.explanation) box.append(el('div', {}, el('strong', {}, '💡 Plain English: '), q.explanation));
+  if (q.source && /^https:\/\/docs\.aws\.amazon\.com\//.test(q.source)) box.append(el('div', { class: 'muted', style: 'margin-top:8px' }, '📄 ', el('a', { href: q.source, target: '_blank', rel: 'noopener' }, 'AWS documentation for this question')));
+  if (q.docNote && /^https:\/\/docs\.aws\.amazon\.com\//.test(q.docNote.source)) box.append(el('div', { class: 'callout warn' }, el('strong', {}, `📘 Documentation check: ${q.docNote.verdict}. `), q.docNote.note, ' (', el('a', { href: q.docNote.source, target: '_blank', rel: 'noopener' }, 'AWS documentation'), ')'));
+  const o = originLine(q); if (o) box.append(el('div', { class: 'muted', style: 'margin-top:8px' }, o));
+  return box;
+}
+
+function renderReveal() {
+  const q = cur.q, ans = answerOf(q), wrap = el('div', {});
+  const head = { good: ['good', '✅ Right on the first try.'], part: ['warn', '🟡 Right on the second try. Counted as a recovery. It will come back later.'], bad: ['bad', `❌ The answer is ${ans.join(' + ')}.`] }[cur.result];
+  wrap.append(el('div', { class: 'callout ' + head[0] }, el('strong', {}, head[1]),
+    cur.challengeChoice ? el('div', { class: 'muted', style: 'margin-top:4px' }, `You defended your first pick with: “${cur.challengeChoice}”.`) : null));
+  const missedQuals = cur.quals.filter(ql => !qualCaught(ql));
+  if (cur.result !== 'good' && missedQuals.length) wrap.append(el('div', { class: 'muted' }, 'Constraints you didn’t highlight: ', missedQuals.map(m => `“${m.text}”`).join(', ')));
+  wrap.append(explanationBlock(q));
+
+  const next = el('button', { class: 'primary', onclick: nextQuestion }, round.i + 1 < round.items.length ? 'Next question →' : 'Finish round →');
+  if (cur.result === 'good') { wrap.append(el('div', { class: 'row', style: 'margin-top:16px' }, el('span', { class: 'spacer' }), next)); return wrap; }
+
+  // Miss diagnosis: required before moving on, one tap.
+  next.disabled = !cur.missReason;
+  wrap.append(el('div', { class: 'callout', style: 'margin-top:16px' },
+    el('strong', {}, 'Why did you miss it? '), el('span', { class: 'muted' }, 'This builds your miss profile in Stats.'),
+    el('div', { class: 'reasons' }, MISS_REASONS.map(([id, label]) => el('button', { class: cur.missReason === id ? 'primary' : '', onclick: () => {
+      const h = store.hist[q.number];
+      if (cur.missReason) h.reasons[cur.missReason]--;
+      cur.missReason = id; h.reasons[id] = (h.reasons[id] || 0) + 1; save(); render();
+    } }, label)))));
+  wrap.append(el('div', { class: 'row', style: 'margin-top:12px' }, el('span', { class: 'muted' }, 'A similar scenario comes back in 2 rounds, and this exact one in 5.'), el('span', { class: 'spacer' }), next));
+  return wrap;
+}
+
+function nextQuestion() {
+  round.i++;
+  if (round.i < round.items.length) startQuestion(); else renderRoundEnd();
+}
+
+function renderRoundEnd() {
+  cur = null;
+  const r = round.results, good = r.filter(x => x === 'good').length;
+  const face = good === 3 ? '🔥' : good === 2 ? '💪' : good === 1 ? '🌱' : '🧭';
+  const msg = good === 3 ? 'Clean sweep.' : good === 2 ? 'Solid round.' : good === 1 ? 'Progress. The misses are queued to come back.' : 'Tough set. Every miss is queued to come back.';
+  $app.replaceChildren(el('div', { class: 'card center' },
+    el('div', { class: 'big' }, face),
+    el('div', { class: 'dots', style: 'justify-content:center;margin:8px 0' }, r.map(x => el('span', { class: 'dot ' + x }))),
+    el('h2', { style: 'margin:6px 0' }, `${good} of ${r.length} on the first try`),
+    el('p', { class: 'muted' }, msg),
+    el('p', {}, 'Stand up, drink some water, look away from the screen for a minute. Come back when you’re ready.'),
+    el('div', { class: 'row', style: 'justify-content:center;margin-top:12px' },
+      el('button', { onclick: renderStats }, 'See stats'),
+      el('button', { class: 'primary', onclick: startRound }, 'Next 3 →'))));
+}
+
+function renderEmpty() {
+  $app.replaceChildren(el('div', { class: 'card' }, el('h2', {}, 'No questions match these settings.'), el('button', { class: 'primary', onclick: renderSettings }, 'Change settings')));
+}
+
+function pct(a, b) { return b ? Math.round(100 * a / b) : 0; }
+function barRow(label, a, b, note) {
+  return el('tr', {}, el('td', { style: 'width:42%' }, label), el('td', {}, el('div', { class: 'bar' }, el('i', { style: `width:${pct(a, b)}%` }))), el('td', { style: 'width:22%;text-align:right' }, b ? `${pct(a, b)}%` : '–', el('div', { class: 'muted' }, note || `${a}/${b}`)));
+}
+
+function resumeButton() {
+  return round && cur && round.i < round.items.length ? el('button', { onclick: render }, '← Back to my question') : null;
+}
+
+function renderStats() {
+  const t = store.totals, reasons = {};
+  const dom = { 1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0] };
+  for (const [n, h] of Object.entries(store.hist)) {
+    for (const [k, v] of Object.entries(h.reasons || {})) reasons[k] = (reasons[k] || 0) + v;
+    const q = byNum(Number(n)); if (q && dom[q.domain]) { dom[q.domain][0] += h.good; dom[q.domain][1] += h.seen; }
+  }
+  const totalMiss = Object.values(reasons).reduce((a, b) => a + b, 0);
+  const top = Object.entries(reasons).sort((a, b) => b[1] - a[1])[0];
+  const advice = {
+    misread: 'Slow down on the last sentence. That’s where the real question is. Highlight it every time.',
+    confused: 'Make pairs: write the two services you mixed up and one sentence on when to use each.',
+    qualifier: 'Your highlighting step is the fix. Always mark LEAST/MOST, “must” and “without” before reading the options.',
+    unknown: 'Content gap. Open the AWS documentation link on those misses and read just the first paragraph.',
+    careless: 'Trust the elimination step: if you ruled an option out with a reason, don’t switch back to it without a new reason.'
+  };
+  const card = el('div', { class: 'card' }, el('h2', { style: 'margin-top:0' }, 'Your stats'),
+    el('table', { class: 'stats' },
+      barRow('Right on the first try', t.firstTry, t.answered),
+      barRow('Recovered on the second try', t.recovered, t.answered),
+      barRow('Constraints caught (auto-detected)', t.qualCaught, t.qualTotal),
+      barRow('Eliminations that were correct', t.elimRight, t.elimTotal, `right answers eliminated: ${t.elimCorrectByMistake}`)),
+    el('h3', {}, 'Why you miss'),
+    totalMiss ? el('table', { class: 'stats' }, MISS_REASONS.map(([id, label]) => barRow(label, reasons[id] || 0, totalMiss, `${reasons[id] || 0}`))) : el('p', { class: 'muted' }, 'No misses tagged yet.'),
+    top ? el('div', { class: 'callout' }, el('strong', {}, 'Biggest lever: '), advice[top[0]]) : null,
+    el('h3', {}, 'First-try accuracy by domain'),
+    el('table', { class: 'stats' }, [1, 2, 3, 4].map(d => barRow(`Domain ${d}`, dom[d][0], dom[d][1]))),
+    el('p', { class: 'muted' }, `Review queue: ${store.queue.length} scheduled · Rounds played: ${store.round}`),
+    el('div', { class: 'row' }, resumeButton(), el('button', { class: 'primary', onclick: startRound }, 'Play 3 →'), el('span', { class: 'spacer' }), el('button', { class: 'small ghost', onclick: confirmReset }, 'Reset stats')));
+  $app.replaceChildren(card);
+}
+
+function confirmReset() {
+  $app.replaceChildren(el('div', { class: 'card' }, el('h2', { style: 'margin-top:0' }, 'Reset all Triple Shot stats?'), el('p', {}, 'This clears your history, miss reasons and review queue on this device.'),
+    el('div', { class: 'row' }, el('button', { onclick: renderStats }, 'Keep them'), el('button', { class: 'primary', onclick: () => { const s = store.settings; store = freshStore(); store.settings = s; save(); renderStats(); } }, 'Yes, reset'))));
+}
+
+function renderSettings() {
+  const s = store.settings;
+  const poolSel = el('select', {}, el('option', { value: 'c01' }, 'MLA-C01 (bank + C01 gap and overlap questions)'), el('option', { value: 'c02' }, 'MLA-C02 (all written + bank)'));
+  poolSel.value = s.pool;
+  const focusSel = el('select', {}, [['all', 'All domains'], ['2,4', 'Domains 2 + 4 (weak areas)'], ['1', 'Domain 1: Data preparation'], ['2', 'Domain 2: Model development'], ['3', 'Domain 3: Deployment and orchestration'], ['4', 'Domain 4: Monitoring, maintenance, security']].map(([v, l]) => el('option', { value: v }, l)));
+  focusSel.value = s.focus;
+  const count = el('span', { class: 'muted' });
+  const upd = () => { store.settings = { pool: poolSel.value, focus: focusSel.value }; save(); count.textContent = `${pool().length} questions available (ordering and matching questions are skipped here).`; };
+  poolSel.onchange = upd; focusSel.onchange = upd; upd();
+  $app.replaceChildren(el('div', { class: 'card' }, el('h2', { style: 'margin-top:0' }, 'Settings'),
+    el('label', { class: 'field' }, el('span', {}, 'Question pool'), poolSel),
+    el('label', { class: 'field' }, el('span', {}, 'Focus'), focusSel), count,
+    el('div', { class: 'row', style: 'margin-top:16px' }, resumeButton(), el('span', { class: 'spacer' }), el('button', { class: 'primary', onclick: startRound }, 'Play 3 →'))));
+}
+
+function renderHome() {
+  $app.replaceChildren(el('div', { class: 'card' },
+    el('h2', { style: 'margin-top:0' }, 'Three questions. Full focus. Then breathe.'),
+    el('ol', {},
+      el('li', {}, el('strong', {}, 'Spot: '), 'read the scenario and tap the words that limit the answer, before the options appear.'),
+      el('li', {}, el('strong', {}, 'Eliminate: '), 'strike out options one at a time and say why.'),
+      el('li', {}, el('strong', {}, 'Commit: '), 'pick, then defend your pick. A wrong pick gets one retry before the answer is shown.'),
+      el('li', {}, el('strong', {}, 'Learn: '), 'read the explanation, then tag why you missed it. Misses come back later, first as a similar question and then as the same one.')),
+    el('p', { class: 'muted' }, `Pool: ${store.settings.pool === 'c01' ? 'MLA-C01' : 'MLA-C02'} · Focus: ${store.settings.focus === 'all' ? 'all domains' : 'domains ' + store.settings.focus} · ${pool().length} questions. Progress is saved in this browser only.`),
+    el('div', { class: 'row' }, el('button', { onclick: renderSettings }, 'Settings'), el('span', { class: 'spacer' }), el('button', { class: 'primary', onclick: startRound }, 'Start 3 →'))));
+}
+
+document.getElementById('navStats').onclick = renderStats;
+document.getElementById('navSettings').onclick = renderSettings;
+renderHome();
+})();
+</script>
+</body>
+</html>
