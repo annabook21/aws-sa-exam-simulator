@@ -146,7 +146,16 @@ const QUALIFIERS = [
   /\b\d+(\.\d+)?\s?(KB|MB|GB|TB|seconds?|minutes?|hours?|days?|%)\b/g,
   /\b(Choose|Select) (two|three|TWO|THREE)\b/g,
   /\b(existing|already)\b [^.,?]{3,30}/gi,
-  /\b(GPU|accelerated|edge devices?)\b/gi
+  /\b(GPU|accelerated|edge devices?)\b/gi,
+  /\b(MINIMIZE|MAXIMIZE|REDUCE|IMPROVE|INCREASE|DECREASE|BEST|FIRST)\b[^.,?]{0,30}/g,
+  /\b(more|less) (consistent|random|accurate|expensive|latency|cost\w*)\b/gi,
+  /\b(false positives?|false negatives?|precision|recall|F1( score)?|accuracy|AUC|RMSE|MAE|R2|confusion matrix|threshold)\b/gi,
+  /\b(categorical|numeric(al)?|text|image|time[- ]series|tabular|unlabeled|labeled|streaming|nested JSON|CSV|Parquet)\b( data)?/gi,
+  /\b(imbalance\w*|missing values?|outliers?|duplicates?|skew\w*|correlated|noise|drift|bias|fairness|overfit\w*|underfit\w*)\b/gi,
+  /\b(epochs?|loss|learning rate|batch size|hyperparameters?|regulariz\w+)\b/gi,
+  /\b(explain\w*|interpretab\w+|audit\w*|governance|centraliz\w+|permissions?|cross-account|approval|approved|version\w*)\b/gi,
+  /\b(predict (the|whether)[^.,?]{0,30}|classif\w+|regression|forecast\w*|recommend\w*|anomal\w+)\b/gi,
+  /\b(as quickly as possible|minimal (setup|code changes?|effort|changes?)|simplest|quickest|alerts?|automatic rollback|rollback|data quality|protected health information|human (review|labeling)|AccessDenied|ignores?)\b/gi
 ];
 
 // Service and feature terms used to find "similar scenario" questions.
@@ -264,7 +273,8 @@ function detectQuals(text) {
       if (m[0].length === 0) re.lastIndex++;
     }
   }
-  return found.sort((a, b) => a.s - b.s);
+  const seenText = new Set();
+  return found.sort((a, b) => a.s - b.s).filter(f => { const k = f.text.toLowerCase(); if (seenText.has(k)) return false; seenText.add(k); return true; });
 }
 
 // ---------- rendering ----------
@@ -334,7 +344,7 @@ function renderSpot() {
 }
 
 function constraintSummary() {
-  if (!cur.quals.length) return el('div', { class: 'muted', style: 'margin-top:8px' }, 'No standard qualifiers were detected automatically. Rely on your own highlights.');
+  if (!cur.quals.length) return el('div', { class: 'muted', style: 'margin-top:8px' }, 'No common clue words were found in this one. It’s probably testing a concept, so highlight the symptom, the data type, or the goal yourself.');
   return el('div', { style: 'margin-top:8px' },
     el('div', { class: 'muted' }, 'Detected automatically (a heuristic, not the answer key): ✓ = you caught it'),
     cur.quals.map(ql => el('span', { class: 'qual ' + (qualCaught(ql) ? 'caught' : 'missed') }, (qualCaught(ql) ? '✓ ' : '○ ') + ql.text)));
