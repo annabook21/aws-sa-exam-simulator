@@ -1259,6 +1259,10 @@
             </div>
 
             <button class="btn" onclick="startExam()">Begin Exam</button>
+            <div style="margin-top:16px;padding:14px;border:2px solid #7c3aed;border-radius:10px;">
+                <button class="btn" style="background:#7c3aed;" onclick="startExam(true)">🎯 C01 Readiness Check</button>
+                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;">30 MLA-C01 questions in the official domain mix (8 / 8 / 7 / 7), exam mode, 60 minutes. Ignores the settings above. At the end you get a readiness rating and your weakest domain.</p>
+            </div>
         </div>
 
         <!-- Progress Bar -->
@@ -1419,6 +1423,7 @@
                 </div>
             </div>
 
+            <div id="readinessPanel"></div>
             <div class="domain-breakdown" id="domainBreakdown"></div>
 
             <!-- Review Bank Notice -->
@@ -1467,6 +1472,7 @@ This notepad persists throughout your exam session."></textarea>
         let startTime;
         let testMode = 'exam';
         let isReviewBankExam = false;
+        let isDiagnostic = false;
         
         // Review Bank Storage Key (unique per exam type)
         const REVIEW_BANK_KEY = 'examSimulator_reviewBank_MLA'; // ML Associate
@@ -1615,6 +1621,7 @@ This notepad persists throughout your exam session."></textarea>
 
             examData = selectedQuestions;
             isReviewBankExam = true;
+            isDiagnostic = false;
             
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
@@ -1686,10 +1693,19 @@ This notepad persists throughout your exam session."></textarea>
             });
         });
 
-        function startExam() {
+        function startExam(diagnostic) {
             if (!examData || examData.length === 0) {
                 alert('Exam data is not loaded yet. Please wait a moment and try again.');
                 return;
+            }
+
+            isDiagnostic = diagnostic === true;
+            if (isDiagnostic) {
+                document.getElementById('examVersion').value = 'c01';
+                document.getElementById('focusArea').value = 'all';
+                document.getElementById('testMode').value = 'exam';
+                document.getElementById('questionCount').value = 'all';
+                document.getElementById('timeLimit').value = '60';
             }
 
             const questionCount = document.getElementById('questionCount').value;
@@ -1719,8 +1735,19 @@ This notepad persists throughout your exam session."></textarea>
                 selectedQuestions = selectedQuestions.filter(q => domains.includes(q.domain));
             }
             
-            if (randomizeQuestions) {
+            if (randomizeQuestions || isDiagnostic) {
                 selectedQuestions = shuffle(selectedQuestions);
+            }
+
+            if (isDiagnostic) {
+                // Official C01 weights: 28% / 26% / 22% / 24% of 30 questions
+                const quota = {1: 8, 2: 8, 3: 7, 4: 7};
+                const picked = [];
+                const rest = [];
+                selectedQuestions.forEach(q => {
+                    if (quota[q.domain] > 0) { picked.push(q); quota[q.domain]--; } else { rest.push(q); }
+                });
+                selectedQuestions = shuffle(picked.concat(rest.slice(0, 30 - picked.length)));
             }
 
             if (questionCount !== 'all') {
@@ -2337,6 +2364,32 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('domainBreakdown').innerHTML = rows ? `<h3 style="margin:20px 0 8px;">Score by exam domain</h3><table style="width:100%;border-collapse:collapse;">${rows}</table><p style="font-size:0.8em;color:#6b7280;margin-top:6px;">Green means 72% or higher in that domain. Domain tags on the original bank questions (1-145) are approximate.</p>` : '';
         }
 
+        function renderReadiness(results, correct) {
+            const panel = document.getElementById('readinessPanel');
+            if (!isDiagnostic) { panel.innerHTML = ''; return; }
+            const pct = Math.round((correct / results.length) * 100);
+            const band = pct >= 80
+                ? ['#10b981', 'On track', 'You have a margin. Sleep is worth more than more questions tonight.']
+                : pct >= 70
+                ? ['#f59e0b', 'Borderline', 'Close to the line. Spend 30 to 45 minutes on your weakest domain below, then stop.']
+                : ['#ef4444', 'At risk', 'Below the usual safe zone. Spend your remaining time only on the weakest domain below, in short rounds.'];
+            const stats = {};
+            results.forEach(r => {
+                const d = r.question.domain;
+                stats[d] = stats[d] || {correct: 0, total: 0};
+                stats[d].total++;
+                if (r.isCorrect) stats[d].correct++;
+            });
+            const weakest = Object.keys(stats).sort((a, b) => stats[a].correct / stats[a].total - stats[b].correct / stats[b].total)[0];
+            const names = {1: 'Data Preparation for ML', 2: 'ML Model Development', 3: 'Deployment and Orchestration of ML Workflows', 4: 'ML Solution Monitoring, Maintenance, and Security'};
+            panel.innerHTML = `<div style="margin:20px 0;padding:16px;border-left:6px solid ${band[0]};background:rgba(124,58,237,0.06);border-radius:8px;">
+                <div style="font-size:1.3em;font-weight:bold;color:${band[0]};">Readiness: ${band[1]} (${pct}%)</div>
+                <p style="margin-top:6px;">${band[2]}</p>
+                <p style="margin-top:6px;"><strong>Weakest domain:</strong> Domain ${weakest}: ${names[weakest]} (${stats[weakest].correct} / ${stats[weakest].total}). To drill it, pick it under Focus Area.</p>
+                <p style="margin-top:10px;font-size:0.8em;color:#6b7280;">This rating is a rule of thumb, not a score prediction. AWS reports a scaled score (720 out of 1000 to pass) and does not publish how percent correct maps to it. Bands: 80% or more on track, 70 to 79% borderline, under 70% at risk. If you have already seen many of these questions, your percentage will run high.</p>
+            </div>`;
+        }
+
         function explanationHtml(question) {
             if (!question.explanation) return '';
             const div = document.createElement('div');
@@ -2427,6 +2480,7 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('notAnsweredCount').textContent = notAnswered;
             document.getElementById('timeSpent').textContent = timeSpentFormatted;
             renderDomainBreakdown(detailedResults);
+            renderReadiness(detailedResults, correct);
 
             // Collect questions for review bank actions
             const questionsToOffer = [];
