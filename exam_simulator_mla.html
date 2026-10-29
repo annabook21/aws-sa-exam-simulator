@@ -1599,20 +1599,19 @@ This notepad persists throughout your exam session."></textarea>
 
             const timeLimitMinutes = parseInt(document.getElementById('timeLimit').value);
             const randomizeQuestions = document.getElementById('randomizeQuestions').checked;
-            const randomizeOptions = document.getElementById('randomizeOptions').checked;
             testMode = document.getElementById('testMode').value;
 
-            let selectedQuestions = [...reviewBank];
+            // Use the current copy of each saved question so it gets the latest answers and explanations
+            const current = new Map(EXAM_DATA.map(q => [`${q.topic}-${q.number}`, q]));
+            let selectedQuestions = reviewBank.map(q => current.get(`${q.topic}-${q.number}`) || q);
             
             if (randomizeQuestions) {
                 selectedQuestions = shuffle(selectedQuestions);
             }
 
             examQuestionsOriginal = selectedQuestions.map(q => ({...q}));
-
-            if (randomizeOptions) {
-                selectedQuestions = selectedQuestions.map(q => randomizeQuestionOptions(q));
-            }
+            currentExamVersion = document.getElementById('examVersion').value;
+            document.getElementById('examTitle').textContent = 'AWS ML Associate Review Bank Practice';
 
             examData = selectedQuestions;
             isReviewBankExam = true;
