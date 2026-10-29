@@ -1,0 +1,42 @@
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Optional: Keep original JSON for reference but don't necessarily need it for production
+# sa_exam.json
+
+# Documentation (optional - you might want to include these)
+# SOLUTION_EXPLAINED.md
+# QUICK_START.md
+
