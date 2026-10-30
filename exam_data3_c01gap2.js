@@ -114,7 +114,7 @@ EXAM_DATA.push(...[
       "D": "Automated data labeling only, with no human workers."
     },
     "correct_answer": "A",
-    "explanation": "Ground Truth lets you use a vendor-managed workforce or 'create your own private workforce', managed with Amazon Cognito or your own OIDC identity provider. A private team keeps the images among approved staff. B and C send the images to people outside the hospital. D still needs human labels to start (and at least 1,250 objects), and it isn't the 'only our staff' control the contracts require."
+    "explanation": "Ground Truth lets you use a vendor-managed workforce or 'create your own private workforce', managed with Amazon Cognito or your own OIDC identity provider. A private team keeps the images among approved staff. B and C send the images to people outside the hospital. D still needs human labels to start (and at least 1,250 objects), and it isn't the 'only our staff' control the contracts require. (Ground Truth is closed to new customers, but C01 still tests it.)"
   },
   {
     "number": 423, "domain": 1, "task": "1.3",

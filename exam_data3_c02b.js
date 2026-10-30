@@ -262,7 +262,7 @@ EXAM_DATA.push(...[
     "origin": "written",
     "number": 214, "concept": true,
     "skill": "2.1.3",
-    "question": "A bank's credit model must be approved by regulators, who require a clear explanation of how each input affects every decision. A deep neural network is 1% more accurate than simpler models but cannot be explained easily. Which model should the ML engineer choose?",
+    "question": "A bank is choosing a NEW credit model. Regulators require the model itself to be inherently interpretable: reviewers must be able to read directly from the model how each input affects every decision, and post-hoc explanation tools are not accepted as a substitute. A deep neural network is 1% more accurate than simpler models. Which model should the ML engineer choose?",
     "options": {
       "A": "An interpretable model, such as logistic regression or a shallow decision tree",
       "B": "The deep neural network, explained with SageMaker Clarify SHAP values",
@@ -270,7 +270,7 @@ EXAM_DATA.push(...[
       "D": "The deep neural network, with a model card describing its training data"
     },
     "correct_answer": "A",
-    "explanation": "When regulators require a clear explanation of how each input affects every decision, choose a model that is explainable by design. SHAP gives estimates for a black box, but it isn't a direct readout. A 500-tree ensemble is hard to follow. A model card documents the model but doesn't explain each decision."
+    "explanation": "When regulators require the model to be interpretable by design, choose a model whose logic you can read directly (coefficients or a few tree splits). SHAP explains a black box after the fact, which the scenario rules out. (Contrast with #379: there the accurate model already exists and the requirement is only to explain each decision, so Clarify SHAP is the least-rework answer.) A 500-tree ensemble is hard to follow. A model card documents the model but doesn't explain each decision."
   },
   {
     "topic": "Topic 3 - C02 Guide Coverage",
@@ -375,7 +375,7 @@ EXAM_DATA.push(...[
       "D": "Use Amazon Bedrock model evaluation with human workers on a sample of invoices."
     },
     "correct_answer": "B",
-    "explanation": "Humans review only uncertain predictions in production → Amazon A2I, which routes low-confidence results to reviewers with a built-in workflow. The Lambda-and-email approach is custom code with no review interface. Ground Truth is for labeling training data. Bedrock evaluation tests models offline and doesn't review live invoices."
+    "explanation": "Humans review only uncertain predictions in production → Amazon A2I, which routes low-confidence results to reviewers with a built-in workflow. The Lambda-and-email approach is custom code with no review interface. Ground Truth is for labeling training data. Bedrock evaluation tests models offline and doesn't review live invoices. (Side note: AWS has closed Amazon A2I to new customers; existing customers can still use it, and C01 can still ask about it.)"
   },
   {
     "topic": "Topic 3 - C02 Guide Coverage",
