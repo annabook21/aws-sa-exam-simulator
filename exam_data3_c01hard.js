@@ -236,7 +236,7 @@ EXAM_DATA.push(...[
       "D": "A streaming labeling job with automated data labeling turned on."
     },
     "correct_answer": "B",
-    "explanation": "Automated data labeling (active learning) is available only for four built-in task types: single-label image classification, semantic segmentation, bounding-box object detection, and single-label text classification. One category per ticket is single-label, so B fits. A is multi-label, which isn't supported. C: custom task types aren't supported. D: AWS says streaming labeling jobs don't support automated data labeling. The model labels the high-confidence tickets and sends the low-confidence ones to humans."
+    "explanation": "Automated data labeling (active learning) is available only for four built-in task types: single-label image classification, semantic segmentation, bounding-box object detection, and single-label text classification. One category per ticket is single-label, so B fits. A is multi-label, which isn't supported. C: custom task types aren't supported. D: AWS says streaming labeling jobs don't support automated data labeling. The model labels the high-confidence tickets and sends the low-confidence ones to humans. (Ground Truth is closed to new customers, but C01 still tests it.)"
   },
   {
     "number": 359, "domain": 1, "task": "1.2",
