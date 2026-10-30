@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rule-Out Drill</title>
+<style>
+:root {
+  --bg: #f7f7fb; --card: #ffffff; --ink: #1d1d2b; --muted: #5d6077; --line: #e3e4ee;
+  --accent: #5b4bdb; --keep: #11875d; --keep-soft: #e3f6ee; --out: #c2410c; --out-soft: #fdeee3; --bad: #b91c1c; --bad-soft: #fde8e8;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14141c; --card: #1e1e2a; --ink: #ececf4; --muted: #a3a6bd; --line: #33344a;
+    --accent: #9d92ff; --keep: #4fd6a0; --keep-soft: #17352a; --out: #ffa36b; --out-soft: #3a2619; --bad: #ff8080; --bad-soft: #3d1c1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14141c; --card: #1e1e2a; --ink: #ececf4; --muted: #a3a6bd; --line: #33344a;
+  --accent: #9d92ff; --keep: #4fd6a0; --keep-soft: #17352a; --out: #ffa36b; --out-soft: #3a2619; --bad: #ff8080; --bad-soft: #3d1c1c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.tabs button { border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 8px 14px; border-radius: 999px; font: inherit; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.muted { color: var(--muted); } .small { font-size: .88rem; }
+.clue { font-size: 1.12rem; font-weight: 600; margin: 4px 0 10px; }
+.clue mark { background: #fff1a8; color: #1d1d2b; padding: 0 3px; border-radius: 4px; }
+.opt { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; flex-wrap: wrap; }
+.opt .name { flex: 1 1 200px; font-weight: 500; }
+.seg { display: flex; gap: 6px; }
+.seg button { border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 6px 12px; border-radius: 8px; font: inherit; cursor: pointer; }
+.seg button.on.k { background: var(--keep); border-color: var(--keep); color: #fff; }
+.seg button.on.o { background: var(--out); border-color: var(--out); color: #fff; }
+.opt.right { border-color: var(--keep); background: var(--keep-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.why { flex-basis: 100%; font-size: .92rem; }
+.rule { background: var(--keep-soft); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+.rule b { color: var(--keep); display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 16px; border-radius: 10px; font: inherit; cursor: pointer; }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 6px 0 12px; }
+.progress span { display: block; height: 100%; background: var(--accent); }
+select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); max-width: 100%; }
+a { color: var(--accent); }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+td, th { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); }
+.k { color: var(--keep); } .o { color: var(--out); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Rule-Out Drill</h1>
+  <p class="sub">Exam answers hinge on a few clue words. Each card shows a clue and some options: mark each one <b class="k">keep</b> or <b class="o">rule out</b>, then check. Written by Claude from AWS documentation (each rule links its page). Not official AWS material.</p>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="drill" aria-selected="true">🎯 Drill (5 per round)</button>
+    <button role="tab" data-tab="rules" aria-selected="false">📋 All rules</button>
+    <button role="tab" data-tab="stats" aria-selected="false">📈 My misses</button>
+  </div>
+  <div id="view"></div>
+  <p class="small muted" style="margin-top:24px"><a href="connections_mla.html">C01 Connections + plan</a> · <a href="exam_simulator_mla.html">Exam simulator</a>. Progress is saved in this browser only.</p>
+</div>
+<script>
+// k = keep, o = rule out. Each card: d = domain, clue (with [[trigger]] marks), opts [name, k|o, why], rule, src
+const D = 'https://docs.aws.amazon.com/';
+const CARDS = [
+  // ---------- Domain 3: deployment ----------
+  { id: 'shadow', d: 3, clue: 'Test the new model on [[live traffic]] using a [[shadow variant]], with no impact on users.', opts: [
+    ['Real-time endpoint (single model)', 'k', 'Shadow tests run on real-time endpoints: a shadow variant on the same endpoint receives copies of requests.'],
+    ['Serverless endpoint', 'o', 'Serverless can’t host shadow tests (it also has no multiple production variants).'],
+    ['Asynchronous endpoint', 'o', 'Asynchronous inference is on AWS’s list of features incompatible with shadow tests.'],
+    ['Multi-model endpoint', 'o', 'Multi-model endpoints are also incompatible with shadow tests.'],
+    ['Endpoint on Inf1 instances', 'o', 'Inf1 (Inferentia) endpoints are excluded too.']],
+    rule: 'Shadow → real-time, single-model endpoint. Rules out serverless, async, multi-model, multi-container, Marketplace containers and Inf1.', src: D + 'sagemaker/latest/dg/shadow-tests.html' },
+  { id: 'gpu', d: 3, clue: 'The model [[requires a GPU]]; traffic is sporadic and cold starts are fine.', opts: [
+    ['Serverless inference', 'o', 'AWS lists GPUs among the features serverless inference doesn’t support. Sporadic traffic is the trap.'],
+    ['Real-time endpoint on a GPU instance with auto scaling', 'k', 'Supports GPUs. Auto scaling handles the uneven load.'],
+    ['Asynchronous inference on a GPU instance', 'k', 'Also supports GPU instances and can scale to zero if requests can be queued.'],
+    ['Serverless with provisioned concurrency', 'o', 'Still serverless, so still no GPU.']],
+    rule: 'GPU → never serverless.', src: D + 'sagemaker/latest/dg/serverless-endpoints.html' },
+  { id: 'monitor', d: 4, clue: 'They need [[Model Monitor]] with [[data capture]] on the deployed model.', opts: [
+    ['Real-time endpoint hosting one model', 'k', 'Supports data capture and Model Monitor.'],
+    ['Serverless endpoint', 'o', 'AWS excludes data capture and Model Monitor from serverless inference.'],
+    ['Multi-model endpoint', 'o', 'Model Monitor supports only endpoints that host a single model.'],
+    ['Batch transform job with data capture', 'k', 'Model Monitor can also monitor batch transform jobs.']],
+    rule: 'Model Monitor / data capture → rules out serverless and multi-model endpoints.', src: D + 'sagemaker/latest/dg/model-monitor.html' },
+  { id: 'async', d: 3, clue: 'Payloads up to [[500 MB]], each request takes up to [[20 minutes]], and it should [[scale to zero]] when idle.', opts: [
+    ['Asynchronous inference', 'k', 'Built for payloads up to 1 GB and processing up to 1 hour. It queues requests and can scale to zero.'],
+    ['Real-time inference', 'o', 'Built for low-latency interactive calls, not 20-minute jobs.'],
+    ['Serverless inference', 'o', 'Not designed for payloads and processing times this large.'],
+    ['Batch transform on a nightly schedule', 'o', 'Requests arrive in bursts and need answers soon after, not a nightly batch.']],
+    rule: 'Big payloads or long processing with near-real-time needs → async (up to 1 GB, up to 1 hour).', src: D + 'sagemaker/latest/dg/deploy-model.html' },
+  { id: 'batch', d: 3, clue: 'Score [[the whole dataset every night]]; [[no persistent endpoint]]; match each prediction to its input ID.', opts: [
+    ['Batch transform', 'k', 'AWS: use it to get inferences from large datasets when you don’t need a persistent endpoint, and to associate input records with predictions.'],
+    ['Real-time endpoint called in a loop', 'o', 'Keeps an endpoint running and sends millions of single requests.'],
+    ['Asynchronous inference, one request per record', 'o', 'Still millions of individual requests. Async is for large single requests.'],
+    ['Serverless endpoint', 'o', 'Same problem with millions of single calls, plus concurrency limits.']],
+    rule: 'Whole dataset, offline, no endpoint → batch transform.', src: D + 'sagemaker/latest/dg/batch-transform.html' },
+  { id: 'mme', d: 3, clue: '[[Thousands of models]], [[same framework]], most rarely used, [[occasional cold starts OK]].', opts: [
+    ['Multi-model endpoint', 'k', 'One shared container. Models load from S3 on demand and are cached.'],
+    ['One real-time endpoint per model', 'o', 'Thousands of mostly idle endpoints is the cost problem you’re trying to fix.'],
+    ['One serverless endpoint per model', 'o', 'There’s a limit of 50 serverless endpoints per Region, and serverless doesn’t support multi-model endpoints.'],
+    ['Shadow test', 'o', 'Shadow tests compare two variants; they don’t host many models.']],
+    rule: 'Many models + shared framework + tolerate cold starts → multi-model endpoint (but then no Model Monitor and no shadow tests).', src: D + 'sagemaker/latest/dg/multi-model-endpoints.html' },
+  { id: 'serverless', d: 3, clue: 'CPU model, [[idle for long periods]], [[cold starts acceptable]], [[minimize cost]].', opts: [
+    ['Serverless inference', 'k', 'Ideal for idle periods between bursts of traffic. Scales to zero, so you pay only for use.'],
+    ['Real-time endpoint running 24/7', 'o', 'You pay for idle instances.'],
+    ['Serverless with provisioned concurrency for the whole day', 'o', 'Keeping it warm all day defeats the savings. Use it only for predictable bursts.'],
+    ['Multi-model endpoint', 'o', 'There’s only one model here.']],
+    rule: 'Idle + cold starts OK + CPU → serverless. Predictable burst → add provisioned concurrency for that window.', src: D + 'sagemaker/latest/dg/serverless-endpoints.html' },
+  { id: 'gradual', d: 3, clue: 'Send [[a small slice of real users]] to the new model first, with [[automatic rollback]] if errors rise.', opts: [
+    ['Blue/green with canary traffic shifting + CloudWatch alarms', 'k', 'Shifts a small portion first, and the alarms trigger rollback.'],
+    ['Blue/green with linear traffic shifting + CloudWatch alarms', 'k', 'Also gradual, with alarms. Canary = one small step then the rest; linear = equal steps.'],
+    ['Shadow test', 'o', 'Users NEVER see shadow responses, so it isn’t a rollout.'],
+    ['All-at-once traffic shifting', 'o', 'Everyone moves at once; there’s no small slice.']],
+    rule: 'Real users see the new model gradually → canary/linear. “No user impact” → shadow.', src: D + 'sagemaker/latest/dg/deployment-guardrails-blue-green.html' },
+  { id: 'rolling', d: 3, clue: 'Swap versions on a fleet of [[10 accelerated instances]] with only [[1 spare instance]], no downtime.', opts: [
+    ['Rolling deployment, batch size 1', 'k', 'Replaces capacity a little at a time, so it needs only a small extra amount.'],
+    ['Blue/green (any traffic shifting)', 'o', 'Needs a full second fleet of 10 instances.'],
+    ['Shadow test with 10% sampling', 'o', 'Doesn’t switch versions.'],
+    ['Delete and recreate the endpoint', 'o', 'Causes downtime.']],
+    rule: 'Scarce accelerated capacity → rolling deployment.', src: D + 'sagemaker/latest/dg/deployment-guardrails-rolling.html' },
+  { id: 'targetvariant', d: 3, clue: 'Send [[specific test requests]] to Variant2 [[without changing the split]] for everyone else.', opts: [
+    ['InvokeEndpoint with TargetVariant=Variant2', 'k', 'Overrides the random split for that request only.'],
+    ['UpdateEndpointWeightsAndCapacities', 'o', 'Changes the split for everyone.'],
+    ['Create a separate endpoint', 'o', 'Unnecessary extra deployment.'],
+    ['Add a shadow variant', 'o', 'Callers never get shadow responses.']],
+    rule: 'Per-request routing → TargetVariant.', src: D + 'sagemaker/latest/dg/model-ab-testing.html' },
+  { id: 'pipe-gate', d: 3, clue: 'Register the model [[only if accuracy ≥ 0.90]]; otherwise [[stop with an error message]].', opts: [
+    ['Condition step + Fail step', 'k', 'The Condition step branches on the metric; the Fail step stops the run with a custom message.'],
+    ['Callback step', 'o', 'For waiting on external processes (via SQS), not for checking a value.'],
+    ['QualityCheck step alone', 'o', 'Checks drift against a baseline; it doesn’t gate registration.'],
+    ['Lambda step that deletes bad models afterwards', 'o', 'Cleans up after the fact instead of gating.']],
+    rule: 'Gate on a metric → Condition (+ Fail). Wait for an external system or Glue → Callback.', src: D + 'sagemaker/latest/dg/build-and-manage-steps-types.html' },
+  { id: 'scaling', d: 3, clue: 'An LLM endpoint scales out [[too slowly]] when [[concurrent requests]] spike.', opts: [
+    ['Target tracking on ConcurrentRequestsPerModelHighResolution', 'k', 'High-resolution metrics emit every 10 seconds, so the endpoint scales out much faster.'],
+    ['Keep InvocationsPerInstance (1-minute metric)', 'o', 'That’s what is slow today.'],
+    ['Increase ScaleInCooldown', 'o', 'Affects scaling in, not scaling out.'],
+    ['Step scaling on 5-minute CPU', 'o', 'Even slower.']],
+    rule: 'Faster reaction to concurrency → high-resolution concurrency metric.', src: D + 'sagemaker/latest/dg/endpoint-auto-scaling-add-code-define.html' },
+  // ---------- Domain 4 ----------
+  { id: 'mq', d: 4, clue: 'Alert when [[accuracy]] of the deployed model drops.', opts: [
+    ['Model quality monitor + ground truth labels in S3', 'k', 'Accuracy needs true labels, which Model Monitor merges with the captured predictions.'],
+    ['Data quality monitor', 'o', 'Watches input drift, not accuracy.'],
+    ['Feature attribution drift monitor', 'o', 'Watches changes in feature importance.'],
+    ['CloudWatch Invocations alarm', 'o', 'Counts requests.']],
+    rule: 'Accuracy → model quality + labels. No labels yet → data quality (input drift).', src: D + 'sagemaker/latest/dg/model-monitor-model-quality.html' },
+  { id: 'overhead', d: 4, clue: 'Total latency rose but [[ModelLatency is flat]] after payloads got bigger.', opts: [
+    ['Check OverheadLatency', 'k', 'Time added by SageMaker outside the model, which depends on payload size.'],
+    ['Optimize the model code', 'o', 'The model’s own time didn’t change.'],
+    ['Check Invocation5XXErrors', 'o', 'Errors, not latency.'],
+    ['Compile with Neo', 'o', 'Speeds up the model, but the model isn’t the bottleneck.']],
+    rule: 'Total − ModelLatency = OverheadLatency (in microseconds). Serverless cold start → ModelSetupTime.', src: D + 'sagemaker/latest/dg/monitoring-cloudwatch.html' },
+  { id: 'privatelink', d: 4, clue: 'An app in a [[private subnet with no internet]] must call InvokeEndpoint.', opts: [
+    ['Interface VPC endpoint (PrivateLink) for SageMaker Runtime', 'k', 'Traffic stays on the AWS network, with no IGW or NAT needed.'],
+    ['NAT gateway', 'o', 'Sends traffic out the internet path.'],
+    ['S3 gateway endpoint', 'o', 'Covers S3 only.'],
+    ['VPC peering to SageMaker', 'o', 'That’s not how AWS services are reached.']],
+    rule: 'No internet + call SageMaker → interface VPC endpoint. Restrict which endpoints can be called → VPC endpoint policy.', src: D + 'sagemaker/latest/dg/interface-vpc-endpoint.html' },
+  // ---------- Domain 1 ----------
+  { id: 'firehose-csv', d: 1, clue: 'Firehose receives [[CSV]] and must store [[Parquet]] in S3.', opts: [
+    ['Lambda transform CSV→JSON, then Firehose record format conversion', 'k', 'Firehose’s format conversion reads JSON only.'],
+    ['Firehose format conversion directly on CSV', 'o', 'The conversion can’t read CSV.'],
+    ['Scheduled Glue job that converts later', 'o', 'Works, but adds a second pipeline and a delay.'],
+    ['Kinesis Data Streams + custom EC2 writer', 'o', 'Servers and code to run.']],
+    rule: 'Firehose → Parquet/ORC only from JSON, using a Glue table schema.', src: D + 'firehose/latest/dev/record-format-conversion.html' },
+  { id: 'replay', d: 1, clue: 'Need to [[replay / reprocess]] the last few days of streaming data.', opts: [
+    ['Kinesis Data Streams with longer retention', 'k', '24-hour default, up to 365 days, and consumers can reread.'],
+    ['Amazon Data Firehose', 'o', 'A delivery service with no replay.'],
+    ['Add shards', 'o', 'Adds throughput, not history.'],
+    ['SQS', 'o', 'Messages are gone once they’re consumed and deleted.']],
+    rule: 'Replay → KDS retention (or a raw S3 copy). Firehose can’t replay.', src: D + 'streams/latest/dev/key-concepts.html' },
+  { id: 'kafka', d: 1, clue: 'Existing [[Kafka]] producers and consumers; [[no code changes]].', opts: [
+    ['Amazon MSK', 'k', 'Runs open-source Kafka, so existing clients work unchanged.'],
+    ['Kinesis Data Streams', 'o', 'Different API, so the apps would need rewriting.'],
+    ['Amazon Data Firehose', 'o', 'Different API.'],
+    ['SQS', 'o', 'A queue, not Kafka.']],
+    rule: 'Kafka + no code change → MSK.', src: D + 'msk/latest/developerguide/what-is-msk.html' },
+  { id: 'hotshard', d: 1, clue: 'Kinesis [[throttling]] while total throughput is [[well under capacity]]; [[one shard is hot]].', opts: [
+    ['A high-cardinality partition key', 'k', 'The partition key picks the shard, so a low-variety key creates a hot shard.'],
+    ['Add more shards', 'o', 'The same key still lands on one shard.'],
+    ['Enhanced fan-out', 'o', 'Helps reads, not writes.'],
+    ['Longer retention', 'o', 'Unrelated.']],
+    rule: 'Hot shard → fix the partition key, not the shard count.', src: D + 'streams/latest/dev/key-concepts.html' },
+  { id: 's3-503', d: 1, clue: 'Many training workers get [[503 Slow Down]] reading one S3 [[prefix]].', opts: [
+    ['Spread objects across more prefixes', 'k', 'Request limits apply per prefix (5,500 GET/s each).'],
+    ['S3 Transfer Acceleration', 'o', 'Speeds up long-distance transfers, not request rates.'],
+    ['Add more instances', 'o', 'More requests on the same prefix makes it worse.'],
+    ['Switch to Pipe mode', 'o', 'Same requests, same prefix.']],
+    rule: '503 Slow Down → more prefixes. Distance → Transfer Acceleration.', src: D + 'AmazonS3/latest/userguide/optimizing-performance.html' },
+  { id: 'novpc', d: 1, clue: 'Training startup is slow, and the team [[can’t use a VPC]].', opts: [
+    ['FastFile mode', 'k', 'Streams from S3 with no VPC needed.'],
+    ['FSx for Lustre', 'o', 'Requires the training job to run in a VPC.'],
+    ['Amazon EFS', 'o', 'Requires a VPC (and the data must already be in EFS).'],
+    ['Bigger EBS volume with File mode', 'o', 'Still downloads everything first.']],
+    rule: 'No VPC → rules out FSx and EFS. Random access + very high IOPS + many jobs → FSx for Lustre.', src: D + 'sagemaker/latest/dg/model-access-training-data.html' },
+  { id: 'fs-online', d: 1, clue: 'Build training data with feature values [[as of each label’s timestamp]].', opts: [
+    ['Feature Store offline store (point-in-time by event time)', 'k', 'Keeps all historical records with their event times.'],
+    ['Feature Store online store', 'o', 'Keeps only the LATEST record per ID, which leaks the future.'],
+    ['Recompute features today', 'o', 'Leaks the future too.'],
+    ['GetRecord for each label', 'o', 'Online store again.']],
+    rule: 'History or training → offline store. Millisecond inference → online store (latest event time wins).', src: D + 'sagemaker/latest/dg/feature-store-concepts.html' },
+  { id: 'columnar', d: 1, clue: 'Queries read [[3 of 200 columns]]; scan costs are too high.', opts: [
+    ['Parquet', 'k', 'Columnar: reads only the columns it needs.'],
+    ['ORC', 'k', 'Also columnar.'],
+    ['CSV with gzip', 'o', 'Smaller files, but every column is still read.'],
+    ['Avro', 'o', 'Row-based (good for streaming writes and schema evolution).'],
+    ['JSON Lines', 'o', 'Row-based.']],
+    rule: 'Read a few columns → Parquet/ORC.', src: D + 'firehose/latest/dev/record-format-conversion.html' },
+  { id: 'dedupe', d: 1, clue: 'Duplicates with [[no common ID]] and [[no exact field matches]] (Jon / John Doe).', opts: [
+    ['Lake Formation FindMatches ML transform', 'k', 'Learns matches from examples you label.'],
+    ['SELECT DISTINCT', 'o', 'Removes exact matches only.'],
+    ['Data Wrangler drop duplicates', 'o', 'Exact matches only.'],
+    ['Macie', 'o', 'Finds sensitive data.']],
+    rule: 'Fuzzy duplicates → FindMatches.', src: D + 'glue/latest/dg/machine-learning.html' },
+  { id: 'pii', d: 1, clue: 'PII task: [[find which buckets]] vs [[mask in the pipeline]] vs [[keep records linkable]].', opts: [
+    ['Find which buckets have PII → Macie', 'k', 'Discovers and reports. It doesn’t mask.'],
+    ['Mask in an ETL pipeline → Glue Detect PII', 'k', 'Redact, partially redact, or hash.'],
+    ['Keep linkable → SHA-256 hash action', 'k', 'The same input always gives the same token.'],
+    ['Keep linkable → redact with ******', 'o', 'Every value becomes identical, so records can’t be linked.'],
+    ['Find which buckets → GuardDuty', 'o', 'Detects threats; it doesn’t inspect data contents.']],
+    rule: 'Macie finds. Glue Detect PII transforms. Hash keeps records linkable.', src: D + 'glue/latest/dg/detect-PII.html' },
+  { id: 'dq', d: 1, clue: 'Block bad rows [[before loading]] and see [[which records failed]].', opts: [
+    ['Glue Data Quality inside the ETL job', 'k', 'Proactive, and can identify failing records.'],
+    ['Glue Data Quality on the Data Catalog table', 'o', 'Runs after the load and can’t list failing records (but it CAN recommend rules).'],
+    ['Macie', 'o', 'Not about quality.'],
+    ['CloudWatch alarm on job duration', 'o', 'Not about data.']],
+    rule: 'In-pipeline gate → DQ in ETL. Rule recommendations → DQ on the Data Catalog. No-code analysts → DataBrew rulesets.', src: D + 'glue/latest/dg/glue-data-quality.html' },
+  { id: 'gt', d: 1, clue: 'Turn on Ground Truth [[automated data labeling]].', opts: [
+    ['5,000 images, single-label classification', 'k', 'A supported built-in task, above the minimum.'],
+    ['800 images, bounding boxes', 'o', 'Below the 1,250-object minimum.'],
+    ['Multi-label text classification', 'o', 'Only SINGLE-label text classification is supported.'],
+    ['Custom task template', 'o', 'Custom task types aren’t supported.'],
+    ['Streaming labeling job', 'o', 'Not supported.']],
+    rule: 'Auto-labeling = 1,250+ objects and one of 4 built-in single-label/box/segmentation tasks.', src: D + 'sagemaker/latest/dg/sms-automated-labeling.html' },
+  { id: 'outliers', d: 1, clue: 'Outliers: [[known physical limits]] vs [[real extremes that must stay]].', opts: [
+    ['Known limits → Min-Max outlier thresholds', 'k', 'AWS: use it when you know the threshold values.'],
+    ['Must stay → Robust Scaler', 'k', 'Median and quartile-based, so it isn’t distorted by extremes.'],
+    ['Must stay → Min Max Scaler', 'o', 'Extremes squash everything else together.'],
+    ['Known limits → remove the top 1% by quantile', 'o', 'Might delete valid values or keep invalid ones.']],
+    rule: 'Know the bounds → Min-Max thresholds. Keep the extremes → Robust Scaler.', src: D + 'sagemaker/latest/dg/canvas-transform.html' },
+  { id: 'stream-transform', d: 1, clue: '[[5-minute rolling windows]] per device, [[state]], [[late events]].', opts: [
+    ['Managed Service for Apache Flink', 'k', 'Built for windows, state and late-event handling.'],
+    ['Lambda on the stream', 'o', 'Keeps no state between invocations.'],
+    ['Firehose Lambda transform', 'o', 'Works per batch, with no windowed state.'],
+    ['Hourly Glue job', 'o', 'Batch, and up to an hour late.']],
+    rule: 'Stateful windows → Flink. Simple per-record changes → Lambda.', src: D + 'managed-flink/latest/java/what-is.html' },
+  { id: 'enc', d: 1, clue: 'Encrypt traffic [[between training nodes]].', opts: [
+    ['EnableInterContainerTrafficEncryption', 'k', 'Encrypts node-to-node traffic (training may take longer).'],
+    ['EnableNetworkIsolation', 'o', 'Blocks network calls; it doesn’t encrypt.'],
+    ['VolumeKmsKeyId', 'o', 'Encrypts data at rest on the volumes.'],
+    ['S3 gateway endpoint', 'o', 'Covers S3 traffic, not node-to-node traffic.']],
+    rule: 'Between nodes → inter-container encryption. No calls at all → network isolation.', src: D + 'sagemaker/latest/APIReference/API_CreateTrainingJob.html' },
+  { id: 'bias-metric', d: 1, clue: 'Which bias metric? [[group sizes]] / [[label rates in training data]] / [[model prediction rates]].', opts: [
+    ['Group sizes → CI', 'k', '(na−nd)/(na+nd). 0 = balanced.'],
+    ['Label rates → DPL', 'k', 'qa−qd, before training.'],
+    ['Prediction rates → DI', 'k', 'q′d/q′a, after training. 1 = parity.'],
+    ['Label rates → DI', 'o', 'DI uses PREDICTIONS.'],
+    ['Group sizes → DPL', 'o', 'DPL uses labels.']],
+    rule: 'CI = counts. DPL = labels. DI = predictions (parity at 1).', src: D + 'sagemaker/latest/dg/clarify-data-bias-metric-true-label-imbalance.html' },
+  // ---------- Domain 2 ----------
+  { id: 'forecast', d: 2, clue: 'Forecasting: [[hundreds of related series]] vs [[one single series]].', opts: [
+    ['Hundreds of related series + quantiles → DeepAR', 'k', 'Beats ARIMA/ETS with many related series.'],
+    ['One series → ARIMA/ETS may win', 'k', 'AWS says classical methods may be more accurate for a single series.'],
+    ['One series → DeepAR always wins', 'o', '“Always” is the trap.'],
+    ['New category never seen in training → DeepAR cat value', 'o', 'DeepAR can forecast only for categories it saw during training.']],
+    rule: 'DeepAR = many related series. dynamic_feat must include future values. cat values must have been seen in training.', src: D + 'sagemaker/latest/dg/deepar.html' },
+  { id: 'fm', d: 2, clue: '[[Extremely sparse]] user × item data.', opts: [
+    ['Factorization Machines, binary classification (click or no click)', 'k', 'Supported mode.'],
+    ['Factorization Machines, regression (rating score)', 'k', 'Supported mode.'],
+    ['Factorization Machines, multiclass', 'o', 'Only binary classification or regression.'],
+    ['Factorization Machines trained on CSV', 'o', 'Training requires recordIO-protobuf Float32.']],
+    rule: 'Sparse → FM (binary or regression only, recordIO-protobuf).', src: D + 'sagemaker/latest/dg/fact-machines.html' },
+  { id: 'anomaly', d: 2, clue: 'Logins from an IP that’s [[unusual for that user]]; [[no labels]].', opts: [
+    ['IP Insights', 'k', 'Learns entity ↔ IPv4 patterns, unsupervised.'],
+    ['Random Cut Forest', 'o', 'Finds general numeric anomalies, not per-user IP patterns.'],
+    ['XGBoost', 'o', 'Needs labels.'],
+    ['GuardDuty', 'o', 'Account-level threat detection, not a model inside your app.']],
+    rule: 'Entity + IP → IP Insights. Numeric spikes → Random Cut Forest.', src: D + 'sagemaker/latest/dg/ip-insights.html' },
+  { id: 'vision', d: 2, clue: 'Vision: [[count instances]] vs [[exact area or outline]] vs [[one label per image]].', opts: [
+    ['Count cars → object detection', 'k', 'One box per instance.'],
+    ['Weed area → semantic segmentation', 'k', 'Labels every pixel.'],
+    ['Count cars → image classification', 'o', 'One label for the whole image.'],
+    ['Weed area → object detection', 'o', 'Boxes overstate irregular shapes.']],
+    rule: 'Count = detection. Area = segmentation. Whole image = classification.', src: D + 'sagemaker/latest/dg/algos.html' },
+  { id: 'amt', d: 2, clue: 'Tuning: the container reports the metric [[only at the end]], and [[50 jobs run in parallel]].', opts: [
+    ['Random search', 'k', 'Each trial is independent, so maximum parallelism is fine.'],
+    ['Hyperband', 'o', 'Needs intermediate (per-epoch) metrics.'],
+    ['Bayesian', 'o', 'Learns from finished jobs, so heavy parallelism weakens it.'],
+    ['Grid', 'o', 'Categorical parameters only.']],
+    rule: 'Hyperband needs per-epoch metrics (and TrainingJobEarlyStoppingType=OFF). Every categorical combination → grid.', src: D + 'sagemaker/latest/dg/automatic-model-tuning-how-it-works.html' },
+  { id: 'warm', d: 2, clue: 'Warm start a tuning job that uses [[new data]], a [[new image version]], or a [[different objective metric]].', opts: [
+    ['New data or new image → TRANSFER_LEARNING', 'k', 'Allows different data and image versions.'],
+    ['New data → IDENTICAL_DATA_AND_ALGORITHM', 'o', 'Requires the same data and image.'],
+    ['Different objective metric → any warm start', 'o', 'The objective must match the parent jobs.'],
+    ['8 parent jobs', 'o', 'Maximum of 5 parents.']],
+    rule: 'Warm start: same objective, at most 5 parents. Changed data or image → TRANSFER_LEARNING.', src: D + 'sagemaker/latest/dg/automatic-model-tuning-warm-start.html' },
+  { id: 'parallel', d: 2, clue: 'Model [[doesn’t fit in one GPU’s memory]].', opts: [
+    ['Model parallelism', 'k', 'Splits the model across GPUs.'],
+    ['Data parallelism', 'o', 'Every GPU needs a full copy of the model.'],
+    ['Bigger batch size', 'o', 'Needs even more memory.'],
+    ['Pipe mode', 'o', 'Changes how data is read, not where the model lives.']],
+    rule: 'Model too big → model parallel. Data too big or slow → data parallel.', src: D + 'sagemaker/latest/dg/distributed-training.html' },
+  { id: 'spot', d: 2, clue: 'Managed [[spot]] training settings.', opts: [
+    ['Checkpoints in /opt/ml/checkpoints synced to S3', 'k', 'Lets training resume after an interruption.'],
+    ['MaxWaitTimeInSeconds > MaxRuntimeInSeconds', 'k', 'Required.'],
+    ['Falls back to On-Demand when Spot runs out', 'o', 'It never falls back.'],
+    ['Built-in algorithm without checkpoints, 4-hour MaxWait', 'o', 'Limited to 3,600 seconds.']],
+    rule: 'Spot = up to 90% savings + checkpoints + MaxWait > MaxRuntime. No On-Demand fallback.', src: D + 'sagemaker/latest/dg/model-managed-spot-training.html' },
+  { id: 'explain', d: 2, clue: 'Explain [[each decision]] of an [[existing]] model to a regulator.', opts: [
+    ['Clarify SHAP (local explanations)', 'k', 'Per-prediction feature attributions, with no retraining.'],
+    ['Model Monitor', 'o', 'Watches drift.'],
+    ['Debugger', 'o', 'Debugs training.'],
+    ['Retrain as a linear model', 'o', 'Works, but it’s rework and likely loses accuracy.']],
+    rule: 'Why this prediction → Clarify SHAP (local); overall importance → global SHAP.', src: D + 'sagemaker/latest/dg/clarify-shapley-values.html' },
+  { id: 'debugger', d: 2, clue: 'Training [[loss becomes NaN]]; stop wasting GPU hours.', opts: [
+    ['ExplodingTensor rule + StopTraining action', 'k', 'Detects NaN/infinite values and stops the job.'],
+    ['VanishingGradient rule', 'o', 'Detects tiny gradients, not NaN.'],
+    ['Overfit rule', 'o', 'Compares training and validation loss.'],
+    ['Model Monitor', 'o', 'Monitors endpoints, not training.']],
+    rule: 'NaN → ExplodingTensor. Tiny gradients → VanishingGradient. Validation getting worse → Overfit/Overtraining.', src: D + 'sagemaker/latest/dg/debugger-built-in-rules.html' },
+  { id: 'bedrock', d: 2, clue: 'Customize or host a foundation model: [[labeled pairs]] / [[smaller and faster]] / [[add facts]] / [[my own instances and VPC]].', opts: [
+    ['Labeled prompt→response pairs → supervised fine-tuning', 'k', 'Learns the mapping from input to output.'],
+    ['Smaller and faster with the big model’s quality → distillation', 'k', 'Teacher → student.'],
+    ['Up-to-date facts → RAG knowledge base', 'k', 'Retrieves facts at query time.'],
+    ['Own instances, VPC, container → Bedrock on-demand', 'o', 'Bedrock is managed. Use JumpStart for that level of control.'],
+    ['Serve the fine-tuned model → call the base model ID', 'o', 'Use Provisioned Throughput or a custom model deployment instead.']],
+    rule: 'Bedrock = managed API. JumpStart = your infrastructure.', src: D + 'bedrock/latest/userguide/custom-models.html' },
+  { id: 'speech', d: 2, clue: 'Language AI services: [[brand names]] / [[context and homophones]] / [[translation glossary]].', opts: [
+    ['Brand names in transcripts → Transcribe custom vocabulary', 'k', 'A word list.'],
+    ['Context and homophones (floe vs flow) → Transcribe custom language model', 'k', 'Needs a large body of domain text.'],
+    ['Keep “Amazon Photos” untranslated → Translate custom terminology', 'k', 'A glossary.'],
+    ['Homophones → custom vocabulary', 'o', 'A word list doesn’t learn context.']],
+    rule: 'Vocabulary = a word list; language model = a reading list; terminology = a translation glossary.', src: D + 'transcribe/latest/dg/improving-accuracy.html' },
+  { id: 'fit', d: 2, clue: 'Training vs validation: [[0.99 / 0.78]] vs [[0.71 / 0.70]].', opts: [
+    ['0.99 / 0.78 → overfitting: ↓max_depth, ↑min_child_weight, subsample < 1', 'k', 'The model is too complex.'],
+    ['0.71 / 0.70 → underfitting: more capacity or features', 'k', 'The model is too simple.'],
+    ['0.71 / 0.70 → add regularization', 'o', 'Makes underfitting worse.'],
+    ['0.99 / 0.78 → more rounds without early stopping', 'o', 'Makes overfitting worse.']],
+    rule: 'Big gap = overfit. Both low = underfit.', src: D + 'sagemaker/latest/dg/xgboost_hyperparameters.html' }
+];
+
+const KEY = 'ruleOut.mla.v1';
+let st; try { st = JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { st = {}; }
+st.miss = st.miss || {}; st.done = st.done || {}; st.dom = st.dom || 'all';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clueHtml = c => esc(c).replace(/\[\[(.+?)\]\]/g, '<mark>$1</mark>');
+const view = document.getElementById('view');
+const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+
+let round = [], pos = 0, picks = {}, checked = false, roundScore = 0, order = [];
+function newRound() {
+  const pool = CARDS.filter(c => st.dom === 'all' || String(c.d) === st.dom);
+  // missed cards first, then never-done cards, then the rest
+  const missed = shuffle(pool.filter(c => st.miss[c.id] > 0));
+  const fresh = shuffle(pool.filter(c => !st.done[c.id] && !(st.miss[c.id] > 0)));
+  const rest = shuffle(pool.filter(c => st.done[c.id] && !(st.miss[c.id] > 0)));
+  round = missed.slice(0, 2).concat(fresh, rest).slice(0, 5);
+  pos = 0; roundScore = 0; startCard();
+}
+function startCard() { picks = {}; checked = false; if (round[pos]) order = shuffle(round[pos].opts.map((o, i) => i)); renderDrill(); }
+function renderDrill() {
+  const domSel = `<select id="dom">${[['all', 'All domains'], ['1', 'Domain 1'], ['2', 'Domain 2'], ['3', 'Domain 3'], ['4', 'Domain 4']].map(([v, l]) => `<option value="${v}" ${st.dom === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
+  if (pos >= round.length) {
+    view.innerHTML = `<div class="row" style="margin-top:0">${domSel}</div><div class="card" style="margin-top:12px"><h3 style="margin-top:0">Round done: ${roundScore}/${round.length} perfect cards</h3><p class="muted">Cards with a mistake come back first next round.</p><div class="row"><button class="btn primary" id="next">Next 5 →</button></div></div>`;
+    document.getElementById('next').onclick = newRound; bindDom(); return;
+  }
+  const c = round[pos];
+  const opts = order.map(i => {
+    const [name, ans, why] = c.opts[i]; const p = picks[i];
+    const cls = checked ? (p === ans ? 'right' : 'wrong') : '';
+    return `<div class="opt ${cls}"><span class="name">${esc(name)}</span>
+      <span class="seg"><button data-i="${i}" data-v="k" class="k ${p === 'k' ? 'on' : ''}" ${checked ? 'disabled' : ''}>Keep</button><button data-i="${i}" data-v="o" class="o ${p === 'o' ? 'on' : ''}" ${checked ? 'disabled' : ''}>Rule out</button></span>
+      ${checked ? `<span class="why"><b class="${ans === 'k' ? 'k' : 'o'}">${ans === 'k' ? 'Keep' : 'Rule out'}:</b> ${esc(why)}</span>` : ''}</div>`;
+  }).join('');
+  const all = c.opts.every((o, i) => picks[i]);
+  view.innerHTML = `<div class="row" style="margin-top:0">${domSel}<span class="small muted">Card ${pos + 1} of ${round.length} · Domain ${c.d}</span></div>
+    <div class="progress"><span style="width:${pos / round.length * 100}%"></span></div>
+    <div class="card"><div class="muted small">The question says…</div><div class="clue">${clueHtml(c.clue)}</div>${opts}
+    ${checked ? `<div class="rule"><b>Rule</b>${esc(c.rule)} <a class="small" href="${c.src}" target="_blank" rel="noopener">AWS doc</a></div><div class="row"><button class="btn primary" id="go">Next →</button></div>`
+      : `<div class="row"><button class="btn primary" id="check" ${all ? '' : 'disabled'}>Check</button><span class="small muted">${all ? '' : 'Mark every option first.'}</span></div>`}</div>`;
+  view.querySelectorAll('.seg button').forEach(b => b.onclick = () => { picks[b.dataset.i] = b.dataset.v; renderDrill(); });
+  const chk = document.getElementById('check');
+  if (chk) chk.onclick = () => {
+    checked = true;
+    const perfect = c.opts.every((o, i) => picks[i] === o[1]);
+    st.done[c.id] = (st.done[c.id] || 0) + 1;
+    st.miss[c.id] = perfect ? Math.max(0, (st.miss[c.id] || 0) - 1) : (st.miss[c.id] || 0) + 1;
+    if (perfect) roundScore++;
+    save(); renderDrill();
+  };
+  const go = document.getElementById('go'); if (go) go.onclick = () => { pos++; startCard(); };
+  bindDom();
+}
+function bindDom() { const d = document.getElementById('dom'); if (d) d.onchange = () => { st.dom = d.value; save(); newRound(); }; }
+function renderRules() {
+  view.innerHTML = [1, 2, 3, 4].map(d => `<h3>Domain ${d}</h3><div class="card tbl"><table><tr><th>Clue</th><th>Rule</th></tr>${CARDS.filter(c => c.d === d).map(c => `<tr><td>${clueHtml(c.clue)}</td><td>${esc(c.rule)} <a class="small" href="${c.src}" target="_blank" rel="noopener">doc</a></td></tr>`).join('')}</table></div>`).join('');
+}
+function renderStats() {
+  const missed = CARDS.filter(c => st.miss[c.id] > 0).sort((a, b) => st.miss[b.id] - st.miss[a.id]);
+  const done = Object.keys(st.done).length;
+  view.innerHTML = `<div class="card"><p>${done} of ${CARDS.length} rule cards practiced. ${missed.length} still being missed.</p>
+    ${missed.length ? `<div class="tbl"><table><tr><th>Rule</th><th>Open misses</th></tr>${missed.map(c => `<tr><td>${clueHtml(c.clue)}<br><span class="small muted">${esc(c.rule)}</span></td><td>${st.miss[c.id]}</td></tr>`).join('')}</table></div>` : '<p class="muted">Nothing outstanding.</p>'}
+    <div class="row"><button class="btn" id="reset">Reset progress</button></div></div>`;
+  document.getElementById('reset').onclick = () => { st.miss = {}; st.done = {}; save(); renderStats(); };
+}
+{ const h = (location.hash || '').match(/^#d([1-4])$/); if (h) { st.dom = h[1]; save(); } }
+const RENDER = { drill: () => { if (!round.length) newRound(); else renderDrill(); }, rules: renderRules, stats: renderStats };
+document.querySelectorAll('[role=tab]').forEach(b => b.onclick = () => { document.querySelectorAll('[role=tab]').forEach(x => x.setAttribute('aria-selected', x === b)); RENDER[b.dataset.tab](); });
+newRound();
+</script>
+</body>
+</html>

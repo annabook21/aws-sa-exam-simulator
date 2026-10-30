@@ -69,9 +69,10 @@ select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(
     <button role="tab" data-tab="plan" aria-selected="true">📅 Plan</button>
     <button role="tab" data-tab="map" aria-selected="false">🧠 Connections</button>
     <button role="tab" data-tab="recall" aria-selected="false">⚡ Recall (5 at a time)</button>
+    <button role="tab" data-tab="coverage" aria-selected="false">✅ Coverage audit</button>
   </div>
   <div id="view"></div>
-  <p class="small muted" style="margin-top:24px">Practice: <a href="exam_simulator_mla.html">Exam simulator</a> · <a href="triple_shot_mla.html">Triple Shot</a>. Progress on this page is saved in this browser only.</p>
+  <p class="small muted" style="margin-top:24px">Practice: <a href="exam_simulator_mla.html">Exam simulator</a> · <a href="ruleout_mla.html">Rule-Out Drill</a>. Progress on this page is saved in this browser only.</p>
 </div>
 <script>
 const CARDS = [
@@ -122,25 +123,34 @@ const CARDS = [
   { t: '2.3', title: 'Read the loss curves', clue: 'Training vs validation loss over epochs.', rule: 'Training ↓, validation ↑ → overfitting: stop early or regularize. Both high → underfitting: add capacity or features. Barely moving → learning rate or vanishing gradients. NaN → exploding values.', trap: '', src: 'https://docs.aws.amazon.com/sagemaker/latest/dg/debugger-built-in-rules.html' },
   { t: '2.3', title: 'Debugger rules and actions', clue: 'Automatically catch training problems.', rule: 'ExplodingTensor = NaN/inf. VanishingGradient = tiny gradients (sigmoid depth → use ReLU or batch norm). Overfit / Overtraining = validation gets worse. LossNotDecreasing. Actions: StopTraining, Email, SMS (via SNS).', trap: 'Built-in actions don’t work on jobs with spot interruptions. Model Monitor is for endpoints, not training.', src: 'https://docs.aws.amazon.com/sagemaker/latest/dg/debugger-built-in-actions.html' },
   { t: '2.3', title: 'Clarify: bias and explanations', clue: 'Fairness numbers or “why this prediction”.', rule: 'Pre-training: CI, DPL. Post-training: DI, DPPL. SHAP: local (one prediction) and global (the whole model).', trap: 'DI compares PREDICTIONS; DPL compares LABELS.', src: 'https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-post-training-bias-metric-di.html' },
-  { t: '2.3', title: 'Shadow comparison, baselines, reproducibility', clue: 'Prove the new model is better, safely and repeatably.', rule: 'Shadow test + DataStorageConfig captures both variants’ responses to compare predictions (users see production only). Baseline first (majority class or a simple model). Reproducibility → SageMaker managed MLflow (training job MlflowConfig).', trap: 'Latency and error metrics alone don’t compare prediction QUALITY.', src: 'https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_CreateInferenceExperiment.html' }
+  { t: '2.3', title: 'Shadow comparison, baselines, reproducibility', clue: 'Prove the new model is better, safely and repeatably.', rule: 'Shadow test + DataStorageConfig captures both variants’ responses to compare predictions (users see production only). Baseline first (majority class or a simple model). Reproducibility → SageMaker managed MLflow (training job MlflowConfig).', trap: 'Latency and error metrics alone don’t compare prediction QUALITY.', src: 'https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_CreateInferenceExperiment.html' },
+  { t: '1.1', title: 'S3 storage classes', clue: 'Pick a storage class by how often data is read and whether it can be re-created.', rule: 'Frequent → Standard. Monthly + millisecond access → Standard-IA (One Zone-IA if re-creatable). Quarterly + millisecond access → Glacier Instant Retrieval. Yearly, minutes to hours → Glacier Flexible Retrieval. Almost never, hours → Deep Archive. Unknown or changing → Intelligent-Tiering (no retrieval fees).', trap: 'One Zone-IA isn’t resilient to losing an AZ, so use it only for data you can re-create. Flexible Retrieval and Deep Archive need a restore first.', src: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html' },
+  { t: '1.1', title: 'Getting data out of sources', clue: 'DynamoDB, Kafka, replaying a stream.', rule: 'DynamoDB → S3: export to S3 (needs PITR; uses no read capacity; full or incremental). Existing Kafka apps → MSK (no code change). Replay a stream → KDS retention (24 h default, up to 365 days).', trap: 'A Scan uses read capacity on the live table. Firehose can’t replay.', src: 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/S3DataExport.HowItWorks.html' },
+  { t: '1.2', title: 'Dedupe, binning, splitting, binary encoding', clue: 'Cleaning and feature shapes.', rule: 'Fuzzy duplicates with no shared ID → Lake Formation FindMatches (outputs a match_id column or removes duplicates). Non-linear effect in a linear model → binning (quantile bins for uneven data). Timestamp/address → split into hour, weekday, postal code. ~1,000 clean categories → binary encoding (~10 columns).', trap: 'DISTINCT and drop duplicates catch only exact matches.', src: 'https://docs.aws.amazon.com/glue/latest/dg/machine-learning.html' },
+  { t: '1.2', title: 'Labeling workforces', clue: 'Who is allowed to see the data?', rule: 'Confidential data → private workforce (your staff, via Cognito or OIDC). Otherwise you can use a vendor-managed workforce.', trap: 'Mechanical Turk closed 2026-09-30 and Ground Truth is closed to new customers, but C01 may still ask about them.', src: 'https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-management.html' },
+  { t: '1.3', title: 'Bias sources, shuffling, S3 encryption', clue: 'How data went wrong, or how to protect it.', rule: 'Collected from an unrepresentative group → selection bias. Values recorded wrongly or inconsistently → measurement bias. Data sorted by label → shuffle or stratify before splitting. Need to control the key policy → SSE-KMS with a customer managed key (SSE-S3 is the default, and AWS manages those keys).', trap: 'Changing the bucket default doesn’t re-encrypt existing objects (use S3 Batch Operations Copy).', src: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html' },
+  { t: '2.1', title: 'Transcribe, Bedrock evaluation, feasibility', clue: 'Choosing AI services and models.', rule: 'A few misheard names → custom vocabulary. Context or homophones with lots of domain text → custom language model. Compare FMs on your own prompts → Bedrock model evaluation (automatic, LLM judge, or humans). A known deterministic rule → don’t use ML.', trap: 'Custom vocabulary DisplayAs isn’t applied while a custom language model is active.', src: 'https://docs.aws.amazon.com/transcribe/latest/dg/improving-accuracy.html' },
+  { t: '2.2', title: 'Regularization and ensembles', clue: 'Which knob for which problem?', rule: 'L1 = drives useless weights to exactly 0 (feature selection). L2 / weight decay = shrinks all weights. Dropout = randomly turns off neurons (neural networks). Bagging (random forest) = less variance. Boosting = less bias. Too many features for the data → feature selection or PCA.', trap: 'More rounds or depth without early stopping fixes underfitting, not overfitting.', src: '' },
+  { t: '2.3', title: 'ROC/AUC and underfitting', clue: 'Reading the scores.', rule: 'AUC = the chance a random positive is ranked above a random negative, across all thresholds (0.5 = random). Training and validation both low and close → underfitting. Barely beats the baseline → not ready.', trap: 'AUC isn’t accuracy. Leakage makes scores look suspiciously HIGH.', src: '' }
 ];
 
 const TASKS = { '1.1': 'Ingest and store data', '1.2': 'Transform data and feature engineering', '1.3': 'Data integrity and preparing data', '2.1': 'Choose a modeling approach', '2.2': 'Train and refine models', '2.3': 'Analyze model performance' };
-const ts = (task, rounds) => `triple_shot_mla.html?pool=hard&focus=t${task}`;
+const sim = (focus, n) => `exam_simulator_mla.html?version=c01&focus=${focus}&mode=study&count=${n || 10}`;
+const ro = d => `ruleout_mla.html#d${d}`;
 const PLAN = [
-  { d: 'Sat Oct 31', task: '1.1', steps: ['Read the 1.1 Connections (10 min)', 'Recall: 1.1 deck until all cards are green', `<a href="${ts('1.1')}">Triple Shot: Task 1.1 hard set</a> — 3 rounds`] },
-  { d: 'Sun Nov 1', task: '1.2', steps: ['Read the 1.2 Connections', 'Recall: 1.2 deck', `<a href="${ts('1.2')}">Triple Shot: Task 1.2</a> — 3 rounds`] },
-  { d: 'Mon Nov 2', task: '1.3', steps: ['Read the 1.3 Connections', 'Recall: 1.3 deck', `<a href="${ts('1.3')}">Triple Shot: Task 1.3</a> — 3 rounds`] },
-  { d: 'Tue Nov 3', task: '1.x', steps: ['Recall: all Domain 1 cards (mixed)', '<a href="triple_shot_mla.html?pool=c01&focus=1">Triple Shot: Domain 1, full C01 pool</a> — 4 rounds', 'Re-read any card tied to a miss'] },
-  { d: 'Wed Nov 4', task: '2.1', steps: ['Read the 2.1 Connections', 'Recall: 2.1 deck', `<a href="${ts('2.1')}">Triple Shot: Task 2.1</a> — 3 rounds`] },
-  { d: 'Thu Nov 5', task: '2.2', steps: ['Read the 2.2 Connections (first half: tuning, XGBoost, spot)', 'Recall: 2.2 deck', `<a href="${ts('2.2')}">Triple Shot: Task 2.2</a> — 3 rounds`] },
-  { d: 'Fri Nov 6', task: '2.2', steps: ['Read the 2.2 Connections (second half: distributed, paths, registry, Bedrock)', 'Recall: 2.2 deck again', `<a href="${ts('2.2')}">Triple Shot: Task 2.2</a> — 3 rounds`] },
-  { d: 'Sat Nov 7', task: '2.3', steps: ['Read the 2.3 Connections', 'Recall: 2.3 deck', `<a href="${ts('2.3')}">Triple Shot: Task 2.3</a> — 3 rounds`] },
-  { d: 'Sun Nov 8', task: '2.x', steps: ['Recall: all Domain 2 cards (mixed)', '<a href="triple_shot_mla.html?pool=c01&focus=2">Triple Shot: Domain 2, full C01 pool</a> — 4 rounds'] },
-  { d: 'Mon Nov 9', task: 'check', steps: ['<a href="exam_simulator_mla.html">Simulator → C01 Readiness Check</a> (it now prefers questions you haven’t seen)', 'Read every explanation you missed; re-read the matching card'] },
-  { d: 'Tue Nov 10', task: 'weak', steps: ['Open Triple Shot stats: drill the task with the most misses', 'Recall: full deck, only the cards marked “not yet”'] },
-  { d: 'Wed Nov 11', task: '3-4', steps: ['Keep Domains 3 and 4 warm: <a href="triple_shot_mla.html?pool=c01&focus=3">Domain 3</a> 2 rounds, <a href="triple_shot_mla.html?pool=c01&focus=4">Domain 4</a> 2 rounds', 'Recall: full deck once'] },
-  { d: 'Thu Nov 12', task: 'light', steps: ['Light day: one pass of the Recall deck', 'Stop by the evening and sleep early'] },
+  { d: 'Sat Oct 31', task: '1.1', steps: ['Read the 1.1 Connections (10 min)', 'Recall: 1.1 deck until all cards are green', `<a href="${ro(1)}">Rule-Out Drill</a> — 1 round, Domain 1`, `<a href="${sim('t1.1')}">Simulator: Task 1.1 hard set, study mode, 10 questions</a>`] },
+  { d: 'Sun Nov 1', task: '1.2', steps: ['Read the 1.2 Connections', 'Recall: 1.2 deck', `<a href="${ro(1)}">Rule-Out Drill</a> — 1 round`, `<a href="${sim('t1.2')}">Simulator: Task 1.2, 10 questions</a>`] },
+  { d: 'Mon Nov 2', task: '1.3', steps: ['Read the 1.3 Connections', 'Recall: 1.3 deck', `<a href="${ro(1)}">Rule-Out Drill</a> — 1 round`, `<a href="${sim('t1.3')}">Simulator: Task 1.3, 10 questions</a>`] },
+  { d: 'Tue Nov 3', task: '1.x', steps: ['Recall: all Domain 1 cards (mixed)', `<a href="${sim('1', 25)}">Simulator: Domain 1, full C01 pool, 25 questions</a>`, 'Re-read the card behind every miss'] },
+  { d: 'Wed Nov 4', task: '2.1', steps: ['Read the 2.1 Connections', 'Recall: 2.1 deck', `<a href="${ro(2)}">Rule-Out Drill</a> — 1 round, Domain 2`, `<a href="${sim('t2.1')}">Simulator: Task 2.1, 10 questions</a>`] },
+  { d: 'Thu Nov 5', task: '2.2', steps: ['Read the 2.2 Connections (first half: tuning, XGBoost, spot, regularization)', 'Recall: 2.2 deck', `<a href="${sim('t2.2')}">Simulator: Task 2.2, 10 questions</a>`] },
+  { d: 'Fri Nov 6', task: '2.2', steps: ['Read the 2.2 Connections (second half: distributed, paths, registry, Bedrock, ensembles)', `<a href="${ro(2)}">Rule-Out Drill</a> — 1 round`, `<a href="${sim('t2.2')}">Simulator: Task 2.2 again, 10 questions</a>`] },
+  { d: 'Sat Nov 7', task: '2.3', steps: ['Read the 2.3 Connections', 'Recall: 2.3 deck', `<a href="${sim('t2.3')}">Simulator: Task 2.3, 10 questions</a>`] },
+  { d: 'Sun Nov 8', task: '2.x', steps: ['Recall: all Domain 2 cards (mixed)', `<a href="${sim('2', 25)}">Simulator: Domain 2, full C01 pool, 25 questions</a>`, 'AWS Skill Builder: take the free Official Practice Question Set for MLA-C01 (written by AWS; check whether a Korean version is listed)'] },
+  { d: 'Mon Nov 9', task: '3-4', steps: ['Keep Domains 3 and 4 warm: <a href="ruleout_mla.html#d3">Rule-Out Drill, Domain 3</a> and <a href="ruleout_mla.html#d4">Domain 4</a>, 1 round each', `<a href="${sim('3', 10)}">Simulator: Domain 3, 10 questions</a> and <a href="${sim('4', 10)}">Domain 4, 10 questions</a>`] },
+  { d: 'Tue Nov 10', task: 'mock', steps: ['<a href="exam_simulator_mla.html">Simulator → 🏁 Final Mock</a>: 40 held-out questions, 90 minutes, ONE attempt. This is your real readiness signal.', 'Read every explanation you missed and the matching Connections card'] },
+  { d: 'Wed Nov 11', task: 'weak', steps: ['Drill the weakest domain from the Final Mock: Rule-Out Drill “My misses” + simulator hard set for that task', 'Recall: only the “not yet” cards'] },
+  { d: 'Thu Nov 12', task: 'light', steps: ['Light day: one pass of the Rule-Out “All rules” table and the Recall deck', 'Stop by the evening and sleep early'] },
   { d: 'Fri Nov 13', task: 'exam', steps: ['Earliest retake date (14 days after Oct 30). Book it now; if your date is different, shift the plan.'] }
 ];
 
@@ -197,7 +207,62 @@ function renderRecall() {
   if (b('miss')) b('miss').onclick = () => { st.known[deck[pos]] = false; save(); deck.push(deck[pos]); pos++; revealed = false; renderRecall(); };
   if (b('again')) b('again').onclick = () => { newDeck(); renderRecall(); };
 }
-const RENDER = { plan: renderPlan, map: renderMap, recall: () => { if (!deck.length) newDeck(); renderRecall(); } };
+const COVERAGE = [
+  ['1.1', 'Data formats and ingestion (Parquet, JSON, CSV, ORC, Avro, RecordIO)', '341, 347, 359, 374', 'full'],
+  ['1.1', 'Core data sources (S3, EFS, FSx)', '342, 349, 350, 441*', 'partial: FSx for NetApp ONTAP only appears in a card'],
+  ['1.1', 'Streaming sources (Kinesis, Flink, Kafka)', '341, 344, 356, 417, 439*', 'full'],
+  ['1.1', 'Storage options and tradeoffs; initial storage decisions', '414, 415, 440*', 'full'],
+  ['1.1', 'Extracting from S3/EBS/EFS/RDS/DynamoDB (Transfer Acceleration, EBS PIOPS)', '343, 348, 416, 443*, gap set 309–340', 'full'],
+  ['1.1', 'Ingesting into Data Wrangler and Feature Store', '345, 346, 442*', 'partial: Data Wrangler import sources only in the original bank'],
+  ['1.1', 'Merging data from multiple sources', '348, 418', 'full'],
+  ['1.1', 'Troubleshooting capacity and scalability', '343, 344', 'full'],
+  ['1.2', 'Cleaning: outliers, imputing, combining, deduplication', '354, 355, 418, 444*, 446*', 'full'],
+  ['1.2', 'Feature engineering: scaling, splitting, binning, log, normalization', '352, 353, 419, 420', 'full'],
+  ['1.2', 'Encoding: one-hot, binary, label, tokenization', '351, 359, 360, 421', 'full'],
+  ['1.2', 'Tools: Data Wrangler, Glue, DataBrew', '351–355, 418, 423', 'full'],
+  ['1.2', 'Streaming transforms (Lambda, Spark)', '356', 'partial: Spark streaming only in a card'],
+  ['1.2', 'Labeling services (Ground Truth, workforces)', '357, 358, 422', 'full'],
+  ['1.3', 'Pre-training bias metrics (CI, DPL)', '361, 362, 447*', 'full'],
+  ['1.3', 'Fixing class imbalance (synthetic data, resampling)', '363, 364, 388', 'full'],
+  ['1.3', 'Encryption', '369, 424', 'full'],
+  ['1.3', 'Classification, anonymization, masking', '366, 367, 445*', 'full'],
+  ['1.3', 'Compliance: PII, PHI, data residency', '366–368, gap set (Comprehend Medical)', 'full'],
+  ['1.3', 'Validating data quality (DataBrew, Glue DQ)', '365, 423, 448*', 'full'],
+  ['1.3', 'Bias sources (selection, measurement) with Clarify', '425', 'full'],
+  ['1.3', 'Splitting, shuffling, augmentation', '364, 370, 371, 426', 'full'],
+  ['1.3', 'Configuring data for training (EFS, FSx)', '349, 350, 449*', 'full'],
+  ['2.1', 'Algorithms for business problems; built-in algorithms', '372–376, 382, 450*–454*', 'full'],
+  ['2.1', 'AI services (Translate, Transcribe, Rekognition, Bedrock)', '377, 378, 427, 428, 429', 'full'],
+  ['2.1', 'Interpretability in model selection', '379', 'full'],
+  ['2.1', 'Feasibility of an ML solution', '430', 'full'],
+  ['2.1', 'Foundation models and templates (JumpStart, Bedrock)', '380, 429, 435', 'full'],
+  ['2.1', 'Selecting models by cost', '381, 437', 'full'],
+  ['2.2', 'Epochs, steps, batch size', '413', 'full'],
+  ['2.2', 'Reducing training time (early stopping, distributed)', '390, 391, 397', 'full'],
+  ['2.2', 'Model size factors; reducing size', '396, 433', 'full'],
+  ['2.2', 'Regularization (dropout, weight decay, L1, L2)', '387, 431', 'full'],
+  ['2.2', 'Hyperparameter tuning (random, Bayesian, AMT)', '383–386, 455*, 456*', 'full'],
+  ['2.2', 'Hyperparameter effects (trees, layers)', '387, 432', 'full'],
+  ['2.2', 'Bringing outside models into SageMaker; script mode', '392, 393', 'full'],
+  ['2.2', 'Fine-tuning pretrained models (Bedrock, JumpStart)', '398, 399, 435, 459*', 'full'],
+  ['2.2', 'Overfitting, underfitting, catastrophic forgetting', '387, 395, 432, 433', 'full'],
+  ['2.2', 'Ensembling, stacking, boosting', '382, 434', 'full'],
+  ['2.2', 'Model versioning (Model Registry)', '394, 458*', 'full'],
+  ['2.3', 'Metrics (confusion matrix, heat maps, F1, precision, recall, RMSE, ROC, AUC)', '400–403, 412, 436', 'full'],
+  ['2.3', 'Performance baselines', '407', 'full'],
+  ['2.3', 'Identifying overfitting and underfitting', '404, 438', 'full'],
+  ['2.3', 'Clarify metrics and interpreting outputs', '409, 411, 460*', 'full'],
+  ['2.3', 'Convergence issues; Debugger', '405, 406', 'full'],
+  ['2.3', 'Tradeoffs: performance, training time, cost', '437', 'full'],
+  ['2.3', 'Reproducible experiments', '408', 'full'],
+  ['2.3', 'Shadow vs production variant', '410, bank 49/118/143', 'full']
+];
+function renderCoverage() {
+  const partial = COVERAGE.filter(r => r[3] !== 'full').length;
+  view.innerHTML = `<div class="card small">Every “Knowledge of” and “Skills in” item for <b>Domains 1 and 2</b> in the official MLA-C01 guide, mapped to the questions that test it. ${COVERAGE.length - partial} items are fully covered and ${partial} are partly covered. Numbers with * are in the held-out Final Mock. <b>Not audited item by item here:</b> Domains 3 and 4, which met the standard on your report. They’re covered by the original bank, the earlier written questions and 18 Final Mock questions, but they weren’t checked against the guide line by line this time.</div>
+    <div class="card tbl"><table><tr><th>Task</th><th>Guide item</th><th>Questions</th><th>Status</th></tr>${COVERAGE.map(r => `<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td class="small">${esc(r[2])}</td><td class="small" style="color:${r[3] === 'full' ? 'var(--good)' : 'var(--warn)'}">${esc(r[3])}</td></tr>`).join('')}</table></div>`;
+}
+const RENDER = { plan: renderPlan, map: renderMap, coverage: renderCoverage, recall: () => { if (!deck.length) newDeck(); renderRecall(); } };
 document.querySelectorAll('[role=tab]').forEach(btn => btn.onclick = () => {
   document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b === btn));
   RENDER[btn.dataset.tab]();
