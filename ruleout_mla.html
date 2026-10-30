@@ -63,7 +63,7 @@ th { color: var(--muted); }
 <body>
 <div class="wrap">
   <h1>Rule-Out Drill</h1>
-  <p class="sub">Exam answers hinge on a few clue words. Each card shows a clue and some options: mark each one <b class="k">keep</b> or <b class="o">rule out</b>, then check. Written by Claude from AWS documentation (each rule links its page). Not official AWS material.</p>
+  <p class="sub">Each card is a mini exam question. The <mark>highlighted words</mark> are the clues. For every answer option, decide: <b class="k">Possible</b> (could still be the answer) or <b class="o">Eliminate</b> (the clue rules it out). Then press Check to see why. Written by Claude from AWS documentation (each rule links its page). Not official AWS material.</p>
   <div class="tabs" role="tablist">
     <button role="tab" data-tab="drill" aria-selected="true">🎯 Drill (5 per round)</button>
     <button role="tab" data-tab="rules" aria-selected="false">📋 All rules</button>
@@ -225,32 +225,12 @@ const CARDS = [
     ['Data Wrangler drop duplicates', 'o', 'Exact matches only.'],
     ['Macie', 'o', 'Finds sensitive data.']],
     rule: 'Fuzzy duplicates → FindMatches.', src: D + 'glue/latest/dg/machine-learning.html' },
-  { id: 'pii', d: 1, clue: 'PII task: [[find which buckets]] vs [[mask in the pipeline]] vs [[keep records linkable]].', opts: [
-    ['Find which buckets have PII → Macie', 'k', 'Discovers and reports. It doesn’t mask.'],
-    ['Mask in an ETL pipeline → Glue Detect PII', 'k', 'Redact, partially redact, or hash.'],
-    ['Keep linkable → SHA-256 hash action', 'k', 'The same input always gives the same token.'],
-    ['Keep linkable → redact with ******', 'o', 'Every value becomes identical, so records can’t be linked.'],
-    ['Find which buckets → GuardDuty', 'o', 'Detects threats; it doesn’t inspect data contents.']],
-    rule: 'Macie finds. Glue Detect PII transforms. Hash keeps records linkable.', src: D + 'glue/latest/dg/detect-PII.html' },
   { id: 'dq', d: 1, clue: 'Block bad rows [[before loading]] and see [[which records failed]].', opts: [
     ['Glue Data Quality inside the ETL job', 'k', 'Proactive, and can identify failing records.'],
     ['Glue Data Quality on the Data Catalog table', 'o', 'Runs after the load and can’t list failing records (but it CAN recommend rules).'],
     ['Macie', 'o', 'Not about quality.'],
     ['CloudWatch alarm on job duration', 'o', 'Not about data.']],
     rule: 'In-pipeline gate → DQ in ETL. Rule recommendations → DQ on the Data Catalog. No-code analysts → DataBrew rulesets.', src: D + 'glue/latest/dg/glue-data-quality.html' },
-  { id: 'gt', d: 1, clue: 'Turn on Ground Truth [[automated data labeling]].', opts: [
-    ['5,000 images, single-label classification', 'k', 'A supported built-in task, above the minimum.'],
-    ['800 images, bounding boxes', 'o', 'Below the 1,250-object minimum.'],
-    ['Multi-label text classification', 'o', 'Only SINGLE-label text classification is supported.'],
-    ['Custom task template', 'o', 'Custom task types aren’t supported.'],
-    ['Streaming labeling job', 'o', 'Not supported.']],
-    rule: 'Auto-labeling = 1,250+ objects and one of 4 built-in single-label/box/segmentation tasks.', src: D + 'sagemaker/latest/dg/sms-automated-labeling.html' },
-  { id: 'outliers', d: 1, clue: 'Outliers: [[known physical limits]] vs [[real extremes that must stay]].', opts: [
-    ['Known limits → Min-Max outlier thresholds', 'k', 'AWS: use it when you know the threshold values.'],
-    ['Must stay → Robust Scaler', 'k', 'Median and quartile-based, so it isn’t distorted by extremes.'],
-    ['Must stay → Min Max Scaler', 'o', 'Extremes squash everything else together.'],
-    ['Known limits → remove the top 1% by quantile', 'o', 'Might delete valid values or keep invalid ones.']],
-    rule: 'Know the bounds → Min-Max thresholds. Keep the extremes → Robust Scaler.', src: D + 'sagemaker/latest/dg/canvas-transform.html' },
   { id: 'stream-transform', d: 1, clue: '[[5-minute rolling windows]] per device, [[state]], [[late events]].', opts: [
     ['Managed Service for Apache Flink', 'k', 'Built for windows, state and late-event handling.'],
     ['Lambda on the stream', 'o', 'Keeps no state between invocations.'],
@@ -263,62 +243,25 @@ const CARDS = [
     ['VolumeKmsKeyId', 'o', 'Encrypts data at rest on the volumes.'],
     ['S3 gateway endpoint', 'o', 'Covers S3 traffic, not node-to-node traffic.']],
     rule: 'Between nodes → inter-container encryption. No calls at all → network isolation.', src: D + 'sagemaker/latest/APIReference/API_CreateTrainingJob.html' },
-  { id: 'bias-metric', d: 1, clue: 'Which bias metric? [[group sizes]] / [[label rates in training data]] / [[model prediction rates]].', opts: [
-    ['Group sizes → CI', 'k', '(na−nd)/(na+nd). 0 = balanced.'],
-    ['Label rates → DPL', 'k', 'qa−qd, before training.'],
-    ['Prediction rates → DI', 'k', 'q′d/q′a, after training. 1 = parity.'],
-    ['Label rates → DI', 'o', 'DI uses PREDICTIONS.'],
-    ['Group sizes → DPL', 'o', 'DPL uses labels.']],
-    rule: 'CI = counts. DPL = labels. DI = predictions (parity at 1).', src: D + 'sagemaker/latest/dg/clarify-data-bias-metric-true-label-imbalance.html' },
   // ---------- Domain 2 ----------
-  { id: 'forecast', d: 2, clue: 'Forecasting: [[hundreds of related series]] vs [[one single series]].', opts: [
-    ['Hundreds of related series + quantiles → DeepAR', 'k', 'Beats ARIMA/ETS with many related series.'],
-    ['One series → ARIMA/ETS may win', 'k', 'AWS says classical methods may be more accurate for a single series.'],
-    ['One series → DeepAR always wins', 'o', '“Always” is the trap.'],
-    ['New category never seen in training → DeepAR cat value', 'o', 'DeepAR can forecast only for categories it saw during training.']],
-    rule: 'DeepAR = many related series. dynamic_feat must include future values. cat values must have been seen in training.', src: D + 'sagemaker/latest/dg/deepar.html' },
-  { id: 'fm', d: 2, clue: '[[Extremely sparse]] user × item data.', opts: [
-    ['Factorization Machines, binary classification (click or no click)', 'k', 'Supported mode.'],
-    ['Factorization Machines, regression (rating score)', 'k', 'Supported mode.'],
-    ['Factorization Machines, multiclass', 'o', 'Only binary classification or regression.'],
-    ['Factorization Machines trained on CSV', 'o', 'Training requires recordIO-protobuf Float32.']],
-    rule: 'Sparse → FM (binary or regression only, recordIO-protobuf).', src: D + 'sagemaker/latest/dg/fact-machines.html' },
   { id: 'anomaly', d: 2, clue: 'Logins from an IP that’s [[unusual for that user]]; [[no labels]].', opts: [
     ['IP Insights', 'k', 'Learns entity ↔ IPv4 patterns, unsupervised.'],
     ['Random Cut Forest', 'o', 'Finds general numeric anomalies, not per-user IP patterns.'],
     ['XGBoost', 'o', 'Needs labels.'],
     ['GuardDuty', 'o', 'Account-level threat detection, not a model inside your app.']],
     rule: 'Entity + IP → IP Insights. Numeric spikes → Random Cut Forest.', src: D + 'sagemaker/latest/dg/ip-insights.html' },
-  { id: 'vision', d: 2, clue: 'Vision: [[count instances]] vs [[exact area or outline]] vs [[one label per image]].', opts: [
-    ['Count cars → object detection', 'k', 'One box per instance.'],
-    ['Weed area → semantic segmentation', 'k', 'Labels every pixel.'],
-    ['Count cars → image classification', 'o', 'One label for the whole image.'],
-    ['Weed area → object detection', 'o', 'Boxes overstate irregular shapes.']],
-    rule: 'Count = detection. Area = segmentation. Whole image = classification.', src: D + 'sagemaker/latest/dg/algos.html' },
   { id: 'amt', d: 2, clue: 'Tuning: the container reports the metric [[only at the end]], and [[50 jobs run in parallel]].', opts: [
     ['Random search', 'k', 'Each trial is independent, so maximum parallelism is fine.'],
     ['Hyperband', 'o', 'Needs intermediate (per-epoch) metrics.'],
     ['Bayesian', 'o', 'Learns from finished jobs, so heavy parallelism weakens it.'],
     ['Grid', 'o', 'Categorical parameters only.']],
     rule: 'Hyperband needs per-epoch metrics (and TrainingJobEarlyStoppingType=OFF). Every categorical combination → grid.', src: D + 'sagemaker/latest/dg/automatic-model-tuning-how-it-works.html' },
-  { id: 'warm', d: 2, clue: 'Warm start a tuning job that uses [[new data]], a [[new image version]], or a [[different objective metric]].', opts: [
-    ['New data or new image → TRANSFER_LEARNING', 'k', 'Allows different data and image versions.'],
-    ['New data → IDENTICAL_DATA_AND_ALGORITHM', 'o', 'Requires the same data and image.'],
-    ['Different objective metric → any warm start', 'o', 'The objective must match the parent jobs.'],
-    ['8 parent jobs', 'o', 'Maximum of 5 parents.']],
-    rule: 'Warm start: same objective, at most 5 parents. Changed data or image → TRANSFER_LEARNING.', src: D + 'sagemaker/latest/dg/automatic-model-tuning-warm-start.html' },
   { id: 'parallel', d: 2, clue: 'Model [[doesn’t fit in one GPU’s memory]].', opts: [
     ['Model parallelism', 'k', 'Splits the model across GPUs.'],
     ['Data parallelism', 'o', 'Every GPU needs a full copy of the model.'],
     ['Bigger batch size', 'o', 'Needs even more memory.'],
     ['Pipe mode', 'o', 'Changes how data is read, not where the model lives.']],
     rule: 'Model too big → model parallel. Data too big or slow → data parallel.', src: D + 'sagemaker/latest/dg/distributed-training.html' },
-  { id: 'spot', d: 2, clue: 'Managed [[spot]] training settings.', opts: [
-    ['Checkpoints in /opt/ml/checkpoints synced to S3', 'k', 'Lets training resume after an interruption.'],
-    ['MaxWaitTimeInSeconds > MaxRuntimeInSeconds', 'k', 'Required.'],
-    ['Falls back to On-Demand when Spot runs out', 'o', 'It never falls back.'],
-    ['Built-in algorithm without checkpoints, 4-hour MaxWait', 'o', 'Limited to 3,600 seconds.']],
-    rule: 'Spot = up to 90% savings + checkpoints + MaxWait > MaxRuntime. No On-Demand fallback.', src: D + 'sagemaker/latest/dg/model-managed-spot-training.html' },
   { id: 'explain', d: 2, clue: 'Explain [[each decision]] of an [[existing]] model to a regulator.', opts: [
     ['Clarify SHAP (local explanations)', 'k', 'Per-prediction feature attributions, with no retraining.'],
     ['Model Monitor', 'o', 'Watches drift.'],
@@ -331,25 +274,145 @@ const CARDS = [
     ['Overfit rule', 'o', 'Compares training and validation loss.'],
     ['Model Monitor', 'o', 'Monitors endpoints, not training.']],
     rule: 'NaN → ExplodingTensor. Tiny gradients → VanishingGradient. Validation getting worse → Overfit/Overtraining.', src: D + 'sagemaker/latest/dg/debugger-built-in-rules.html' },
-  { id: 'bedrock', d: 2, clue: 'Customize or host a foundation model: [[labeled pairs]] / [[smaller and faster]] / [[add facts]] / [[my own instances and VPC]].', opts: [
-    ['Labeled prompt→response pairs → supervised fine-tuning', 'k', 'Learns the mapping from input to output.'],
-    ['Smaller and faster with the big model’s quality → distillation', 'k', 'Teacher → student.'],
-    ['Up-to-date facts → RAG knowledge base', 'k', 'Retrieves facts at query time.'],
-    ['Own instances, VPC, container → Bedrock on-demand', 'o', 'Bedrock is managed. Use JumpStart for that level of control.'],
-    ['Serve the fine-tuned model → call the base model ID', 'o', 'Use Provisioned Throughput or a custom model deployment instead.']],
-    rule: 'Bedrock = managed API. JumpStart = your infrastructure.', src: D + 'bedrock/latest/userguide/custom-models.html' },
-  { id: 'speech', d: 2, clue: 'Language AI services: [[brand names]] / [[context and homophones]] / [[translation glossary]].', opts: [
-    ['Brand names in transcripts → Transcribe custom vocabulary', 'k', 'A word list.'],
-    ['Context and homophones (floe vs flow) → Transcribe custom language model', 'k', 'Needs a large body of domain text.'],
-    ['Keep “Amazon Photos” untranslated → Translate custom terminology', 'k', 'A glossary.'],
-    ['Homophones → custom vocabulary', 'o', 'A word list doesn’t learn context.']],
-    rule: 'Vocabulary = a word list; language model = a reading list; terminology = a translation glossary.', src: D + 'transcribe/latest/dg/improving-accuracy.html' },
-  { id: 'fit', d: 2, clue: 'Training vs validation: [[0.99 / 0.78]] vs [[0.71 / 0.70]].', opts: [
-    ['0.99 / 0.78 → overfitting: ↓max_depth, ↑min_child_weight, subsample < 1', 'k', 'The model is too complex.'],
-    ['0.71 / 0.70 → underfitting: more capacity or features', 'k', 'The model is too simple.'],
-    ['0.71 / 0.70 → add regularization', 'o', 'Makes underfitting worse.'],
-    ['0.99 / 0.78 → more rounds without early stopping', 'o', 'Makes overfitting worse.']],
-    rule: 'Big gap = overfit. Both low = underfit.', src: D + 'sagemaker/latest/dg/xgboost_hyperparameters.html' }
+  // ---------- rewritten as single scenarios (2026-10-30) ----------
+  { id: 'pii-find', d: 1, clue: 'Security must [[find which S3 buckets contain PII]] across 40 accounts. [[Nothing needs to be masked yet]].', opts: [
+    ['Amazon Macie', 'k', 'Discovers and reports sensitive data in S3, and works across an organization.'],
+    ['AWS Glue Detect PII transform', 'o', 'Masks data inside a Glue job you build, one dataset at a time. That isn’t a bucket inventory.'],
+    ['Amazon GuardDuty', 'o', 'Detects threats from logs; it doesn’t inspect what the data contains.'],
+    ['Amazon Comprehend DetectPiiEntities', 'o', 'Analyzes text you send it; it doesn’t scan buckets.']],
+    rule: 'Find PII in S3 → Macie. Mask PII in a pipeline → Glue Detect PII.', src: D + 'macie/latest/user/what-is-macie.html' },
+  { id: 'pii-link', d: 1, clue: 'Replace SSNs in training data, but the [[same SSN must always map to the same value]] so records can still be [[linked]].', opts: [
+    ['Glue Detect PII: apply a cryptographic hash (SHA-256)', 'k', 'The same input always gives the same irreversible token.'],
+    ['Glue Detect PII: redact with ******', 'o', 'Every SSN becomes identical, so records can’t be linked.'],
+    ['Glue Detect PII: partial redact (keep the last 4 digits)', 'o', 'Still exposes part of the number and isn’t a consistent ID.'],
+    ['Amazon Macie', 'o', 'Finds PII; it doesn’t transform anything.']],
+    rule: 'Keep records linkable → hash. Simply hide the values → redact.', src: D + 'glue/latest/dg/detect-PII.html' },
+  { id: 'gt-auto', d: 1, clue: 'A team wants Ground Truth [[automated data labeling]] for [[800 images]] needing [[bounding boxes]].', opts: [
+    ['Turn on automated data labeling for the job', 'o', 'The minimum is 1,250 objects (AWS suggests 5,000), and they have 800.'],
+    ['Label with human workers (no automated labeling)', 'k', 'Below the minimum, humans label everything.'],
+    ['Use a custom labeling template with automated labeling', 'o', 'Automated labeling doesn’t support custom task types.'],
+    ['Use a streaming labeling job with automated labeling', 'o', 'Streaming jobs don’t support automated labeling.']],
+    rule: 'Automated labeling: 1,250+ objects and a built-in task (single-label image or text classification, bounding box, semantic segmentation).', src: D + 'sagemaker/latest/dg/sms-automated-labeling.html' },
+  { id: 'outlier-limits', d: 1, clue: 'Sensor values outside [[known physical limits (-40 to 150 °C)]] are glitches and must be [[removed]].', opts: [
+    ['Data Wrangler Min-Max numeric outliers (thresholds -40 and 150, Remove)', 'k', 'AWS: use it when you know the threshold values.'],
+    ['Quantile numeric outliers (remove the top and bottom 1%)', 'o', 'Could delete valid readings or keep invalid ones.'],
+    ['Standard deviation numeric outliers (3 standard deviations)', 'o', 'Statistical, so it ignores the known limits.'],
+    ['Robust Scaler', 'o', 'Scales values; it doesn’t remove anything.']],
+    rule: 'Known bounds → Min-Max outlier thresholds.', src: D + 'sagemaker/latest/dg/canvas-transform.html' },
+  { id: 'outlier-keep', d: 1, clue: 'A feature has a few [[extreme values that are real and must stay]]. Scale it for k-NN [[without distortion]].', opts: [
+    ['Robust Scaler', 'k', 'Uses statistics that are robust to outliers (median and quartiles).'],
+    ['Min Max Scaler', 'o', 'The extremes squash everything else into a tiny range.'],
+    ['Standard Scaler', 'o', 'The mean and standard deviation get pulled by the extremes.'],
+    ['Remove rows above the 99th percentile', 'o', 'The values must stay.']],
+    rule: 'Outliers must stay → Robust Scaler.', src: D + 'sagemaker/latest/dg/canvas-transform.html' },
+  { id: 'bias-size', d: 1, clue: 'Before training, measure whether one group has [[far more SAMPLES]] than another.', opts: [
+    ['Class imbalance (CI)', 'k', '(na−nd)/(na+nd): compares group sizes.'],
+    ['Difference in proportions of labels (DPL)', 'o', 'Compares positive LABEL rates, not sizes.'],
+    ['Disparate impact (DI)', 'o', 'A post-training metric on model predictions.'],
+    ['RMSE', 'o', 'A regression error metric.']],
+    rule: 'Group sizes = CI.', src: D + 'sagemaker/latest/dg/clarify-bias-metric-class-imbalance.html' },
+  { id: 'bias-label', d: 1, clue: 'Before training, compare the [[rate of positive LABELS]] (approved = 1) between two groups.', opts: [
+    ['Difference in proportions of labels (DPL)', 'k', 'qa − qd, from the training labels.'],
+    ['Class imbalance (CI)', 'o', 'Compares how many samples each group has.'],
+    ['Disparate impact (DI)', 'o', 'Uses the model’s PREDICTIONS, after training.'],
+    ['Accuracy', 'o', 'Not a bias metric.']],
+    rule: 'Label rates before training = DPL.', src: D + 'sagemaker/latest/dg/clarify-data-bias-metric-true-label-imbalance.html' },
+  { id: 'bias-pred', d: 2, clue: 'After training, compare how often the [[MODEL PREDICTS]] approval for each group, as a ratio.', opts: [
+    ['Disparate impact (DI)', 'k', 'q′d / q′a. 1 = parity; below 1 = group a favored.'],
+    ['Difference in proportions of labels (DPL)', 'o', 'Uses training labels, not predictions.'],
+    ['Class imbalance (CI)', 'o', 'Group sizes.'],
+    ['F1 score', 'o', 'Measures accuracy, not fairness between groups.']],
+    rule: 'Prediction rates after training = DI (parity at 1).', src: D + 'sagemaker/latest/dg/clarify-post-training-bias-metric-di.html' },
+  { id: 'forecast-many', d: 2, clue: 'Forecast demand for [[4,000 related products]], including [[new products]], with [[P10/P90 ranges]].', opts: [
+    ['DeepAR', 'k', 'One model across many related series, with probabilistic forecasts.'],
+    ['One ARIMA model per product', 'o', 'New products have almost no history to learn from.'],
+    ['Random Cut Forest', 'o', 'Detects anomalies; it doesn’t forecast.'],
+    ['Linear Learner regression', 'o', 'Single-point estimates that ignore the time-series structure.']],
+    rule: 'Many related series → DeepAR.', src: D + 'sagemaker/latest/dg/deepar.html' },
+  { id: 'forecast-one', d: 2, clue: 'Forecast [[ONE bakery’s]] daily sales. [[No related series]].', opts: [
+    ['A standard method such as ARIMA or ETS', 'k', 'AWS says these may be more accurate for a single series.'],
+    ['DeepAR, because it always beats classical methods', 'o', 'DeepAR starts to win with hundreds of related series. “Always” is the trap.'],
+    ['k-means', 'o', 'Clusters data; it doesn’t forecast.'],
+    ['Object2Vec', 'o', 'Learns embeddings, not forecasts.']],
+    rule: 'One series → classical forecasting may win.', src: D + 'sagemaker/latest/dg/deepar.html' },
+  { id: 'fm', d: 2, clue: 'Predict whether a user [[clicks an ad]]. Features are [[extremely sparse]] one-hot IDs.', opts: [
+    ['Factorization Machines, binary classification, recordIO-protobuf', 'k', 'Built for high-dimensional sparse click prediction.'],
+    ['Factorization Machines in multiclass mode', 'o', 'FM supports only binary classification and regression.'],
+    ['Factorization Machines trained on CSV', 'o', 'Training requires recordIO-protobuf Float32.'],
+    ['k-means', 'o', 'Unsupervised, so it can’t predict clicks.']],
+    rule: 'Sparse clicks or recommendations → Factorization Machines.', src: D + 'sagemaker/latest/dg/fact-machines.html' },
+  { id: 'vision-count', d: 2, clue: '[[Count]] the cars in each camera image and show where each one is.', opts: [
+    ['Object detection', 'k', 'One box per car, so you count the boxes.'],
+    ['Image classification', 'o', 'One label for the whole image, so it can’t count.'],
+    ['Semantic segmentation', 'o', 'Labels pixels by class but doesn’t separate one car from another.'],
+    ['Random Cut Forest', 'o', 'Not a vision algorithm.']],
+    rule: 'Count instances = object detection.', src: D + 'sagemaker/latest/dg/algos.html' },
+  { id: 'vision-area', d: 2, clue: 'Measure the [[exact area]] of weeds in drone photos, [[following their outline]].', opts: [
+    ['Semantic segmentation', 'k', 'Labels every pixel, so you can measure the area.'],
+    ['Object detection', 'o', 'Boxes overstate irregular shapes.'],
+    ['Image classification', 'o', 'One label per image.'],
+    ['Rekognition DetectLabels', 'o', 'Common labels only, with no pixel mask.']],
+    rule: 'Exact area or outline = semantic segmentation.', src: D + 'sagemaker/latest/dg/algos.html' },
+  { id: 'warm', d: 2, clue: 'Reuse last month’s tuning results. There is [[new training data]] and a [[new container image version]].', opts: [
+    ['Warm start type TRANSFER_LEARNING', 'k', 'Allows different data and image versions.'],
+    ['Warm start type IDENTICAL_DATA_AND_ALGORITHM', 'o', 'Requires the same data and image.'],
+    ['Warm start that also changes the objective metric', 'o', 'The objective must match the parent jobs.'],
+    ['Warm start from 8 parent jobs', 'o', 'Maximum of 5 parents.']],
+    rule: 'Changed data or image → TRANSFER_LEARNING.', src: D + 'sagemaker/latest/dg/automatic-model-tuning-warm-start.html' },
+  { id: 'spot', d: 2, clue: 'A 10-hour PyTorch training job. [[Cut cost as much as possible]]. [[Interruptions are OK]].', opts: [
+    ['Managed spot training + checkpoints to S3 + MaxWaitTimeInSeconds > MaxRuntimeInSeconds', 'k', 'Up to 90% savings, and training resumes from the last checkpoint.'],
+    ['Managed spot training without checkpoints', 'o', 'An interruption restarts training from zero.'],
+    ['Managed spot training that falls back to On-Demand when Spot runs out', 'o', 'Managed spot never falls back to On-Demand.'],
+    ['MaxWaitTimeInSeconds lower than MaxRuntimeInSeconds', 'o', 'Invalid: MaxWait must be larger.']],
+    rule: 'Spot = checkpoints + MaxWait > MaxRuntime. No On-Demand fallback.', src: D + 'sagemaker/latest/dg/model-managed-spot-training.html' },
+  { id: 'bedrock-style', d: 2, clue: 'You have [[5,000 labeled prompt→response pairs]] showing the exact tone and format you want.', opts: [
+    ['Supervised fine-tuning in Bedrock', 'k', 'Learns from labeled input→output pairs.'],
+    ['Reinforcement fine-tuning', 'o', 'Uses reward functions instead of labeled answers.'],
+    ['Distillation', 'o', 'Makes a smaller model match a big one; it doesn’t teach a style.'],
+    ['RAG knowledge base', 'o', 'Adds facts at query time but doesn’t teach a consistent format.']],
+    rule: 'Labeled pairs → supervised fine-tuning.', src: D + 'bedrock/latest/userguide/custom-models.html' },
+  { id: 'bedrock-small', d: 2, clue: 'A big Bedrock model works well but is [[too slow and expensive]]. You want a [[smaller model with similar quality]].', opts: [
+    ['Distillation (big teacher → small student)', 'k', 'Transfers the big model’s skill into a smaller, faster model.'],
+    ['Buy Provisioned Throughput for the big model', 'o', 'More capacity, but the same cost per answer.'],
+    ['RAG knowledge base', 'o', 'Adds facts, not speed.'],
+    ['Supervised fine-tuning of the big model', 'o', 'Still the big, slow model.']],
+    rule: 'Smaller + faster + similar quality → distillation.', src: D + 'bedrock/latest/userguide/custom-models.html' },
+  { id: 'jumpstart', d: 2, clue: 'Fine-tune an open-weight LLM and host it on [[instance types you choose]], [[in your VPC]], controlling the container.', opts: [
+    ['SageMaker JumpStart', 'k', 'Pretrained models deployed on your own SageMaker infrastructure.'],
+    ['Amazon Bedrock on-demand', 'o', 'A managed API: you don’t choose instances or run the container.'],
+    ['Amazon Q Business', 'o', 'A ready-made assistant, not hosting.'],
+    ['Amazon Comprehend', 'o', 'Text analytics, not LLM hosting.']],
+    rule: 'Control over infrastructure → JumpStart. Just call an API → Bedrock.', src: D + 'sagemaker/latest/dg/algos.html' },
+  { id: 'speech-names', d: 2, clue: 'Transcribe misspells [[about 40 product names and acronyms]]. You have only the [[word list]].', opts: [
+    ['Transcribe custom vocabulary', 'k', 'Built for specific words such as brand names and acronyms.'],
+    ['Transcribe custom language model', 'o', 'Needs a large body of domain text.'],
+    ['Translate custom terminology', 'o', 'Used for translation, not speech to text.'],
+    ['Amazon Polly lexicon', 'o', 'Used for text to speech.']],
+    rule: 'Word list → custom vocabulary.', src: D + 'transcribe/latest/dg/improving-accuracy.html' },
+  { id: 'speech-context', d: 2, clue: 'Transcribe picks the [[wrong homophone]] (flow vs ice floe). You have [[lots of domain text]].', opts: [
+    ['Transcribe custom language model', 'k', 'Learns context from domain text.'],
+    ['Transcribe custom vocabulary', 'o', 'Boosts words but doesn’t learn context.'],
+    ['Translate custom terminology', 'o', 'Used for translation.'],
+    ['Comprehend custom entities', 'o', 'Works after transcription and doesn’t fix it.']],
+    rule: 'Context or homophones → custom language model.', src: D + 'transcribe/latest/dg/improving-accuracy.html' },
+  { id: 'translate-brand', d: 2, clue: 'Amazon Translate keeps [[translating brand names]] that must stay unchanged.', opts: [
+    ['Translate custom terminology', 'k', 'A glossary that keeps the terms you specify.'],
+    ['Transcribe custom vocabulary', 'o', 'Used for speech to text.'],
+    ['Train a Seq2Seq model', 'o', 'Far more work.'],
+    ['Delete brand names before translating', 'o', 'Loses content.']],
+    rule: 'Brand names in translation → custom terminology.', src: D + 'translate/latest/dg/how-custom-terminology.html' },
+  { id: 'overfit', d: 2, clue: 'XGBoost: training AUC [[0.99]], validation AUC [[0.78]].', opts: [
+    ['Lower max_depth and raise min_child_weight', 'k', 'Simpler trees reduce overfitting.'],
+    ['Set subsample and colsample_bytree to about 0.7', 'k', 'Each tree sees a different slice of the data, which reduces overfitting.'],
+    ['Raise max_depth to 12', 'o', 'More complex, so it overfits more.'],
+    ['Raise num_round and remove early stopping', 'o', 'Keeps fitting noise.']],
+    rule: 'Big gap between training and validation = overfitting → simplify, subsample, regularize.', src: D + 'sagemaker/latest/dg/xgboost_hyperparameters.html' },
+  { id: 'underfit', d: 2, clue: 'Training AUC [[0.71]], validation AUC [[0.70]]. Both are low and close together.', opts: [
+    ['Add capacity (deeper trees, more rounds with early stopping) or better features', 'k', 'The model is too simple (underfitting).'],
+    ['Add stronger regularization (raise alpha and lambda)', 'o', 'Makes underfitting worse.'],
+    ['Lower subsample to 0.3', 'o', 'Even more conservative.'],
+    ['Use less training data', 'o', 'Removes information.']],
+    rule: 'Both scores low = underfitting → more capacity.', src: D + 'sagemaker/latest/dg/xgboost_hyperparameters.html' }
 ];
 
 const KEY = 'ruleOut.mla.v1';
@@ -383,15 +446,15 @@ function renderDrill() {
     const [name, ans, why] = c.opts[i]; const p = picks[i];
     const cls = checked ? (p === ans ? 'right' : 'wrong') : '';
     return `<div class="opt ${cls}"><span class="name">${esc(name)}</span>
-      <span class="seg"><button data-i="${i}" data-v="k" class="k ${p === 'k' ? 'on' : ''}" ${checked ? 'disabled' : ''}>Keep</button><button data-i="${i}" data-v="o" class="o ${p === 'o' ? 'on' : ''}" ${checked ? 'disabled' : ''}>Rule out</button></span>
-      ${checked ? `<span class="why"><b class="${ans === 'k' ? 'k' : 'o'}">${ans === 'k' ? 'Keep' : 'Rule out'}:</b> ${esc(why)}</span>` : ''}</div>`;
+      <span class="seg"><button data-i="${i}" data-v="k" class="k ${p === 'k' ? 'on' : ''}" ${checked ? 'disabled' : ''}>Possible</button><button data-i="${i}" data-v="o" class="o ${p === 'o' ? 'on' : ''}" ${checked ? 'disabled' : ''}>Eliminate</button></span>
+      ${checked ? `<span class="why"><b class="${ans === 'k' ? 'k' : 'o'}">${ans === 'k' ? 'Possible' : 'Eliminate'}:</b> ${esc(why)}</span>` : ''}</div>`;
   }).join('');
   const all = c.opts.every((o, i) => picks[i]);
   view.innerHTML = `<div class="row" style="margin-top:0">${domSel}<span class="small muted">Card ${pos + 1} of ${round.length} · Domain ${c.d}</span></div>
     <div class="progress"><span style="width:${pos / round.length * 100}%"></span></div>
-    <div class="card"><div class="muted small">The question says…</div><div class="clue">${clueHtml(c.clue)}</div>${opts}
+    <div class="card"><div class="muted small">Scenario</div><div class="clue">${clueHtml(c.clue)}</div>${opts}
     ${checked ? `<div class="rule"><b>Rule</b>${esc(c.rule)} <a class="small" href="${c.src}" target="_blank" rel="noopener">AWS doc</a></div><div class="row"><button class="btn primary" id="go">Next →</button></div>`
-      : `<div class="row"><button class="btn primary" id="check" ${all ? '' : 'disabled'}>Check</button><span class="small muted">${all ? '' : 'Mark every option first.'}</span></div>`}</div>`;
+      : `<div class="muted small" style="margin-top:6px">Answer options: mark each one Possible or Eliminate.</div><div class="row"><button class="btn primary" id="check" ${all ? '' : 'disabled'}>Check</button><span class="small muted">${all ? '' : 'Mark every option first.'}</span></div>`}</div>`;
   view.querySelectorAll('.seg button').forEach(b => b.onclick = () => { picks[b.dataset.i] = b.dataset.v; renderDrill(); });
   const chk = document.getElementById('check');
   if (chk) chk.onclick = () => {
