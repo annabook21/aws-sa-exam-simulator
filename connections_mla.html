@@ -72,7 +72,7 @@ select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(
     <button role="tab" data-tab="coverage" aria-selected="false">✅ Coverage audit</button>
   </div>
   <div id="view"></div>
-  <p class="small muted" style="margin-top:24px">Practice: <a href="exam_simulator_mla.html">Exam simulator</a> · <a href="ruleout_mla.html">Rule-Out Drill</a>. Progress on this page is saved in this browser only.</p>
+  <p class="small muted" style="margin-top:24px">Practice: <a href="exam_simulator_mla.html">Exam simulator</a>. Progress on this page is saved in this browser only.</p>
 </div>
 <script>
 const CARDS = [
@@ -136,21 +136,20 @@ const CARDS = [
 
 const TASKS = { '1.1': 'Ingest and store data', '1.2': 'Transform data and feature engineering', '1.3': 'Data integrity and preparing data', '2.1': 'Choose a modeling approach', '2.2': 'Train and refine models', '2.3': 'Analyze model performance' };
 const sim = (focus, n) => `exam_simulator_mla.html?version=c01&focus=${focus}&mode=study&count=${n || 10}`;
-const ro = d => `ruleout_mla.html#d${d}`;
 const PLAN = [
-  { d: 'Sat Oct 31', task: '1.1', steps: ['Read the 1.1 Connections (10 min)', 'Recall: 1.1 deck until all cards are green', `<a href="${ro(1)}">Rule-Out Drill</a> — 1 round, Domain 1`, `<a href="${sim('t1.1')}">Simulator: Task 1.1 hard set, study mode, 10 questions</a>`] },
-  { d: 'Sun Nov 1', task: '1.2', steps: ['Read the 1.2 Connections', 'Recall: 1.2 deck', `<a href="${ro(1)}">Rule-Out Drill</a> — 1 round`, `<a href="${sim('t1.2')}">Simulator: Task 1.2, 10 questions</a>`] },
-  { d: 'Mon Nov 2', task: '1.3', steps: ['Read the 1.3 Connections', 'Recall: 1.3 deck', `<a href="${ro(1)}">Rule-Out Drill</a> — 1 round`, `<a href="${sim('t1.3')}">Simulator: Task 1.3, 10 questions</a>`] },
+  { d: 'Sat Oct 31', task: '1.1', steps: ['Read the 1.1 Connections (10 min)', 'Recall: 1.1 deck until all cards are green', `<a href="${sim('t1.1')}">Simulator: Task 1.1 hard set, study mode, 10 questions</a>`] },
+  { d: 'Sun Nov 1', task: '1.2', steps: ['Read the 1.2 Connections', 'Recall: 1.2 deck', `<a href="${sim('t1.2')}">Simulator: Task 1.2, 10 questions</a>`] },
+  { d: 'Mon Nov 2', task: '1.3', steps: ['Read the 1.3 Connections', 'Recall: 1.3 deck', `<a href="${sim('t1.3')}">Simulator: Task 1.3, 10 questions</a>`] },
   { d: 'Tue Nov 3', task: '1.x', steps: ['Recall: all Domain 1 cards (mixed)', `<a href="${sim('1', 25)}">Simulator: Domain 1, full C01 pool, 25 questions</a>`, 'Re-read the card behind every miss'] },
-  { d: 'Wed Nov 4', task: '2.1', steps: ['Read the 2.1 Connections', 'Recall: 2.1 deck', `<a href="${ro(2)}">Rule-Out Drill</a> — 1 round, Domain 2`, `<a href="${sim('t2.1')}">Simulator: Task 2.1, 10 questions</a>`] },
+  { d: 'Wed Nov 4', task: '2.1', steps: ['Read the 2.1 Connections', 'Recall: 2.1 deck', `<a href="${sim('t2.1')}">Simulator: Task 2.1, 10 questions</a>`] },
   { d: 'Thu Nov 5', task: '2.2', steps: ['Read the 2.2 Connections (first half: tuning, XGBoost, spot, regularization)', 'Recall: 2.2 deck', `<a href="${sim('t2.2')}">Simulator: Task 2.2, 10 questions</a>`] },
-  { d: 'Fri Nov 6', task: '2.2', steps: ['Read the 2.2 Connections (second half: distributed, paths, registry, Bedrock, ensembles)', `<a href="${ro(2)}">Rule-Out Drill</a> — 1 round`, `<a href="${sim('t2.2')}">Simulator: Task 2.2 again, 10 questions</a>`] },
+  { d: 'Fri Nov 6', task: '2.2', steps: ['Read the 2.2 Connections (second half: distributed, paths, registry, Bedrock, ensembles)', `<a href="${sim('t2.2')}">Simulator: Task 2.2 again, 10 questions</a>`] },
   { d: 'Sat Nov 7', task: '2.3', steps: ['Read the 2.3 Connections', 'Recall: 2.3 deck', `<a href="${sim('t2.3')}">Simulator: Task 2.3, 10 questions</a>`] },
   { d: 'Sun Nov 8', task: '2.x', steps: ['<a href="exam_simulator_mla.html">Simulator \u2192 \ud83d\udcdd Exam Day Simulation</a>: 65 questions, 130 minutes, real format. Mark Sure / Unsure / Guess on every answer, then review every \u201cSure but wrong\u201d question first', 'AWS Skill Builder: take the free Official Practice Question Set for MLA-C01 (written by AWS; check whether a Korean version is listed)'] },
-  { d: 'Mon Nov 9', task: '3-4', steps: ['Keep Domains 3 and 4 warm: <a href="ruleout_mla.html#d3">Rule-Out Drill, Domain 3</a> and <a href="ruleout_mla.html#d4">Domain 4</a>, 1 round each', `<a href="${sim('3', 10)}">Simulator: Domain 3, 10 questions</a> and <a href="${sim('4', 10)}">Domain 4, 10 questions</a>`] },
+  { d: 'Mon Nov 9', task: '3-4', steps: [`<a href="${sim('3', 10)}">Simulator: Domain 3, 10 questions</a> and <a href="${sim('4', 10)}">Domain 4, 10 questions</a>`] },
   { d: 'Tue Nov 10', task: 'mock', steps: ['<a href="exam_simulator_mla.html">Simulator → 🏁 Final Mock</a>: 40 held-out questions, 90 minutes, ONE attempt. This is your real readiness signal.', 'Read every explanation you missed and the matching Connections card'] },
-  { d: 'Wed Nov 11', task: 'weak', steps: ['Drill the weakest domain from the Final Mock: Rule-Out Drill “My misses” + simulator hard set for that task', 'Recall: only the “not yet” cards'] },
-  { d: 'Thu Nov 12', task: 'light', steps: ['Light day: one pass of the Rule-Out “All rules” table and the Recall deck', 'Stop by the evening and sleep early'] },
+  { d: 'Wed Nov 11', task: 'weak', steps: ['Drill the weakest domain from the Final Mock: simulator study mode for that domain', 'Recall: only the “not yet” cards'] },
+  { d: 'Thu Nov 12', task: 'light', steps: ['Light day: one pass of the Recall deck', 'Stop by the evening and sleep early'] },
   { d: 'Fri Nov 13', task: 'exam', steps: ['Earliest retake date (14 days after Oct 30). Book it now; if your date is different, shift the plan.'] }
 ];
 
