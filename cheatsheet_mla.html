@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C01 Cheat Sheet Quiz</title>
+<style>
+:root { --bg:#f6f6fb; --card:#fff; --ink:#1c1c28; --muted:#646782; --line:#e2e3ee; --accent:#5b4bdb; --good:#0f8a5f; --goodbg:#e2f6ed; --bad:#c0262d; --badbg:#fde6e7; color-scheme:light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#13131b; --card:#1e1e2b; --ink:#ececf5; --muted:#a2a5bd; --line:#34354b; --accent:#9e93ff; --good:#4fd6a0; --goodbg:#163428; --bad:#ff7a80; --badbg:#3d1b1e; color-scheme:dark; } }
+:root[data-theme="dark"] { --bg:#13131b; --card:#1e1e2b; --ink:#ececf5; --muted:#a2a5bd; --line:#34354b; --accent:#9e93ff; --good:#4fd6a0; --goodbg:#163428; --bad:#ff7a80; --badbg:#3d1b1e; color-scheme:dark; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:640px; margin:0 auto; padding:18px 16px 60px; }
+.top { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+h1 { font-size:1.25rem; margin:0; }
+select, .btn { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:10px; padding:8px 12px; }
+.bar { height:8px; background:var(--line); border-radius:99px; margin:14px 0; overflow:hidden; }
+.bar span { display:block; height:100%; background:var(--accent); transition:width .2s; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; }
+.label { color:var(--muted); font-size:.85rem; margin-bottom:4px; }
+.clue { font-size:1.3rem; font-weight:700; margin:0 0 16px; }
+.opt { display:block; width:100%; text-align:left; font:inherit; font-size:1.05rem; padding:14px 16px; margin:10px 0; border-radius:12px; border:2px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+.opt:hover:not(:disabled) { border-color:var(--accent); }
+.opt.right { border-color:var(--good); background:var(--goodbg); }
+.opt.wrong { border-color:var(--bad); background:var(--badbg); }
+.opt:disabled { cursor:default; }
+.why { margin-top:12px; padding:12px 14px; border-radius:12px; background:var(--goodbg); }
+.why.miss { background:var(--badbg); }
+.why b { display:block; margin-bottom:2px; }
+.next { margin-top:14px; width:100%; padding:14px; font-size:1.05rem; background:var(--accent); color:#fff; border:none; border-radius:12px; cursor:pointer; }
+.score { color:var(--muted); font-size:.9rem; }
+.big { font-size:2.4rem; font-weight:800; margin:6px 0; }
+.small { font-size:.85rem; color:var(--muted); }
+a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>C01 Cheat Sheet Quiz</h1>
+    <select id="dom" aria-label="Domain">
+      <option value="all">All domains</option><option value="1">Domain 1 · Data</option><option value="2">Domain 2 · Models</option><option value="34">Domains 3–4 · Deploy &amp; monitor</option>
+    </select>
+  </div>
+  <div class="bar"><span id="bar"></span></div>
+  <div id="app"></div>
+  <p class="small" style="margin-top:20px">Two choices per card: the right answer and its most common trap. Tap one (or press 1 / 2). Misses come back before the round ends. Facts are from AWS documentation, checked 2026-10-30; written by Claude, not AWS. <a href="exam_simulator_mla.html">Exam simulator</a></p>
+</div>
+<script>
+// [domain, clue, answer, [wrong, wrong, wrong], why]
+const Q = [
+ [1,'Stream data to S3 as Parquet, no code to run','Amazon Data Firehose with record format conversion',['Kinesis Data Streams + custom EC2 consumer','Amazon SQS','AWS Glue crawler'],'Firehose converts JSON to Parquet/ORC on delivery. If the input is CSV, add a Lambda transform to JSON first.'],
+ [1,'Firehose receives CSV but must write Parquet','Lambda transform CSV → JSON, then Firehose format conversion',['Firehose format conversion directly on CSV','Athena converts it on arrival','Kinesis enhanced fan-out'],'Firehose’s converter reads JSON only.'],
+ [1,'Reprocess the last few days of streaming data','Kinesis Data Streams with longer retention',['Amazon Data Firehose replay','Add more shards','Amazon SQS'],'KDS keeps data 24 hours by default (up to 365 days), so consumers can reread it. Firehose has no replay.'],
+ [1,'Existing Kafka apps, move to AWS with no code changes','Amazon MSK',['Kinesis Data Streams','Amazon Data Firehose','Amazon SQS'],'MSK runs open-source Kafka, so existing clients work unchanged.'],
+ [1,'Kinesis throttling, yet total traffic is far below capacity; one shard is hot','Use a high-cardinality partition key',['Add more shards','Turn on enhanced fan-out','Increase retention'],'The partition key picks the shard. A low-variety key sends most traffic to one shard, whatever the shard count.'],
+ [1,'Many training workers get S3 503 Slow Down','Spread objects across more S3 prefixes',['Turn on S3 Transfer Acceleration','Add more training instances','Switch to Pipe mode'],'S3 request limits are per prefix (5,500 GET/s each). Transfer Acceleration is for long distances.'],
+ [1,'Training waits ages downloading data; script uses normal file paths','FastFile input mode',['Pipe mode','File mode with a bigger EBS volume','S3 Transfer Acceleration'],'FastFile streams from S3 on demand behind normal file paths, so no code change. Pipe needs code changes.'],
+ [1,'Dozens of jobs reread a huge dataset with random reads; need very high throughput','FSx for Lustre linked to S3',['FastFile mode','Amazon EFS','S3 Transfer Acceleration'],'FSx for Lustre: hundreds of GB/s and millions of IOPS. It needs the job in a VPC.'],
+ [1,'Training data is slow to start, and the team CAN’T use a VPC','FastFile mode',['FSx for Lustre','Amazon EFS','Bigger EBS volume with File mode'],'FSx and EFS both require a VPC. FastFile doesn’t.'],
+ [1,'Queries read 3 of 200 columns; scans are too expensive','Convert to Parquet (columnar)',['Gzip the CSV files','Convert to JSON Lines','Convert to Avro'],'Columnar formats read only the columns needed. Avro and JSON are row-based.'],
+ [1,'Need each customer’s LATEST features in milliseconds at inference','Feature Store online store',['Feature Store offline store','Query S3 with Athena per request','Amazon Redshift'],'The online store keeps the latest record per ID for millisecond GetRecord.'],
+ [1,'Training data must use feature values AS OF each label’s time','Feature Store offline store (point-in-time by event time)',['Feature Store online store','Recompute features today','GetRecord for every label'],'The offline store keeps all history. The online store keeps only the latest, which would leak the future.'],
+ [1,'Copy a live DynamoDB table to S3 without using read capacity','DynamoDB export to S3 (PITR on)',['Glue job that Scans the table','DynamoDB Streams + Lambda','EC2 script with Query calls'],'Exports use no read capacity and don’t affect the table. Point-in-time recovery must be on.'],
+ [1,'Duplicate customers with no shared ID and slightly different spellings','Lake Formation FindMatches',['SELECT DISTINCT in Athena','Data Wrangler drop duplicates','Amazon Macie'],'FindMatches learns fuzzy matches from examples you label. DISTINCT only removes exact duplicates.'],
+ [1,'Find WHICH S3 buckets contain PII across 40 accounts','Amazon Macie',['Glue Detect PII transform','Amazon GuardDuty','Comprehend DetectPiiEntities'],'Macie discovers and reports sensitive data in S3. Glue Detect PII masks data inside a job.'],
+ [1,'Mask SSNs so the same SSN always gets the same token','Glue Detect PII: cryptographic hash (SHA-256)',['Glue Detect PII: redact with ******','Partial redact','Amazon Macie'],'A hash keeps records linkable. Redacting makes every value identical.'],
+ [1,'Stop bad rows BEFORE they load and see which rows failed','Glue Data Quality inside the ETL job',['Glue Data Quality on the Catalog table after load','Amazon Macie','CloudWatch alarm on job duration'],'Data quality in the ETL job is proactive and can identify the failing records. Catalog-level checks can’t.'],
+ [1,'Want AWS to SUGGEST starter quality rules for a cataloged table','Glue Data Quality on the Data Catalog: Recommend rules',['Glue Data Quality inside an ETL job','SageMaker Model Monitor','Amazon Macie'],'Rule recommendations are supported for Data Catalog tables, not for ETL jobs.'],
+ [1,'Category column: 30,000 values with typos','Similarity encoding',['One-hot encoding','Ordinal encoding','Drop the column'],'Similarity encoding gives low-dimension embeddings in which typos land near the right value.'],
+ [1,'Ordered categories like S < M < L < XL','Ordinal encoding',['One-hot encoding','Similarity encoding','Log transform'],'Ordinal encoding keeps the order. One-hot throws it away.'],
+ [1,'Outliers are real and must stay; scale for k-NN','Robust Scaler',['Min Max Scaler','Standard Scaler','Remove the top 1%'],'The Robust Scaler uses the median and quartiles, so extremes don’t distort it.'],
+ [1,'Sensor readings outside known physical limits must be removed','Min-Max outlier thresholds (Remove)',['Quantile outliers (top/bottom 1%)','Standard deviation outliers','Robust Scaler'],'AWS: use Min-Max when you know the threshold values.'],
+ [1,'Skewed income column with missing values','Impute the median',['Impute the mean','Fill with 0','Drop the column'],'Outliers drag the mean. The median stays typical.'],
+ [1,'Right-skewed spend values (few huge), keep order and all rows','Log transform',['Min-max scaling','One-hot encoding','Delete rows above the 99th percentile'],'A log pulls in the long tail. Min-max doesn’t change the shape.'],
+ [1,'Rolling 5-minute averages per device, state, late events','Managed Service for Apache Flink',['Lambda on the stream','Firehose Lambda transform','Hourly Glue job'],'Flink handles windows, state and late events. Lambda keeps no state between calls.'],
+ [1,'Tabular fraud 1%: create NEW synthetic fraud rows','SMOTE',['Random oversampling','Random undersampling','Stratified split'],'SMOTE interpolates new points. Oversampling only duplicates rows.'],
+ [1,'Only 200 defect images vs 20,000 good ones','Augment the defect images (flips, crops)',['Delete most good images','SMOTE on pixels','Drop the defect class'],'Augmentation creates realistic new minority examples without throwing data away.'],
+ [1,'Ground Truth automated labeling for 800 images','Not allowed (minimum 1,250 objects)',['Allowed, with the threshold set to 50%','Allowed only with a custom template','Allowed only for streaming jobs'],'The minimum is 1,250 objects (AWS suggests 5,000). Custom templates and streaming jobs aren’t supported.'],
+ [1,'Confidential X-rays: only your own staff may label them','Private workforce',['Vendor workforce','Public crowd workforce','Automated labeling only'],'A private workforce keeps the data with approved staff.'],
+ [1,'Encrypt traffic BETWEEN distributed training nodes','EnableInterContainerTrafficEncryption',['EnableNetworkIsolation','VolumeKmsKeyId','S3 gateway endpoint'],'This encrypts node-to-node traffic. Network isolation blocks calls; it doesn’t encrypt.'],
+ [1,'Training container must make NO network calls at all','Network isolation',['Inter-container encryption','Bucket policy denying public access','Security group allowing all outbound'],'With isolation, the container can’t call anything. SageMaker still moves data to and from S3 for the job.'],
+ [1,'Data must never be processed outside one Region, in every account','SCP with aws:RequestedRegion',['IAM policy on each role','S3 bucket policy on IP addresses','Amazon Macie'],'An SCP applies to every member account and can’t be overridden by admins.'],
+ [1,'Control the key policy for S3 training data encryption','SSE-KMS with a customer managed key',['SSE-S3 (default)','SSE-C','No encryption'],'SSE-S3 keys are managed by AWS. A customer managed KMS key lets you control the policy.'],
+ [1,'Bias metric: compares group SIZES','Class imbalance (CI)',['DPL','Disparate impact (DI)','RMSE'],'CI = (na−nd)/(na+nd). It counts heads.'],
+ [1,'Bias metric: compares positive LABEL rates in training data','DPL',['Class imbalance (CI)','Disparate impact (DI)','Accuracy'],'DPL = qa − qd, measured before training.'],
+ [1,'Rarely-read data that can’t be re-created; read quarterly; needs ms access','S3 Glacier Instant Retrieval',['S3 One Zone-IA','S3 Glacier Deep Archive','S3 Standard'],'AWS says Instant Retrieval is for data read about once a quarter with millisecond access.'],
+ [1,'Unpredictable access pattern, no retrieval fees','S3 Intelligent-Tiering',['S3 Standard-IA','S3 Glacier Flexible Retrieval','S3 Express One Zone'],'Intelligent-Tiering moves objects automatically and charges no retrieval fees.'],
+ [1,'Keep for 7 years, almost never read, hours to retrieve is fine','S3 Glacier Deep Archive',['S3 Standard-IA','S3 Glacier Instant Retrieval','S3 One Zone-IA'],'Deep Archive is the cheapest, for data read less than once a year.'],
+ [2,'Forecast 4,000 related products with P10/P90','DeepAR',['ARIMA per product','Random Cut Forest','Linear Learner'],'DeepAR trains one model across many related series and gives quantiles.'],
+ [2,'Forecast ONE store’s sales, no related series','ARIMA / ETS may be more accurate',['DeepAR always wins','k-means','Object2Vec'],'AWS says DeepAR wins with hundreds of related series. With one series, classical methods may win.'],
+ [2,'Click prediction on extremely sparse one-hot features','Factorization Machines',['k-means','FM in multiclass mode','XGBoost multiclass'],'FM is built for sparse data and supports binary classification or regression only.'],
+ [2,'Login from an IP that’s unusual FOR THAT USER','IP Insights',['Random Cut Forest','XGBoost','Amazon GuardDuty'],'IP Insights learns the usual entity ↔ IP pairs without labels.'],
+ [2,'Spot anomalies in numeric sensor readings','Random Cut Forest',['IP Insights','DeepAR','BlazingText'],'Random Cut Forest detects anomalous numeric data points.'],
+ [2,'Topics in unlabeled documents','LDA or NTM',['BlazingText supervised','Seq2Seq','Linear Learner'],'Both are unsupervised topic models.'],
+ [2,'Count cars in each image','Object detection',['Image classification','Semantic segmentation','Random Cut Forest'],'Object detection gives one box per car.'],
+ [2,'Measure exact weed area in photos','Semantic segmentation',['Object detection','Image classification','Rekognition DetectLabels'],'Semantic segmentation labels every pixel. Boxes overstate irregular shapes.'],
+ [2,'Your own 12 part types, ~300 images, no ML skills','Rekognition Custom Labels',['Rekognition DetectLabels','Train image classification from scratch','Bedrock prompt'],'Custom Labels needs only a few hundred images. DetectLabels only knows common objects.'],
+ [2,'Brand names keep getting translated','Translate custom terminology',['Transcribe custom vocabulary','Train Seq2Seq','Comprehend'],'Custom terminology is a glossary for translation.'],
+ [2,'Transcripts misspell 40 product names; you only have the word list','Transcribe custom vocabulary',['Custom language model','Translate custom terminology','Polly lexicon'],'A custom vocabulary is a word list. A custom language model needs lots of text.'],
+ [2,'Transcribe picks the wrong homophone; lots of domain text available','Transcribe custom language model',['Custom vocabulary','Translate custom terminology','Comprehend'],'A custom language model learns context from domain text.'],
+ [2,'Explain why ONE applicant was declined by an existing model','Clarify SHAP (local)',['Model Monitor','Debugger','Overall AUC'],'SHAP gives per-prediction attributions without retraining.'],
+ [2,'Foundation model via API, no infrastructure to manage','Amazon Bedrock',['SageMaker JumpStart on your instances','EC2 with GPUs','Amazon EKS'],'Bedrock is a fully managed API.'],
+ [2,'Host a fine-tuned open LLM on YOUR instances, VPC and container','SageMaker JumpStart',['Bedrock on-demand','Amazon Q Business','Amazon Comprehend'],'JumpStart deploys to SageMaker infrastructure that you control.'],
+ [2,'5,000 labeled prompt → response pairs showing the desired style','Bedrock supervised fine-tuning',['RAG knowledge base','Distillation','Reinforcement fine-tuning'],'Labeled pairs are exactly what supervised fine-tuning needs.'],
+ [2,'Big model is great but too slow and costly; want a smaller one','Distillation',['Provisioned Throughput','RAG knowledge base','Supervised fine-tuning of the big model'],'Distillation trains a small student from a big teacher.'],
+ [2,'Model must use up-to-date company facts at query time','RAG knowledge base',['Fine-tuning','Distillation','Larger model'],'RAG retrieves facts when the question is asked.'],
+ [2,'Use a Bedrock model you fine-tuned','Provisioned Throughput or a custom model deployment',['Call the base model ID','Knowledge base','Lambda layer'],'Calling the base model ID uses the original, untuned model.'],
+ [2,'Tuning: metric reported only at the end, 50 jobs in parallel','Random search',['Hyperband','Bayesian optimization','Grid search'],'Random search jobs are independent. Hyperband needs per-epoch metrics.'],
+ [2,'Try every combination of categorical hyperparameters once','Grid search',['Random search','Bayesian optimization','Hyperband'],'Grid search is for categorical parameters only. The job count = number of combinations.'],
+ [2,'Using Hyperband: how to set TrainingJobEarlyStoppingType?','OFF',['AUTO','AUTO, with 1 parallel job','Not allowed with Hyperband'],'Hyperband does its own early stopping.'],
+ [2,'Tune learning rate over 0.0001–1.0','Logarithmic scaling',['Linear scaling','ReverseLogarithmic','Categorical values 0.1 and 1'],'A log scale spreads trials across orders of magnitude.'],
+ [2,'Reuse tuning results with NEW data or a NEW container version','Warm start TRANSFER_LEARNING',['IDENTICAL_DATA_AND_ALGORITHM','Not possible','Grid warm start'],'Identical-data warm start requires the same data and image.'],
+ [2,'Warm start, but with a DIFFERENT objective metric','Not allowed: run a new tuning job',['TRANSFER_LEARNING','IDENTICAL_DATA_AND_ALGORITHM','Use 10 parent jobs'],'The objective must match the parent jobs (maximum 5 parents).'],
+ [2,'Custom PyTorch tuning job: early stopping never triggers','The script must log the metric every epoch',['Use Grid search','Set parallel jobs to 1','Use spot training'],'AMT early stopping compares per-epoch metrics.'],
+ [2,'Model too big for one GPU’s memory','Model parallelism',['Data parallelism','Bigger batch size','Pipe mode'],'Data parallel needs a full copy of the model on every GPU.'],
+ [2,'Model fits on one GPU; 20 TB of data takes 10 days','Data parallelism',['Model parallelism','More epochs','Smaller instance'],'Data parallel splits the data across GPUs, each holding a model copy.'],
+ [2,'Cheapest training; interruptions are fine','Managed spot training + checkpoints',['Spot with automatic On-Demand fallback','Spot without checkpoints','Larger instance'],'Up to 90% off. There’s no On-Demand fallback, and without checkpoints training restarts from zero.'],
+ [2,'Training finished but no model.tar.gz in S3','Save the model to /opt/ml/model',['Save to /tmp','Save to /opt/ml/checkpoints','Bigger volume'],'Only /opt/ml/model is packaged as model.tar.gz.'],
+ [2,'Only human-approved model versions may deploy automatically','Model Registry: PendingManualApproval → Approved',['S3 tags','Git tags','Pick the best metric automatically'],'Approval triggers CI/CD. Rejecting a version redeploys the last approved one.'],
+ [2,'Training AUC 0.99, validation AUC 0.78','Overfitting: ↓max_depth, ↑min_child_weight, subsample < 1',['↑max_depth','More rounds, no early stopping','↑eta to 0.9'],'A big gap between training and validation means the model is too complex.'],
+ [2,'Training 0.71, validation 0.70; both low','Underfitting: add capacity or features',['Add regularization','Lower subsample to 0.3','Remove training data'],'Both scores low means the model is too simple.'],
+ [2,'XGBoost with 1 fraud per 99 legitimate; recall is poor','scale_pos_weight ≈ 99',['eval_metric = accuracy','↑max_depth','↑eta'],'Use scale_pos_weight = negatives ÷ positives.'],
+ [2,'Fine-tuned LLM forgot general skills','Catastrophic forgetting: LoRA, lower LR, mix in old data',['Underfitting: more epochs','Data leakage','Raise the learning rate'],'Fine-tuning overwrote earlier knowledge.'],
+ [2,'Want only the useful features; drive useless weights to exactly 0','L1 regularization',['L2 regularization','Dropout','Bigger batch'],'L1 zeros out weights. L2 shrinks them.'],
+ [2,'Single deep tree has high variance','Bagging (random forest)',['Boosting with a high learning rate','One tree on all data','Stacking one model'],'Bagging averages out variance. Boosting mainly reduces bias.'],
+ [2,'Combine several different models with a meta-model, least effort','AutoGluon-Tabular',['Linear Learner','k-NN','TabTransformer'],'AutoGluon stacks models automatically.'],
+ [2,'Missing a positive is very costly; false alarms are cheap','Recall',['Precision','Accuracy','Specificity'],'Recall = share of real positives caught.'],
+ [2,'False positives are the costly mistake','Precision',['Recall','Accuracy','RMSE'],'Precision = of what you flagged, how much was right.'],
+ [2,'Compare classifiers before any threshold is chosen','AUC',['Accuracy at 0.5','Precision at 0.5','MAE'],'AUC covers all thresholds. 0.5 = random.'],
+ [2,'Fewer false positives now, no retraining','Raise the decision threshold',['Lower the threshold','Retrain longer','Switch to RMSE'],'A higher threshold means fewer false positives and lower recall.'],
+ [2,'Regression: typical $ error, don’t let a few mansions dominate','MAE',['RMSE','AUC','Accuracy'],'RMSE squares errors, so big misses dominate.'],
+ [2,'Training loss becomes NaN; stop wasting GPU time','Debugger ExplodingTensor + StopTraining',['VanishingGradient rule','Overfit rule','Model Monitor'],'ExplodingTensor detects NaN or infinite values.'],
+ [2,'Validation loss starts rising while training loss keeps falling','Overfitting: early stopping or regularization',['Underfitting: add layers','Raise the learning rate','Vanishing gradients'],'Debugger’s Overtraining/Overfit rules catch this.'],
+ [2,'Post-training: compare how often the MODEL approves each group','Disparate impact (DI)',['DPL','Class imbalance (CI)','F1 score'],'DI = q′d / q′a. 1 = parity; below 1 favors group a.'],
+ [2,'Track parameters, data and metrics to reproduce runs','SageMaker managed MLflow',['CloudWatch Logs only','S3 folder names','CloudTrail'],'Experiment tracking records the full recipe of each run.'],
+ [34,'Shadow test / shadow variant','Real-time endpoint (single model)',['Serverless endpoint','Asynchronous endpoint','Multi-model endpoint'],'Shadow tests don’t support serverless, async, multi-model, multi-container or Inf1 endpoints.'],
+ [34,'Model REQUIRES a GPU; traffic is sporadic','Real-time endpoint on a GPU instance',['Serverless inference','Serverless with provisioned concurrency','Multi-model on serverless'],'Serverless doesn’t support GPUs. The sporadic traffic is the trap.'],
+ [34,'Need Model Monitor with data capture','Real-time endpoint hosting one model',['Serverless endpoint','Multi-model endpoint','Lambda function'],'Serverless doesn’t support data capture or Model Monitor, and Model Monitor doesn’t support multi-model endpoints.'],
+ [34,'Payloads up to 1 GB, processing up to 1 hour, scale to zero','Asynchronous inference',['Real-time inference','Serverless inference','Nightly batch transform'],'Async is for large payloads and long processing with near-real-time needs.'],
+ [34,'Score the whole dataset nightly, no endpoint','Batch transform',['Real-time endpoint in a loop','Async per record','Serverless per record'],'Batch transform runs on large datasets without a persistent endpoint.'],
+ [34,'2,000 per-customer models, same framework, cold starts OK','Multi-model endpoint',['One endpoint per model','One serverless endpoint per model','Shadow test'],'One shared container loads models on demand.'],
+ [34,'CPU model, idle most of the day, cold starts OK, minimize cost','Serverless inference',['Real-time 24/7','Multi-model endpoint','Provisioned concurrency all day'],'Serverless scales to zero, so you pay per use.'],
+ [34,'Serverless endpoint, predictable burst at 9 AM breaks latency','Provisioned concurrency (scheduled)',['Switch to real-time 24/7','Raise memory to 6 GB','Switch to async'],'Provisioned concurrency keeps the endpoint warm for predictable bursts.'],
+ [34,'Small slice of REAL users first, auto-rollback on errors','Blue/green canary + CloudWatch alarms',['Shadow test','All-at-once','Rolling with no alarms'],'Users never see shadow responses, so a shadow test isn’t a rollout.'],
+ [34,'Swap versions on 10 accelerated instances with only 1 spare','Rolling deployment, batch size 1',['Blue/green','Shadow test','Delete and recreate'],'Blue/green needs a whole second fleet.'],
+ [34,'Send only specific test requests to Variant2','InvokeEndpoint with TargetVariant',['UpdateEndpointWeightsAndCapacities','New endpoint','Shadow variant'],'TargetVariant overrides the traffic split for that one request.'],
+ [34,'Shift 75% of traffic to Variant2 now, no new endpoint config','UpdateEndpointWeightsAndCapacities',['UpdateEndpoint with a new config','TargetVariant on every request','CreateEndpoint'],'Changes the variant weights in place.'],
+ [34,'Choose the cheapest instance that meets latency, based on load tests','SageMaker Inference Recommender',['Compute Optimizer','Model Monitor','Clarify'],'Inference Recommender runs load tests across instance types.'],
+ [34,'Scale out faster on concurrent LLM requests','High-resolution ConcurrentRequestsPerModel metric',['InvocationsPerInstance (1-minute)','Longer ScaleInCooldown','5-minute CPU step scaling'],'High-resolution metrics are emitted every 10 seconds.'],
+ [34,'Register the model only if accuracy ≥ 0.90, else stop with an error','Condition step + Fail step',['Callback step','QualityCheck step only','Lambda cleanup afterward'],'The Condition step branches on the metric. The Fail step stops the run with a message.'],
+ [34,'Pipeline must wait for an on-premises or Glue job to finish','Callback step',['Condition step','Transform step','Fail step'],'A Callback step sends a token to SQS and waits for the external process to call back.'],
+ [34,'Retrain automatically when new data lands in S3','EventBridge rule → SageMaker pipeline',['Nightly cron','Manual trigger','CloudTrail'],'EventBridge can start a pipeline when the S3 upload event happens.'],
+ [34,'Alert when the deployed model’s ACCURACY drops','Model quality monitor + ground-truth labels',['Data quality monitor','Feature attribution drift','Invocations alarm'],'Accuracy needs true labels, which Model Monitor merges with the captured predictions.'],
+ [34,'Detect input drift; labels arrive months later','Data quality monitor with a training baseline',['Model quality monitor','CloudTrail','Invocations alarm'],'Data quality monitoring compares inputs to the baseline and needs no labels.'],
+ [34,'Latency rose but ModelLatency is flat','Check OverheadLatency',['Optimize the model code','Check 5XX errors','Compile with Neo'],'OverheadLatency is time SageMaker adds outside the model, such as from payload size.'],
+ [34,'Measure cold-start time on a serverless endpoint','ModelSetupTime',['Invocations','DiskUtilization','Invocation4XXErrors'],'ModelSetupTime is the time to launch new compute.'],
+ [34,'Private subnet, no internet, must call InvokeEndpoint','Interface VPC endpoint for SageMaker Runtime (PrivateLink)',['NAT gateway','S3 gateway endpoint','VPC peering'],'PrivateLink keeps the traffic on the AWS network.'],
+ [34,'Data capture has gaps on a busy endpoint','Disk usage too high: keep it below 75%',['Switch to serverless','Recreate the baseline','Turn on CloudTrail'],'Data capture stops capturing when disk usage is high.'],
+ [34,'Find which hop of API Gateway → Lambda → endpoint is slow','AWS X-Ray',['CloudTrail','Model Monitor','CodeGuru Profiler'],'X-Ray’s trace map shows latency at each hop.'],
+ [34,'Who deleted the endpoint?','AWS CloudTrail',['CloudWatch metrics','X-Ray','Model Monitor'],'CloudTrail records API calls.'],
+ [34,'Steady 24/7 SageMaker usage: commit for a discount','SageMaker Savings Plan',['Compute Savings Plan','EC2 Instance Savings Plan','Spot only'],'Compute Savings Plans cover EC2, Lambda and Fargate, not SageMaker.'],
+ [34,'Auto-apply a deny IAM policy at 90% of forecast budget','AWS Budgets action',['Cost Anomaly Detection','Cost Explorer report','CloudWatch CPU alarm'],'Budgets actions can apply IAM policies or SCPs automatically.']
+];
+const KEY = 'cheatQuiz.mla.v1';
+let st; try { st = JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { st = {}; }
+st.miss = st.miss || {}; st.seen = st.seen || {};
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const app = document.getElementById('app'), bar = document.getElementById('bar'), dom = document.getElementById('dom');
+let queue = [], done = 0, right = 0, total = 10, cur = null, opts = [];
+function pool() { return Q.map((q, i) => i).filter(i => dom.value === 'all' || String(Q[i][0]) === dom.value); }
+function newRound() {
+  const p = pool();
+  const missed = shuffle(p.filter(i => st.miss[i] > 0)), fresh = shuffle(p.filter(i => !st.seen[i] && !(st.miss[i] > 0))), rest = shuffle(p.filter(i => st.seen[i] && !(st.miss[i] > 0)));
+  queue = missed.slice(0, 4).concat(fresh, rest).slice(0, 10); total = queue.length; done = 0; right = 0; next();
+}
+function next() {
+  bar.style.width = (done / total * 100) + '%';
+  if (!queue.length) return finish();
+  cur = queue.shift(); const q = Q[cur];
+  opts = shuffle([q[2], q[3][0]]); // the right answer vs. its most tempting trap
+  app.innerHTML = `<div class="card"><div class="label">When the question says…</div><p class="clue">${esc(q[1])}</p>
+    ${opts.map((o, i) => `<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}<div id="fb"></div></div>
+    <p class="score">${done} / ${total} done · ${right} right first try</p>`;
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.i));
+}
+function answer(i) {
+  const q = Q[cur], ok = opts[i] === q[2];
+  app.querySelectorAll('.opt').forEach((b, j) => { b.disabled = true; if (opts[j] === q[2]) b.classList.add('right'); else if (j === i) b.classList.add('wrong'); });
+  st.seen[cur] = 1;
+  if (ok) { right++; done++; st.miss[cur] = Math.max(0, (st.miss[cur] || 0) - 1); }
+  else { st.miss[cur] = (st.miss[cur] || 0) + 1; queue.splice(Math.min(3, queue.length), 0, cur); total++; done++; }
+  save();
+  document.getElementById('fb').innerHTML = `<div class="why ${ok ? '' : 'miss'}"><b>${ok ? '✓ Right' : '✗ Answer: ' + esc(q[2])}</b>${esc(q[4])}</div><button class="next" id="nx">Next →</button>`;
+  document.getElementById('nx').onclick = next; document.getElementById('nx').focus();
+}
+function finish() {
+  bar.style.width = '100%';
+  const open = pool().filter(i => st.miss[i] > 0).length;
+  app.innerHTML = `<div class="card" style="text-align:center"><div class="label">Round done</div><div class="big">${total - right === 0 ? 'Perfect' : (total - right) + ' miss' + (total - right > 1 ? 'es' : '')}</div>
+    <p>${right === total ? 'Clean round.' : 'Missed cards came back until you got them right.'} ${open ? open + ' card' + (open > 1 ? 's' : '') + ' still marked as missed will appear first next round.' : ''}</p>
+    <button class="next" id="again">Next 10 →</button></div>`;
+  document.getElementById('again').onclick = newRound;
+}
+dom.onchange = newRound;
+document.addEventListener('keydown', e => { const n = parseInt(e.key, 10); const b = app.querySelectorAll('.opt'); if (n >= 1 && n <= 2 && b[n - 1] && !b[n - 1].disabled) b[n - 1].click(); else if (e.key === 'Enter' && document.getElementById('nx')) document.getElementById('nx').click(); });
+newRound();
+</script>
+</body>
+</html>
