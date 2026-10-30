@@ -993,6 +993,14 @@
         }
 
         /* Study Mode Feedback */
+        .case-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 0.95em; line-height: 1.5; }
+        .case-box strong { display: block; color: #5b21b6; margin-bottom: 4px; }
+        .confidence-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 14px; font-size: 0.9em; }
+        .confidence-row button { border: 1px solid #c4b5fd; background: #fff; color: #4c1d95; padding: 6px 12px; border-radius: 8px; cursor: pointer; font: inherit; }
+        .confidence-row button.on { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+        body.dark-mode .case-box { background: #2a2540; border-color: #4c3f7a; color: #e9e5ff; }
+        body.dark-mode .confidence-row button { background: #1f1d2b; color: #ddd6fe; border-color: #4c3f7a; }
+        body.dark-mode .confidence-row button.on { background: #7c3aed; color: #fff; }
         .question-origin {
             margin-top: 10px;
             font-size: 0.85em;
@@ -1269,10 +1277,10 @@
 
             <button class="btn" onclick="startExam()">Begin Exam</button>
             <div style="margin-top:16px;padding:14px;border:2px solid #7c3aed;border-radius:10px;">
-                <button class="btn" style="background:#7c3aed;" onclick="startExam(true)">🎯 C01 Readiness Check</button>
+                <button class="btn" style="background:#7c3aed;" onclick="startExam(true)">📝 Exam Day Simulation (65 questions)</button>
                 <button class="btn" style="background:#b91c1c;margin-left:8px;" onclick="startExam('mock')">🏁 Final Mock (take once)</button>
                 <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Final Mock:</strong> 40 held-out questions that never appear in practice (11 / 11 / 9 / 9), 90 minutes. Take it once, around Nov 9–10. Only the first attempt is a clean measure.</p>
-                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Readiness Check:</strong> 30 MLA-C01 questions in the official domain mix (8 / 8 / 7 / 7), exam mode, 60 minutes. Ignores the settings above. At the end you get a readiness rating and your weakest domain.</p>
+                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Exam Day Simulation:</strong> the real C01 format. 65 questions, 130 minutes, domains weighted 18 / 17 / 14 / 16 like the guide (28 / 26 / 22 / 24%), with multiple choice, multiple response, ordering, matching and a case study. Questions you haven't seen come first. Mark how sure you are on each answer; the results show your score on unseen questions only and how often your "Sure" answers were actually right. No pass/fail verdict, just the numbers.</p>
             </div>
         </div>
 
@@ -1312,10 +1320,17 @@
                         </label>
                     </div>
 
+                    <div class="case-box" id="caseBox" hidden></div>
                     <div class="question-text" id="questionText"></div>
                     <div class="question-origin" id="questionOrigin" hidden></div>
 
                     <div class="options" id="optionsContainer"></div>
+                    <div class="confidence-row" id="confidenceRow">
+                        <span>How sure are you?</span>
+                        <button type="button" data-c="sure" onclick="setConfidence('sure')">Sure</button>
+                        <button type="button" data-c="unsure" onclick="setConfidence('unsure')">Unsure</button>
+                        <button type="button" data-c="guess" onclick="setConfidence('guess')">Guess</button>
+                    </div>
 
                     <!-- Study Mode Feedback -->
                     <div class="study-feedback" id="studyFeedback"></div>
@@ -1470,6 +1485,7 @@ This notepad persists throughout your exam session."></textarea>
     <script src="exam_data3_c01hard.js"></script>
     <script src="exam_data3_c01gap2.js"></script>
     <script src="exam_data3_c01mock.js"></script>
+    <script src="exam_data3_c01types.js"></script>
     <script src="exam_domains.js"></script>
     <script src="exam_c01_explanations.js"></script>
 
@@ -1480,6 +1496,14 @@ This notepad persists throughout your exam session."></textarea>
         let currentQuestionIndex = 0;
         let userAnswers = [];
         let markedQuestions = [];
+        let confidence = [];
+        function setConfidence(level) {
+            confidence[currentQuestionIndex] = confidence[currentQuestionIndex] === level ? null : level;
+            renderConfidence();
+        }
+        function renderConfidence() {
+            document.querySelectorAll('#confidenceRow button').forEach(b => b.classList.toggle('on', confidence[currentQuestionIndex] === b.dataset.c));
+        }
         let eliminatedOptions = [];
         let timerInterval;
         let timeRemaining = 0;
@@ -1642,6 +1666,7 @@ This notepad persists throughout your exam session."></textarea>
             
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
+            confidence = new Array(examData.length).fill(null);
             eliminatedOptions = new Array(examData.length).fill(null).map(() => []);
 
             if (testMode === 'exam' && timeLimitMinutes > 0) {
@@ -1723,7 +1748,7 @@ This notepad persists throughout your exam session."></textarea>
                 document.getElementById('focusArea').value = 'all';
                 document.getElementById('testMode').value = 'exam';
                 document.getElementById('questionCount').value = 'all';
-                document.getElementById('timeLimit').value = isFinalMock ? '90' : '60';
+                document.getElementById('timeLimit').value = isFinalMock ? '90' : '130';
             }
 
             const questionCount = document.getElementById('questionCount').value;
@@ -1768,17 +1793,23 @@ This notepad persists throughout your exam session."></textarea>
             }
 
             if (isDiagnostic) {
-                // Official C01 weights: 28% / 26% / 22% / 24% of 30 questions. Questions never seen before go first,
-                // so the score reflects reasoning rather than memory.
+                // Exam Day Simulation: 65 questions weighted like the C01 guide (28/26/22/24% -> 18/17/14/16),
+                // all question types, one case-study set kept together, and unseen questions first.
                 const seen = getSeenSet();
-                selectedQuestions = selectedQuestions.filter(q => !seen.has(q.number)).concat(selectedQuestions.filter(q => seen.has(q.number)));
-                const quota = {1: 8, 2: 8, 3: 7, 4: 7};
+                const unseenFirst = arr => shuffle(arr.filter(q => !seen.has(q.number))).concat(shuffle(arr.filter(q => seen.has(q.number))));
+                const quota = {1: 18, 2: 17, 3: 14, 4: 16};
+                const caseIds = [...new Set(selectedQuestions.filter(q => q.case_id).map(q => q.case_id))];
+                const caseUnseen = caseIds.filter(id => selectedQuestions.filter(q => q.case_id === id).every(q => !seen.has(q.number)));
+                const caseId = shuffle(caseUnseen.length ? caseUnseen : caseIds)[0];
+                const caseSet = caseId ? selectedQuestions.filter(q => q.case_id === caseId).sort((a, b) => a.number - b.number) : [];
+                caseSet.forEach(q => quota[q.domain]--);
                 const picked = [];
-                const rest = [];
-                selectedQuestions.forEach(q => {
-                    if (quota[q.domain] > 0) { picked.push(q); quota[q.domain]--; } else { rest.push(q); }
+                unseenFirst(selectedQuestions.filter(q => !q.case_id)).forEach(q => {
+                    if (quota[q.domain] > 0) { picked.push(q); quota[q.domain]--; }
                 });
-                selectedQuestions = shuffle(picked.concat(rest.slice(0, 30 - picked.length)));
+                const body = shuffle(picked);
+                const at = Math.floor(Math.random() * (body.length + 1));
+                selectedQuestions = body.slice(0, at).concat(caseSet, body.slice(at));
             }
 
             if (questionCount !== 'all') {
@@ -1793,6 +1824,7 @@ This notepad persists throughout your exam session."></textarea>
             
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
+            confidence = new Array(examData.length).fill(null);
             eliminatedOptions = new Array(examData.length).fill(null).map(() => []);
 
             if (testMode === 'exam' && timeLimitMinutes > 0) {
@@ -1878,7 +1910,16 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('questionNumber').textContent = 
                 `Question ${index + 1} of ${examData.length}`;
 
+            const caseBox = document.getElementById('caseBox');
+            if (question.case_text) {
+                caseBox.innerHTML = '';
+                const t = document.createElement('strong'); t.textContent = 'Case study: ' + (question.case_title || '');
+                const body = document.createElement('div'); body.textContent = question.case_text;
+                caseBox.append(t, body);
+            }
+            caseBox.hidden = !question.case_text;
             document.getElementById('questionText').textContent = question.question;
+            renderConfidence();
             const originEl = document.getElementById('questionOrigin');
             if (question.mock) {
                 originEl.textContent = 'Final Mock question written by Claude (not from AWS) · held out of all practice modes';
@@ -2429,7 +2470,7 @@ This notepad persists throughout your exam session."></textarea>
             const pct = Math.round((correct / results.length) * 100);
             const attempts = window.mockAttempts || [];
             const first = attempts.length <= 1;
-            const band = pct >= 80 ? ['#10b981', 'Strong'] : pct >= 72 ? ['#f59e0b', 'Close'] : ['#ef4444', 'Not there yet'];
+            const band = ['#7c3aed', `${correct} / ${results.length}`];
             const names = {1: 'Data Preparation for ML', 2: 'ML Model Development', 3: 'Deployment and Orchestration', 4: 'Monitoring, Maintenance, and Security'};
             const stats = {};
             results.forEach(r => { const d = r.question.domain; stats[d] = stats[d] || {c: 0, t: 0}; stats[d].t++; if (r.isCorrect) stats[d].c++; });
@@ -2445,29 +2486,46 @@ This notepad persists throughout your exam session."></textarea>
 
         function renderReadiness(results, correct) {
             const panel = document.getElementById('readinessPanel');
-            if (isFinalMock) { renderMockResult(results, correct, panel); return; }
-            if (!isDiagnostic) { panel.innerHTML = ''; return; }
-            const pct = Math.round((correct / results.length) * 100);
-            const band = pct >= 80
-                ? ['#10b981', 'On track', 'You have a margin. Sleep is worth more than more questions tonight.']
-                : pct >= 70
-                ? ['#f59e0b', 'Borderline', 'Close to the line. Spend 30 to 45 minutes on your weakest domain below, then stop.']
-                : ['#ef4444', 'At risk', 'Below the usual safe zone. Spend your remaining time only on the weakest domain below, in short rounds.'];
-            const stats = {};
-            results.forEach(r => {
-                const d = r.question.domain;
-                stats[d] = stats[d] || {correct: 0, total: 0};
-                stats[d].total++;
-                if (r.isCorrect) stats[d].correct++;
-            });
-            const weakest = Object.keys(stats).sort((a, b) => stats[a].correct / stats[a].total - stats[b].correct / stats[b].total)[0];
-            const names = {1: 'Data Preparation for ML', 2: 'ML Model Development', 3: 'Deployment and Orchestration of ML Workflows', 4: 'ML Solution Monitoring, Maintenance, and Security'};
-            panel.innerHTML = `<div style="margin:20px 0;padding:16px;border-left:6px solid ${band[0]};background:rgba(124,58,237,0.06);border-radius:8px;">
-                <div style="font-size:1.3em;font-weight:bold;color:${band[0]};">Readiness: ${band[1]} (${pct}%)</div>
-                <p style="margin-top:6px;">${band[2]}</p>
-                <p style="margin-top:6px;"><strong>${window.diagnosticNewCount} of ${results.length}</strong> questions were new to you. The more new questions, the more this score reflects real reasoning instead of memory.${window.diagnosticNewCount < results.length / 2 ? ' <strong style="color:#ef4444;">Most of these were repeats, so treat this rating as inflated.</strong>' : ''}</p>
-                <p style="margin-top:6px;"><strong>Weakest domain:</strong> Domain ${weakest}: ${names[weakest]} (${stats[weakest].correct} / ${stats[weakest].total}). To drill it, pick it under Focus Area.</p>
-                <p style="margin-top:10px;font-size:0.8em;color:#6b7280;">This rating is a rule of thumb, not a score prediction. AWS reports a scaled score (720 out of 1000 to pass) and does not publish how percent correct maps to it. Bands: 80% or more on track, 70 to 79% borderline, under 70% at risk. If you have already seen many of these questions, your percentage will run high.</p>
+            if (isFinalMock) { renderMockResult(results, correct, panel); panel.insertAdjacentHTML('beforeend', calibrationHtml(results)); return; }
+            if (!isDiagnostic) { panel.innerHTML = calibrationHtml(results); return; }
+            const seenBefore = window.seenBeforeExam || new Set();
+            const fresh = results.filter(r => !seenBefore.has(r.question.number));
+            const freshRight = fresh.filter(r => r.isCorrect).length;
+            const pct = n => Math.round(n * 100);
+            const names = {1: 'Data Preparation for ML', 2: 'ML Model Development', 3: 'Deployment and Orchestration', 4: 'Monitoring, Maintenance, and Security'};
+            const rows = [1, 2, 3, 4].map(d => {
+                const all = results.filter(r => r.question.domain === d), f = fresh.filter(r => r.question.domain === d);
+                const fr = f.filter(r => r.isCorrect).length;
+                return `<tr><td>Domain ${d}: ${names[d]}</td><td>${all.filter(r => r.isCorrect).length} / ${all.length}</td><td>${f.length ? `${fr} / ${f.length} (${pct(fr / f.length)}%)` : 'none unseen'}</td></tr>`;
+            }).join('');
+            panel.innerHTML = `<div style="margin:20px 0;padding:16px;border-left:6px solid #7c3aed;background:rgba(124,58,237,0.06);border-radius:8px;">
+                <div style="font-size:1.25em;font-weight:bold;">Exam Day Simulation</div>
+                <p style="margin-top:6px;"><strong>Score on questions you had never seen: ${fresh.length ? `${freshRight} / ${fresh.length} (${pct(freshRight / fresh.length)}%)` : 'no unseen questions left'}</strong>. This is the number to judge yourself by. Overall, including repeats: ${correct} / ${results.length}.</p>
+                ${fresh.length < 40 ? `<p style="color:#b91c1c;margin-top:6px;"><strong>Only ${fresh.length} of ${results.length} were new to you.</strong> Repeats measure memory, so treat this result with caution.</p>` : ''}
+                <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;margin-top:8px;"><tr><th style="text-align:left;">Domain</th><th style="text-align:left;">All</th><th style="text-align:left;">Unseen only</th></tr>${rows}</table></div>
+                <p style="margin-top:10px;font-size:0.8em;color:#6b7280;">No pass or fail verdict on purpose. AWS scores 50 of the 65 real questions on a scaled 100–1,000 range (720 to pass) and doesn't publish how percent correct maps to that score. These questions were written by Claude or come from a community bank; they are not AWS questions.</p>
+            </div>` + calibrationHtml(results);
+        }
+
+        function calibrationHtml(results) {
+            const levels = [['sure', 'Sure'], ['unsure', 'Unsure'], ['guess', 'Guess'], [null, 'Not marked']];
+            const rows = levels.map(([lv, label]) => {
+                const r = results.filter(x => (confidence[x.index] || null) === lv);
+                if (!r.length) return '';
+                const c = r.filter(x => x.isCorrect).length;
+                return `<tr><td>${label}</td><td>${c} / ${r.length} correct (${Math.round(c / r.length * 100)}%)</td></tr>`;
+            }).join('');
+            const sureWrong = results.filter(x => confidence[x.index] === 'sure' && !x.isCorrect);
+            const list = sureWrong.map(x => {
+                const li = document.createElement('li');
+                li.textContent = `Q${x.index + 1} (#${x.question.number}, Domain ${x.question.domain}): ${x.question.question.slice(0, 140)}${x.question.question.length > 140 ? '…' : ''}`;
+                return li.outerHTML;
+            }).join('');
+            if (!rows) return '';
+            return `<div style="margin:16px 0;padding:16px;border-left:6px solid #f59e0b;background:rgba(245,158,11,0.08);border-radius:8px;">
+                <div style="font-size:1.1em;font-weight:bold;">How well does your confidence match reality?</div>
+                <div style="overflow-x:auto;"><table style="margin-top:6px;border-collapse:collapse;">${rows}</table></div>
+                ${sureWrong.length ? `<p style="margin-top:8px;"><strong>${sureWrong.length} answer${sureWrong.length > 1 ? 's' : ''} you were SURE of ${sureWrong.length > 1 ? 'were' : 'was'} wrong.</strong> These are the most dangerous gaps, because on exam day you won't think to recheck them. Review them first:</p><ul>${list}</ul>` : '<p style="margin-top:8px;">Every answer you marked Sure was right.</p>'}
             </div>`;
         }
 
@@ -2570,6 +2628,7 @@ This notepad persists throughout your exam session."></textarea>
                 } catch (e) { window.mockAttempts = [{ correct, total: examData.length }]; }
             }
             const seenBefore = getSeenSet();
+            window.seenBeforeExam = seenBefore;
             window.diagnosticNewCount = examData.filter(q => !seenBefore.has(q.number)).length;
             markSeen(examData.map(q => q.number));
             renderReadiness(detailedResults, correct);
