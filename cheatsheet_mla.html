@@ -39,7 +39,7 @@ a { color:var(--accent); }
   <div class="top">
     <h1>C01 Cheat Sheet Quiz</h1>
     <select id="dom" aria-label="Domain">
-      <option value="all">All domains</option><option value="1">Domain 1 · Data</option><option value="2">Domain 2 · Models</option><option value="34">Domains 3–4 · Deploy &amp; monitor</option>
+      <option value="all">All domains</option><option value="fit">⭐ Overfit vs underfit &amp; training knobs</option><option value="1">Domain 1 · Data</option><option value="2">Domain 2 · Models</option><option value="34">Domains 3–4 · Deploy &amp; monitor</option>
     </select>
   </div>
   <div class="bar"><span id="bar"></span></div>
@@ -49,6 +49,29 @@ a { color:var(--accent); }
 <script>
 // [domain, clue, answer, [wrong, wrong, wrong], why]
 const Q = [
+ ['fit','Training 97%, validation 74%. The model needs to be…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'High training score with a big gap to validation means it memorized the data, so make it simpler.'],
+ ['fit','Training 58%, validation 57%. The model needs to be…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],'Both scores are low and close together, so the model is too weak. Give it more power.'],
+ ['fit','Validation loss RISES while training loss keeps falling. The model needs to be…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],"That's overfitting starting. Stop early or regularize."],
+ ['fit','Raising max_depth makes the model…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],"Deeper trees = more complex. AWS: 'more complex and likely to be overfit.'"],
+ ['fit','Lowering max_depth makes the model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'Shallower trees = simpler.'],
+ ['fit','Raising min_child_weight makes the model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'A backwards knob: higher = MORE conservative (AWS wording). Trees stop splitting sooner.'],
+ ['fit','Lowering min_child_weight makes the model…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],'A backwards knob: lower = trees can split into tiny leaves = more complex.'],
+ ['fit','Raising alpha (L1) or lambda (L2) makes the model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],"More regularization = simpler. AWS: increasing either makes the model 'more conservative.'"],
+ ['fit','Raising gamma in XGBoost makes the model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'Gamma = minimum loss reduction to split. Higher = fewer splits = simpler.'],
+ ['fit','Setting subsample / colsample_bytree from 1.0 to 0.7 makes the model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'Each tree sees only part of the data, which reduces overfitting.'],
+ ['fit','Lowering eta (with early stopping) makes boosting…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],"eta shrinks each step 'to prevent overfitting.' A lower eta is more conservative."],
+ ['fit','Adding dropout makes a neural network…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'Randomly switching off neurons stops it from memorizing.'],
+ ['fit','Adding layers or units makes a neural network…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],'More capacity.'],
+ ['fit','Early stopping makes the final model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'It stops before the model starts memorizing.'],
+ ['fit','More rounds with NO early stopping makes the model…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],'It keeps fitting the training data, including noise.'],
+ ['fit','Adding informative features makes the model…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],'More signal to learn from fixes underfitting.'],
+ ['fit','Removing noisy/redundant features (feature selection) makes the model…','SIMPLER (fixes overfitting)',['MORE POWERFUL (fixes underfitting)'],'Fewer chances to latch onto noise.'],
+ ['fit','Removing regularization makes the model…','MORE POWERFUL (fixes underfitting)',['SIMPLER (fixes overfitting)'],'Less restraint = more complex.'],
+ ['fit','Push useless feature weights to EXACTLY zero','L1 regularization',['L2 regularization (weight decay)'],"L1 = 'Lose' features (zeros them). L2 = 'Lower' all weights but rarely to zero."],
+ ['fit',"Model too big for ONE GPU's memory",'Model parallelism',['Data parallelism'],"Data parallel puts a FULL copy of the model on every GPU, so it can't help when the model doesn't fit."],
+ ['fit','Model fits on one GPU, but 20 TB of data is too slow','Data parallelism',['Model parallelism'],'Copy the model to many GPUs, and each one trains on a different slice of the data.'],
+ ['fit','Tuning: the metric is reported ONLY at the end of training','Random search',['Hyperband'],'Hyperband needs a score after every epoch to cut weak trials.'],
+ ['fit','Tuning with Hyperband: TrainingJobEarlyStoppingType must be…','OFF',['AUTO'],'Hyperband does its own early stopping.'],
  [1,'Stream data to S3 as Parquet, no code to run','Amazon Data Firehose with record format conversion',['Kinesis Data Streams + custom EC2 consumer','Amazon SQS','AWS Glue crawler'],'Firehose converts JSON to Parquet/ORC on delivery. If the input is CSV, add a Lambda transform to JSON first.'],
  [1,'Firehose receives CSV but must write Parquet','Lambda transform CSV → JSON, then Firehose format conversion',['Firehose format conversion directly on CSV','Athena converts it on arrival','Kinesis enhanced fan-out'],'Firehose’s converter reads JSON only.'],
  [1,'Reprocess the last few days of streaming data','Kinesis Data Streams with longer retention',['Amazon Data Firehose replay','Add more shards','Amazon SQS'],'KDS keeps data 24 hours by default (up to 365 days), so consumers can reread it. Firehose has no replay.'],
