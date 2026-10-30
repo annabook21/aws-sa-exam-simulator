@@ -1159,7 +1159,7 @@
                 <span class="theme-icon-dark">☀️</span>
             </button>
             <h1>🧠 AWS ML Associate Exam Simulator</h1>
-            <p style="margin:6px 0 0;"><a href="triple_shot_mla.html" style="color:inherit;font-weight:600;">☕ Try Triple Shot</a>: 3 questions at a time. Spot the constraints, eliminate options with reasons, defend your pick, and track why you miss.</p>
+            <p style="margin:6px 0 0;"><a href="ruleout_mla.html" style="color:inherit;font-weight:600;">🎯 Rule-Out Drill</a>: the clue words that eliminate answers (for example, "shadow variant" rules out serverless and async). Mark each option keep or rule out, then see why.</p>
             <p style="margin:6px 0 0;"><a href="connections_mla.html" style="color:inherit;font-weight:600;">🧠 C01 Connections</a>: the "when X, pick Y" relationships for Domains 1 and 2, a day-by-day retake plan, and 5-card recall drills.</p>
             <div class="subtitle">MLA-C01 and MLA-C02 Practice Test Environment</div>
             <p>Master Machine Learning concepts and services on AWS</p>
@@ -1208,7 +1208,7 @@
                         <option value="c02" selected>MLA-C02 (all 308 questions)</option>
                         <option value="c01">MLA-C01 (original bank + C01 gap and overlap questions, 65 questions / 130 minutes)</option>
                     </select>
-                    <span style="display:block;font-size:0.8em;color:#6b7280;margin-top:4px;">C01 mode uses the original bank (community-sourced answer key, including ordering and matching questions), 32 new questions for C01 topics the bank never tested, 73 harder Domain 1 and 2 questions (#341–413), and earlier written questions that also match C01 skills.</span>
+                    <span style="display:block;font-size:0.8em;color:#6b7280;margin-top:4px;">C01 mode uses the original bank (community-sourced answer key, including ordering and matching questions), 32 new questions for C01 topics the bank never tested, 98 harder Domain 1 and 2 questions (#341–438), and earlier written questions that also match C01 skills.</span>
                 </label>
 
                 <label>
@@ -1216,7 +1216,13 @@
                     <select id="focusArea">
                         <option value="all" selected>All domains</option>
                         <option value="1,2">Domains 1 &amp; 2 (Needs Improvement on your C01 score report)</option>
-                        <option value="hard">Hard set only: new Domain 1 &amp; 2 questions (#341–413)</option>
+                        <option value="hard">Hard set only: new Domain 1 &amp; 2 questions (#341–438)</option>
+                        <option value="t1.1">Hard set · Task 1.1 Ingest and store data</option>
+                        <option value="t1.2">Hard set · Task 1.2 Transform and feature engineering</option>
+                        <option value="t1.3">Hard set · Task 1.3 Data integrity, bias, PII</option>
+                        <option value="t2.1">Hard set · Task 2.1 Choose a modeling approach</option>
+                        <option value="t2.2">Hard set · Task 2.2 Train and refine</option>
+                        <option value="t2.3">Hard set · Task 2.3 Analyze performance</option>
                         <option value="2,4">Domains 2 &amp; 4 (Needs Improvement on the C02 beta)</option>
                         <option value="1">Domain 1: Data Preparation for ML and AI</option>
                         <option value="2">Domain 2: ML Model and Foundation Model Development</option>
@@ -1264,7 +1270,9 @@
             <button class="btn" onclick="startExam()">Begin Exam</button>
             <div style="margin-top:16px;padding:14px;border:2px solid #7c3aed;border-radius:10px;">
                 <button class="btn" style="background:#7c3aed;" onclick="startExam(true)">🎯 C01 Readiness Check</button>
-                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;">30 MLA-C01 questions in the official domain mix (8 / 8 / 7 / 7), exam mode, 60 minutes. Ignores the settings above. At the end you get a readiness rating and your weakest domain.</p>
+                <button class="btn" style="background:#b91c1c;margin-left:8px;" onclick="startExam('mock')">🏁 Final Mock (take once)</button>
+                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Final Mock:</strong> 40 held-out questions that never appear in practice (11 / 11 / 9 / 9), 90 minutes. Take it once, around Nov 9–10. Only the first attempt is a clean measure.</p>
+                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Readiness Check:</strong> 30 MLA-C01 questions in the official domain mix (8 / 8 / 7 / 7), exam mode, 60 minutes. Ignores the settings above. At the end you get a readiness rating and your weakest domain.</p>
             </div>
         </div>
 
@@ -1460,6 +1468,8 @@ This notepad persists throughout your exam session."></textarea>
     <script src="exam_data3_c02c.js"></script>
     <script src="exam_data3_c01gap.js"></script>
     <script src="exam_data3_c01hard.js"></script>
+    <script src="exam_data3_c01gap2.js"></script>
+    <script src="exam_data3_c01mock.js"></script>
     <script src="exam_domains.js"></script>
     <script src="exam_c01_explanations.js"></script>
 
@@ -1477,6 +1487,8 @@ This notepad persists throughout your exam session."></textarea>
         let testMode = 'exam';
         let isReviewBankExam = false;
         let isDiagnostic = false;
+        let isFinalMock = false;
+        const MOCK_KEY = 'mlaFinalMock.v1';
         
         // Review Bank Storage Key (unique per exam type)
         const REVIEW_BANK_KEY = 'examSimulator_reviewBank_MLA'; // ML Associate
@@ -1626,6 +1638,7 @@ This notepad persists throughout your exam session."></textarea>
             examData = selectedQuestions;
             isReviewBankExam = true;
             isDiagnostic = false;
+            isFinalMock = false;
             
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
@@ -1704,12 +1717,13 @@ This notepad persists throughout your exam session."></textarea>
             }
 
             isDiagnostic = diagnostic === true;
-            if (isDiagnostic) {
+            isFinalMock = diagnostic === 'mock';
+            if (isDiagnostic || isFinalMock) {
                 document.getElementById('examVersion').value = 'c01';
                 document.getElementById('focusArea').value = 'all';
                 document.getElementById('testMode').value = 'exam';
                 document.getElementById('questionCount').value = 'all';
-                document.getElementById('timeLimit').value = '60';
+                document.getElementById('timeLimit').value = isFinalMock ? '90' : '60';
             }
 
             const questionCount = document.getElementById('questionCount').value;
@@ -1724,7 +1738,11 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('examTitle').textContent = examVersion === 'c01'
                 ? 'AWS ML Associate (MLA-C01) Practice Exam'
                 : 'AWS ML Associate (MLA-C02 Beta) Practice Exam';
-            if (examVersion === 'c01') {
+            // The Final Mock questions are held out of every practice mode
+            selectedQuestions = isFinalMock ? selectedQuestions.filter(q => q.mock) : selectedQuestions.filter(q => !q.mock);
+            if (isFinalMock) {
+                document.getElementById('examTitle').textContent = 'AWS ML Associate (MLA-C01) Final Mock';
+            } else if (examVersion === 'c01') {
                 selectedQuestions = selectedQuestions.filter(q => q.c01);
             } else {
                 selectedQuestions = selectedQuestions.filter(q => q.origin !== 'written-c01');
@@ -1734,14 +1752,18 @@ This notepad persists throughout your exam session."></textarea>
             }
 
             const focusArea = document.getElementById('focusArea').value;
-            if (focusArea === 'hard') {
+            if (isFinalMock) {
+                // no focus filtering
+            } else if (focusArea === 'hard') {
                 selectedQuestions = selectedQuestions.filter(q => q.hard);
+            } else if (focusArea.startsWith('t')) {
+                selectedQuestions = selectedQuestions.filter(q => q.task === focusArea.slice(1));
             } else if (focusArea !== 'all') {
                 const domains = focusArea.split(',').map(Number);
                 selectedQuestions = selectedQuestions.filter(q => domains.includes(q.domain));
             }
             
-            if (randomizeQuestions || isDiagnostic) {
+            if (randomizeQuestions || isDiagnostic || isFinalMock) {
                 selectedQuestions = shuffle(selectedQuestions);
             }
 
@@ -1858,7 +1880,9 @@ This notepad persists throughout your exam session."></textarea>
 
             document.getElementById('questionText').textContent = question.question;
             const originEl = document.getElementById('questionOrigin');
-            if (question.hard) {
+            if (question.mock) {
+                originEl.textContent = 'Final Mock question written by Claude (not from AWS) · held out of all practice modes';
+            } else if (question.hard) {
                 originEl.textContent = `Hard practice question for C01 Task ${question.task}, written by Claude (not from AWS)` + (question.concept ? ' · Standard ML concept' : ' · Answer based on the AWS documentation linked in the explanation');
             } else if (question.origin === 'written-c01') {
                 originEl.textContent = 'Practice question written for an MLA-C01 exam-guide gap (not from AWS) · Answer based on the AWS documentation linked in the explanation';
@@ -2352,6 +2376,16 @@ This notepad persists throughout your exam session."></textarea>
                 versionSelect.value = saved;
                 versionSelect.dispatchEvent(new Event('change'));
             }
+            // Preset links from the study plan, e.g. ?version=c01&focus=t1.1&mode=study&count=10
+            try {
+                const qp = new URLSearchParams(location.search);
+                const setSel = (id, v) => { const el = document.getElementById(id); if (v && [...el.options].some(o => o.value === v)) el.value = v; };
+                if (qp.get('version')) { setSel('examVersion', qp.get('version')); versionSelect.dispatchEvent(new Event('change')); }
+                setSel('focusArea', qp.get('focus'));
+                setSel('testMode', qp.get('mode'));
+                setSel('questionCount', qp.get('count'));
+                if (qp.get('mode') === 'study') setSel('timeLimit', '0');
+            } catch (e) {}
         });
 
         function renderDomainBreakdown(results) {
@@ -2391,8 +2425,27 @@ This notepad persists throughout your exam session."></textarea>
             } catch (e) {}
         }
 
+        function renderMockResult(results, correct, panel) {
+            const pct = Math.round((correct / results.length) * 100);
+            const attempts = window.mockAttempts || [];
+            const first = attempts.length <= 1;
+            const band = pct >= 80 ? ['#10b981', 'Strong'] : pct >= 72 ? ['#f59e0b', 'Close'] : ['#ef4444', 'Not there yet'];
+            const names = {1: 'Data Preparation for ML', 2: 'ML Model Development', 3: 'Deployment and Orchestration', 4: 'Monitoring, Maintenance, and Security'};
+            const stats = {};
+            results.forEach(r => { const d = r.question.domain; stats[d] = stats[d] || {c: 0, t: 0}; stats[d].t++; if (r.isCorrect) stats[d].c++; });
+            const rows = Object.keys(stats).sort().map(d => `<li>Domain ${d} (${names[d]}): ${stats[d].c} / ${stats[d].t} (${Math.round(stats[d].c / stats[d].t * 100)}%)</li>`).join('');
+            panel.innerHTML = `<div style="margin:20px 0;padding:16px;border-left:6px solid ${band[0]};background:rgba(124,58,237,0.06);border-radius:8px;">
+                <div style="font-size:1.3em;font-weight:bold;color:${band[0]};">Final Mock: ${band[1]} (${pct}%)</div>
+                ${first ? '<p style="margin-top:6px;">This was your first attempt, and none of these 40 questions appear in any practice mode, so this is a clean measure of reasoning on unseen questions.</p>'
+                        : `<p style="margin-top:6px;color:#ef4444;"><strong>This is attempt #${attempts.length}.</strong> Only the first attempt is a clean measure; this one is inflated by memory. First attempt: ${attempts[0].correct}/${attempts[0].total}.</p>`}
+                <ul style="margin-top:6px;">${rows}</ul>
+                <p style="margin-top:10px;font-size:0.8em;color:#6b7280;">Still a rule of thumb, not a score prediction: AWS scales scores (720/1000 to pass) and doesn't publish the mapping. These questions were written by Claude from AWS docs, not by AWS. For an AWS-written check, also take the free Official Practice Question Set on AWS Skill Builder.</p>
+            </div>`;
+        }
+
         function renderReadiness(results, correct) {
             const panel = document.getElementById('readinessPanel');
+            if (isFinalMock) { renderMockResult(results, correct, panel); return; }
             if (!isDiagnostic) { panel.innerHTML = ''; return; }
             const pct = Math.round((correct / results.length) * 100);
             const band = pct >= 80
@@ -2508,6 +2561,14 @@ This notepad persists throughout your exam session."></textarea>
             document.getElementById('notAnsweredCount').textContent = notAnswered;
             document.getElementById('timeSpent').textContent = timeSpentFormatted;
             renderDomainBreakdown(detailedResults);
+            if (isFinalMock) {
+                try {
+                    const attempts = JSON.parse(localStorage.getItem(MOCK_KEY) || '[]');
+                    attempts.push({ date: new Date().toISOString(), correct, total: examData.length });
+                    localStorage.setItem(MOCK_KEY, JSON.stringify(attempts));
+                    window.mockAttempts = attempts;
+                } catch (e) { window.mockAttempts = [{ correct, total: examData.length }]; }
+            }
             const seenBefore = getSeenSet();
             window.diagnosticNewCount = examData.filter(q => !seenBefore.has(q.number)).length;
             markSeen(examData.map(q => q.number));

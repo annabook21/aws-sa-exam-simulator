@@ -209,7 +209,8 @@ const termsOf = q => {
 };
 function pool() {
   const s = store.settings;
-  let p = s.pool === 'hard' ? ALL.filter(q => q.hard) : s.pool === 'c01' ? ALL.filter(q => q.c01) : ALL.filter(q => q.origin !== 'written-c01');
+  let p = s.pool === 'hard' ? ALL.filter(q => q.hard && !q.mock) : s.pool === 'c01' ? ALL.filter(q => q.c01) : ALL.filter(q => q.origin !== 'written-c01');
+  p = p.filter(q => !q.mock);
   if (s.focus.startsWith('t')) p = p.filter(q => q.task === s.focus.slice(1));
   else if (s.focus !== 'all') { const ds = s.focus.split(',').map(Number); p = p.filter(q => ds.includes(q.domain)); }
   return p;
