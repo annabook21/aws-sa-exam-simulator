@@ -1167,6 +1167,7 @@
                 <span class="theme-icon-dark">☀️</span>
             </button>
             <h1>🧠 AWS ML Associate Exam Simulator</h1>
+            <p style="margin:6px 0 0;"><a href="progress_mla.html" style="color:inherit;font-weight:600;">📈 My Progress</a>: every answer you give here is tracked automatically. See your weakest topics and practice them.</p>
             <p style="margin:6px 0 0;"><a href="cheatsheet_mla.html" style="color:inherit;font-weight:600;">⚡ Cheat Sheet Quiz</a>: one clue, two answers, tap the right one and see why.</p>
             <p style="margin:6px 0 0;"><a href="connections_mla.html" style="color:inherit;font-weight:600;">🧠 C01 Connections</a>: the "when X, pick Y" relationships for Domains 1 and 2, a day-by-day retake plan, and 5-card recall drills.</p>
             <div class="subtitle">MLA-C01 and MLA-C02 Practice Test Environment</div>
@@ -1497,6 +1498,47 @@ This notepad persists throughout your exam session."></textarea>
         let userAnswers = [];
         let markedQuestions = [];
         let confidence = [];
+        let recorded = [];
+        // Answer history for the My Progress page. Kept separate from the review bank.
+        const HISTORY_KEY = 'mlaHistory.v1';
+        // Weak-spot set: questions missed and not yet answered right since, plus new questions from the weakest topics.
+        function weakAreas(history) {
+            const stats = {};
+            history.filter(r => !r.mock).slice(-400).forEach(r => {
+                const key = r.t || ('D' + r.d);
+                stats[key] = stats[key] || { key, n: 0, miss: 0 };
+                stats[key].n++; if (!r.ok) stats[key].miss++;
+            });
+            return Object.values(stats).filter(s => s.n >= 3)
+                .map(s => ({ ...s, score: (s.miss + 1) / (s.n + 2) }))
+                .sort((a, b) => b.score - a.score);
+        }
+        function buildWeakSpotSet(pool) {
+            const h = readHistory().filter(r => !r.mock);
+            const last = {};
+            h.forEach(r => { last[r.n] = r.ok; });
+            const seen = new Set(h.map(r => r.n));
+            const areas = weakAreas(h).slice(0, 3).map(a => a.key);
+            // Without enough history, start from the score report: Domain 2 training (2.2), metrics (2.3), then Domain 1.
+            const keys = areas.length ? areas : ['2.2', '2.3', 'D1'];
+            const inArea = q => keys.includes(q.task) || keys.includes('D' + q.domain);
+            const missed = shuffle(pool.filter(q => last[q.number] === false)).slice(0, 8);
+            const used = new Set(missed.map(q => q.number));
+            const fresh = shuffle(pool.filter(q => inArea(q) && !seen.has(q.number) && !used.has(q.number)));
+            const again = shuffle(pool.filter(q => inArea(q) && seen.has(q.number) && !used.has(q.number)));
+            return shuffle(missed.concat(fresh, again).slice(0, 20));
+        }
+        function readHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) { return []; } }
+        function recordAnswer(i) {
+            if (i == null || recorded[i] || !examData[i] || userAnswers[i] == null) return;
+            const q = examData[i];
+            recorded[i] = true;
+            try {
+                const h = readHistory();
+                h.push({ n: q.number, d: q.domain || null, t: q.task || null, ok: !!checkAnswer(q, userAnswers[i]), c: confidence[i] || null, m: testMode, mock: !!q.mock, at: Date.now() });
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-5000)));
+            } catch (e) {}
+        }
         function setConfidence(level) {
             confidence[currentQuestionIndex] = confidence[currentQuestionIndex] === level ? null : level;
             renderConfidence();
@@ -1667,6 +1709,7 @@ This notepad persists throughout your exam session."></textarea>
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
             confidence = new Array(examData.length).fill(null);
+            recorded = new Array(examData.length).fill(false);
             eliminatedOptions = new Array(examData.length).fill(null).map(() => []);
 
             if (testMode === 'exam' && timeLimitMinutes > 0) {
@@ -1743,6 +1786,14 @@ This notepad persists throughout your exam session."></textarea>
 
             isDiagnostic = diagnostic === true;
             isFinalMock = diagnostic === 'mock';
+            const isWeakPractice = diagnostic === 'weak';
+            if (isWeakPractice) {
+                document.getElementById('examVersion').value = 'c01';
+                document.getElementById('focusArea').value = 'all';
+                document.getElementById('testMode').value = 'study';
+                document.getElementById('questionCount').value = 'all';
+                document.getElementById('timeLimit').value = '0';
+            }
             if (isDiagnostic || isFinalMock) {
                 document.getElementById('examVersion').value = 'c01';
                 document.getElementById('focusArea').value = 'all';
@@ -1792,6 +1843,11 @@ This notepad persists throughout your exam session."></textarea>
                 selectedQuestions = shuffle(selectedQuestions);
             }
 
+            if (isWeakPractice) {
+                selectedQuestions = buildWeakSpotSet(selectedQuestions);
+                document.getElementById('examTitle').textContent = 'Practice: My Weak Spots';
+            }
+
             if (isDiagnostic) {
                 // Exam Day Simulation: 65 questions weighted like the C01 guide (28/26/22/24% -> 18/17/14/16),
                 // all question types, one case-study set kept together, and unseen questions first.
@@ -1825,6 +1881,7 @@ This notepad persists throughout your exam session."></textarea>
             userAnswers = new Array(examData.length).fill(null);
             markedQuestions = new Array(examData.length).fill(false);
             confidence = new Array(examData.length).fill(null);
+            recorded = new Array(examData.length).fill(false);
             eliminatedOptions = new Array(examData.length).fill(null).map(() => []);
 
             if (testMode === 'exam' && timeLimitMinutes > 0) {
@@ -1904,6 +1961,7 @@ This notepad persists throughout your exam session."></textarea>
         }
 
         function loadQuestion(index) {
+            if (testMode === 'study' && currentQuestionIndex !== index) recordAnswer(currentQuestionIndex);
             currentQuestionIndex = index;
             const question = examData[index];
 
@@ -2301,6 +2359,7 @@ This notepad persists throughout your exam session."></textarea>
             if (currentQuestionIndex < examData.length - 1) {
                 loadQuestion(currentQuestionIndex + 1);
             } else {
+                if (testMode === 'study') recordAnswer(currentQuestionIndex);
                 showReviewScreen();
             }
         }
@@ -2416,6 +2475,9 @@ This notepad persists throughout your exam session."></textarea>
             if (saved && saved !== versionSelect.value && [...versionSelect.options].some(o => o.value === saved)) {
                 versionSelect.value = saved;
                 versionSelect.dispatchEvent(new Event('change'));
+            }
+            if (new URLSearchParams(location.search).get('practice') === 'weak') {
+                window.addEventListener('load', () => setTimeout(() => startExam('weak'), 0));
             }
             // Preset links from the study plan, e.g. ?version=c01&focus=t1.1&mode=study&count=10
             try {
@@ -2585,6 +2647,7 @@ This notepad persists throughout your exam session."></textarea>
             let incorrect = 0;
             let notAnswered = 0;
 
+            examData.forEach((q, i) => recordAnswer(i));
             const detailedResults = examData.map((question, index) => {
                 const userAnswer = userAnswers[index];
                 const isCorrect = checkAnswer(question, userAnswer);
