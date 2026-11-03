@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copy My Progress</title>
+<style>
+:root { --bg:#f6f6fb; --card:#fff; --ink:#1c1c28; --muted:#646782; --line:#e2e3ee; --accent:#5b4bdb; color-scheme:light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#13131b; --card:#1e1e2b; --ink:#ececf5; --muted:#a2a5bd; --line:#34354b; --accent:#9e93ff; color-scheme:dark; } }
+:root[data-theme="dark"] { --bg:#13131b; --card:#1e1e2b; --ink:#ececf5; --muted:#a2a5bd; --line:#34354b; --accent:#9e93ff; color-scheme:dark; }
+body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:640px; margin:0 auto; padding:24px 16px; }
+.btn { width:100%; padding:16px; font:inherit; font-size:1.1rem; background:var(--accent); color:#fff; border:none; border-radius:12px; cursor:pointer; }
+textarea { width:100%; height:180px; margin-top:14px; font:12px monospace; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px; box-sizing:border-box; }
+.muted { color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Copy my progress</h1>
+  <p>Press the button, then paste into your chat with Claude. It copies your review bank, quiz misses, mock attempts and practice history from <b>this browser only</b>. It contains no passwords or personal information, only practice data from this site.</p>
+  <button class="btn" id="go">📋 Copy my progress</button>
+  <p id="status" class="muted"></p>
+  <textarea id="out" readonly placeholder="Your data appears here. If the copy button doesn't work, select all of this text and copy it."></textarea>
+</div>
+<script>
+const KEYS = ['examSimulator_reviewBank_MLA', 'mlaSeen.v1', 'mlaFinalMock.v1', 'cheatQuiz.mla.v1', 'tripleShot.mla.v1', 'ruleOut.mla.v1', 'mlaConnections.v1', 'mlaExamVersion'];
+function collect() {
+  const out = { exported: new Date().toISOString() };
+  for (const k of KEYS) {
+    let v = null; try { v = localStorage.getItem(k); } catch (e) {}
+    if (v === null) continue;
+    let parsed; try { parsed = JSON.parse(v); } catch (e) { parsed = v; }
+    if (k === 'examSimulator_reviewBank_MLA' && Array.isArray(parsed)) parsed = parsed.map(q => ({ number: q.number, topic: q.topic, domain: q.domain }));
+    out[k] = parsed;
+  }
+  return JSON.stringify(out);
+}
+document.getElementById('go').onclick = async () => {
+  const text = collect();
+  const ta = document.getElementById('out'); ta.value = text;
+  const n = Object.keys(JSON.parse(text)).length - 1;
+  let copied = false;
+  try { await navigator.clipboard.writeText(text); copied = true; } catch (e) {
+    try { ta.focus(); ta.select(); copied = document.execCommand('copy'); } catch (e2) {}
+  }
+  document.getElementById('status').textContent = n === 0
+    ? 'No saved progress was found in this browser. Are you using the same browser (and not a private window) you studied in?'
+    : (copied ? `Copied ${n} saved item${n > 1 ? 's' : ''}. Now paste it into the chat.` : 'Select all the text below and copy it, then paste it into the chat.');
+};
+</script>
+</body>
+</html>
