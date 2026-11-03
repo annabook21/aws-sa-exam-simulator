@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Progress</title>
+<style>
+:root { --bg:#f6f6fb; --card:#fff; --ink:#1c1c28; --muted:#646782; --line:#e2e3ee; --accent:#5b4bdb; --good:#0f8a5f; --mid:#b45309; --bad:#c0262d; color-scheme:light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#13131b; --card:#1e1e2b; --ink:#ececf5; --muted:#a2a5bd; --line:#34354b; --accent:#9e93ff; --good:#4fd6a0; --mid:#ffb366; --bad:#ff7a80; color-scheme:dark; } }
+:root[data-theme="dark"] { --bg:#13131b; --card:#1e1e2b; --ink:#ececf5; --muted:#a2a5bd; --line:#34354b; --accent:#9e93ff; --good:#4fd6a0; --mid:#ffb366; --bad:#ff7a80; color-scheme:dark; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:720px; margin:0 auto; padding:20px 16px 60px; }
+h1 { margin:0 0 4px; font-size:1.5rem; }
+h2 { font-size:1.1rem; margin:0 0 10px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin:14px 0; }
+.muted { color:var(--muted); } .small { font-size:.85rem; }
+.go { display:block; width:100%; padding:16px; font:inherit; font-size:1.1rem; font-weight:600; text-align:center; background:var(--accent); color:#fff; border-radius:12px; text-decoration:none; }
+.row { display:flex; align-items:center; gap:10px; margin:8px 0; }
+.row .name { flex:1 1 auto; min-width:0; }
+.row .pct { width:64px; text-align:right; font-weight:700; }
+.meter { flex:0 0 38%; height:10px; background:var(--line); border-radius:99px; overflow:hidden; }
+.meter span { display:block; height:100%; }
+.stats { display:flex; gap:10px; flex-wrap:wrap; }
+.stat { flex:1 1 120px; background:var(--bg); border-radius:10px; padding:10px; text-align:center; }
+.stat b { display:block; font-size:1.5rem; }
+li { margin:6px 0; }
+a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>My Progress</h1>
+  <p class="muted">Built from every question you answer in the <a href="exam_simulator_mla.html">simulator</a> in this browser. Final Mock answers are counted separately so they don't skew practice.</p>
+  <div id="app"></div>
+</div>
+<script src="exam_data3.js"></script>
+<script src="exam_data3_c02.js"></script>
+<script src="exam_data3_c02b.js"></script>
+<script src="exam_data3_c02c.js"></script>
+<script src="exam_data3_c01gap.js"></script>
+<script src="exam_data3_c01hard.js"></script>
+<script src="exam_data3_c01gap2.js"></script>
+<script src="exam_data3_c01mock.js"></script>
+<script src="exam_data3_c01types.js"></script>
+<script src="exam_domains.js"></script>
+<script>
+const TASKS = { '1.1': 'Ingest & store data', '1.2': 'Transform & feature engineering', '1.3': 'Data quality, bias & PII', '2.1': 'Choosing algorithms & services', '2.2': 'Training & tuning', '2.3': 'Metrics & evaluation', '3.1': 'Deployment options', '3.3': 'Pipelines & CI/CD', '4.1': 'Monitoring', '4.2': 'Security & networking' };
+const DOMS = { 1: 'Domain 1 · Data preparation', 2: 'Domain 2 · Model development', 3: 'Domain 3 · Deployment & orchestration', 4: 'Domain 4 · Monitoring & security' };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let H = []; try { H = JSON.parse(localStorage.getItem('mlaHistory.v1') || '[]'); } catch (e) {}
+let mock = []; try { mock = JSON.parse(localStorage.getItem('mlaFinalMock.v1') || '[]'); } catch (e) {}
+const byNum = {}; (typeof EXAM_DATA !== 'undefined' ? EXAM_DATA : []).forEach(q => byNum[q.number] = q);
+const app = document.getElementById('app');
+const color = p => p >= 80 ? 'var(--good)' : p >= 65 ? 'var(--mid)' : 'var(--bad)';
+const bar = (name, ok, n) => { const p = Math.round(ok / n * 100); return `<div class="row"><span class="name">${esc(name)} <span class="muted small">(${ok}/${n})</span></span><span class="meter"><span style="width:${p}%;background:${color(p)}"></span></span><span class="pct" style="color:${color(p)}">${p}%</span></div>`; };
+
+const practice = H.filter(r => !r.mock);
+if (!practice.length) {
+  app.innerHTML = `<div class="card"><h2>No answers recorded yet</h2><p>Tracking starts now. Answer questions in the simulator (study or exam mode) and this page fills in automatically. Until there's enough data, the button below starts from your score report: Domain 2 training and metrics, then Domain 1.</p></div>
+    <a class="go" href="exam_simulator_mla.html?practice=weak">🎯 Practice my weak spots (20 questions)</a>`;
+} else {
+  const ok = practice.filter(r => r.ok).length;
+  const week = practice.filter(r => r.at > Date.now() - 7 * 864e5).length;
+  // trend: the earlier half vs the latest half of answers
+  const half = Math.floor(practice.length / 2);
+  const early = practice.slice(0, half), late = practice.slice(half);
+  const acc = a => a.length ? Math.round(a.filter(r => r.ok).length / a.length * 100) : null;
+  const trend = practice.length >= 20 ? `${acc(early)}% → ${acc(late)}%` : 'need 20+ answers';
+  // by domain
+  const dom = {}; practice.forEach(r => { if (!r.d) return; dom[r.d] = dom[r.d] || { ok: 0, n: 0 }; dom[r.d].n++; if (r.ok) dom[r.d].ok++; });
+  // by topic (tasks are tagged on the newer questions)
+  const task = {}; practice.forEach(r => { if (!r.t) return; task[r.t] = task[r.t] || { ok: 0, n: 0 }; task[r.t].n++; if (r.ok) task[r.t].ok++; });
+  // weakest areas (same ranking the practice button uses)
+  const stats = {}; practice.slice(-400).forEach(r => { const k = r.t || ('D' + r.d); stats[k] = stats[k] || { k, n: 0, miss: 0 }; stats[k].n++; if (!r.ok) stats[k].miss++; });
+  const weak = Object.values(stats).filter(s => s.n >= 3).map(s => ({ ...s, score: (s.miss + 1) / (s.n + 2) })).sort((a, b) => b.score - a.score).slice(0, 3);
+  const label = k => k.startsWith('D') ? DOMS[k.slice(1)] + ' (bank questions)' : `Task ${k} · ${TASKS[k] || ''}`;
+  // questions still wrong (last attempt wrong), most-missed first
+  const last = {}, misses = {}; practice.forEach(r => { last[r.n] = r.ok; if (!r.ok) misses[r.n] = (misses[r.n] || 0) + 1; });
+  const stillWrong = Object.keys(last).filter(n => last[n] === false).sort((a, b) => misses[b] - misses[a]).slice(0, 12);
+  // confidence
+  const sure = practice.filter(r => r.c === 'sure'), sureOk = sure.filter(r => r.ok).length;
+  app.innerHTML = `
+    <div class="card stats">
+      <div class="stat"><b>${practice.length}</b>answered</div>
+      <div class="stat"><b style="color:${color(Math.round(ok / practice.length * 100))}">${Math.round(ok / practice.length * 100)}%</b>correct overall</div>
+      <div class="stat"><b>${week}</b>this week</div>
+      <div class="stat"><b>${trend}</b>earlier → recent</div>
+    </div>
+    <div class="card"><h2>🎯 Your weakest areas right now</h2>
+      ${weak.length ? weak.map(w => bar(label(w.k), w.n - w.miss, w.n)).join('') : '<p class="muted">Answer at least 3 questions in an area to rank it.</p>'}
+      <a class="go" style="margin-top:12px" href="exam_simulator_mla.html?practice=weak">Practice my weak spots (20 questions)</a>
+      <p class="small muted">Each set mixes questions you got wrong and haven't answered right since with new questions from these areas. It updates after every set.</p>
+    </div>
+    <div class="card"><h2>By domain</h2>${[1, 2, 3, 4].filter(d => dom[d]).map(d => bar(DOMS[d], dom[d].ok, dom[d].n)).join('') || '<p class="muted">No data yet.</p>'}</div>
+    ${Object.keys(task).length ? `<div class="card"><h2>By topic</h2>${Object.keys(task).sort().map(t => bar(`${t} · ${TASKS[t] || ''}`, task[t].ok, task[t].n)).join('')}<p class="small muted">Topics are tagged on the newer questions (#341+). Original bank questions count toward domains only.</p></div>` : ''}
+    ${sure.length ? `<div class="card"><h2>Confidence check</h2><p>When you marked <b>Sure</b>, you were right <b style="color:${color(Math.round(sureOk / sure.length * 100))}">${Math.round(sureOk / sure.length * 100)}%</b> of the time (${sureOk}/${sure.length}).${sure.length - sureOk ? ' Questions you’re sure about but get wrong are the ones you won’t recheck on exam day.' : ''}</p></div>` : ''}
+    ${stillWrong.length ? `<div class="card"><h2>Still getting wrong</h2><p class="small muted">Your last attempt at each was wrong. The weak-spot practice brings these back first.</p><ul>${stillWrong.map(n => { const q = byNum[n]; return `<li><b>#${n}</b>${misses[n] > 1 ? ` <span class="small" style="color:var(--bad)">missed ${misses[n]}×</span>` : ''} · ${esc(q ? q.question.slice(0, 130) + (q.question.length > 130 ? '…' : '') : '')}</li>`; }).join('')}</ul></div>` : ''}
+    ${mock.length ? `<div class="card"><h2>Final Mock</h2><p>First attempt: <b>${mock[0].correct}/${mock[0].total}</b> (${Math.round(mock[0].correct / mock[0].total * 100)}%)${mock.length > 1 ? ` · ${mock.length} attempts in total (only the first is a clean measure)` : ''}.</p></div>` : ''}
+    <p class="small muted">Stored only in this browser. To share it with Claude, use <a href="export_mla.html">Copy my progress</a>.</p>`;
+}
+</script>
+</body>
+</html>
