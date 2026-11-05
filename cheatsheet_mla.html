@@ -228,6 +228,7 @@ function finish() {
   document.getElementById('again').onclick = newRound;
 }
 dom.onchange = newRound;
+{ const d = new URLSearchParams(location.search).get('d'); if (d && [...dom.options].some(o => o.value === d)) dom.value = d; }
 document.addEventListener('keydown', e => { const n = parseInt(e.key, 10); const b = app.querySelectorAll('.opt'); if (n >= 1 && n <= 2 && b[n - 1] && !b[n - 1].disabled) b[n - 1].click(); else if (e.key === 'Enter' && document.getElementById('nx')) document.getElementById('nx').click(); });
 newRound();
 </script>
