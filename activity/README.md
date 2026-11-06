@@ -2,7 +2,9 @@
 
 Plays multiple-choice items from the MLA bank (`EXAM_DATA`). Hotspot and mock items are skipped. With answer history in `localStorage` key `mlaHistory.v1`, the round prefers questions you last got wrong, then unseen questions from the weakest areas. With no history it uses Domain 2 tasks 2.2 and 2.3, then Domain 1, which is the same fallback as My Progress.
 
-Open `arcade_mla.html` from the site root. `arcade_mla.html?n=23` opens that question number.
+Open `arcade_mla.html` from the site root in Safari or Chrome. `arcade_mla.html?n=23` opens that question number.
+
+On a MacBook Pro this is a normal web page. The trackpad clicks an answer. Keys A–E choose one, and Return locks in a multi-select or moves on. Dark mode follows System Settings. At 1512×982, the usual scaled size of a 14-inch MacBook Pro, a full question fits and the page does not scroll sideways. A narrower Split View scrolls down instead.
 
 ```javascript
 const { createActivitySelect } = require('./select');
