@@ -1,0 +1,26 @@
+# Original proprietary game media — ALWAYS keep local
+*.iso
+*.img
+*.cue
+*.bin
+*.rsc
+*.smk
+*.grp
+*.wav
+*.mid
+*.mp3
+*.ogg
+*.bmp
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.exe
+*.dll
+*.zip
+private-samples/
+extracted/
+assets-original/
+disc/
+*.pyc
+__pycache__/
