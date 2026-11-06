@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reader Rabbit 2nd Grade — original-resource research lab</title>
+<style>
+:root { color-scheme: dark; font-family: system-ui,sans-serif; background:#101820; color:#ecf2f7 }
+body { max-width:1000px; margin:2rem auto; padding:0 1rem }
+h1 {font-size:1.5rem} .notice {background:#26364b; padding:1rem; border-left:4px solid #87c9ff}
+label,input,button {font:inherit} input[type=file] {margin:1.2rem 0} button {cursor:pointer;padding:.35rem .6rem}
+small {color:#b6c3cf} table {border-collapse:collapse;width:100%;font-size:.87rem}
+th,td {border-bottom:1px solid #344454;padding:.45rem .25rem;text-align:left;overflow-wrap:anywhere}
+#status {margin:1rem 0;white-space:pre-wrap} #rows {max-height:60vh;overflow:auto}
+</style>
+</head>
+<body>
+<h1>Reader Rabbit's 2nd Grade — Original Resource Laboratory</h1>
+<p class="notice"><strong>Research utility, NOT a playable game.</strong> Inspect genuine audio entries recovered from the 1990s disc. This page uses your local ISO file only; no content is uploaded or served.</p>
+<label>Choose your legally obtained <code>RR2GWINCD.iso</code>: <input type="file" accept=".iso,application/x-iso9660-image" id="disc"></label>
+<p id="status">No image loaded.</p>
+<div id="results" hidden>
+<p><strong id="counts"></strong></p>
+<label>Filter resource filename <input id="filter" type="search" placeholder="e.g. BEZSPCH or SAMSPCH"></label>
+<p><small>Audio may include short cues, voices and music. Playing original material happens locally in your browser.</small></p>
+<div id="rows"><table><thead><tr><th>RSC file</th><th>Type</th><th>Resource ID</th><th>PCM data</th><th>Play original</th></tr></thead><tbody id="body"></tbody></table></div>
+</div>
+<script>
+'use strict';
+const element = id => document.getElementById(id);
+const u16 = (v,o) => v.getUint16(o,true);
+const u32 = (v,o) => v.getUint32(o,true);
+const td = value => {const x=document.createElement('td');x.textContent=String(value);return x;};
+const sector = 2048;
+let disc, resources=[], lastURL=null, audio=null;
+async function readAt(start,length){
+  if (!disc || start < 0 || length < 0 || start+length > disc.size) throw new Error(`Out-of-bounds disc read ${start}+${length}`);
+  return new Uint8Array(await disc.slice(start,start+length).arrayBuffer());
+}
+async function entriesInDirectory(extent,size,visited,prefix=''){
+  if (visited.has(extent+':'+size)) return [];
+  visited.add(extent+':'+size);
+  if (size > 1024*1024*8) throw new Error('Excessively large ISO directory');
+  const data=await readAt(extent*sector,size), v=new DataView(data.buffer);
+  const out=[];
+  let p=0;
+  while(p<data.length){
+    const length=data[p];
+    if (!length){p=Math.ceil((p+1)/sector)*sector;continue;}
+    if (length<34||p+length>data.length) throw new Error('Bad ISO directory record');
+    const n=data[p+32];
+    if (33+n>length) throw new Error('Invalid ISO filename');
+    const name=data.slice(p+33,p+33+n);
+    if (!(n===1&&(name[0]===0||name[0]===1))){
+      const filename=new TextDecoder('ascii').decode(name).split(';')[0];
+      const path=prefix+'/'+filename;
+      const offset=u32(v,p+2)*sector, size=u32(v,p+10);
+      if (offset+size>disc.size) throw new Error('Directory entry outside disc: '+path);
+      if (data[p+25]&2) out.push(...await entriesInDirectory(offset/sector,size,visited,path));
+      else out.push({path,offset,size});
+    }
+    p+=length;
+  }
+  return out;
+}
+async function scanRSC(file){
+  const header=await readAt(file.offset,Math.min(file.size,1024));
+  const v=new DataView(header.buffer);
+  if (header[0]!==0x4d||header[1]!==0x5a||header.length<64) return {count:0,waves:[]};
+  const ne=u32(v,0x3c);
+  if(ne+0x28>file.size) return {count:0,waves:[]};
+  const nehead=await readAt(file.offset+ne,64),nv=new DataView(nehead.buffer);
+  if(nehead[0]!==0x4e||nehead[1]!==0x45) return {count:0,waves:[]};
+  const begin=ne+u16(nv,0x24),end=ne+u16(nv,0x26);
+  if(begin>=end||end>file.size||end-begin>1024*1024)throw Error('Bad NE resource table '+file.path);
+  const table=await readAt(file.offset+begin,end-begin), tv=new DataView(table.buffer);
+  const shift=u16(tv,0);if(shift>16)throw Error('Invalid NE alignment');
+  let p=2,count=0;const candidates=[];
+  while(p+2<=table.length){
+    const type=u16(tv,p);if(!type)break;
+    if(p+8>table.length)throw Error('Truncated resource group');
+    const n=u16(tv,p+2);p+=8;
+    if(n>5000||p+n*12>table.length)throw Error('Bad NE resource count');
+    for(let i=0;i<n;i++){
+      const off=u16(tv,p)<<shift, len=u16(tv,p+2)<<shift,id=u16(tv,p+6);
+      if(off+len>file.size)throw Error('NE resource out of bounds');
+      candidates.push({path:file.path,type:'0x'+type.toString(16),id:'0x'+id.toString(16),start:file.offset+off,length:len});
+      p+=12;count++;
+    }
+  }
+  const waves=[];
+  for(const c of candidates){
+    if(c.length<44)continue;
+    const h=await readAt(c.start,Math.min(c.length,44));
+    if(new TextDecoder('ascii').decode(h.slice(0,4))==='RIFF' &&
+       new TextDecoder('ascii').decode(h.slice(8,12))==='WAVE'){
+      const declared=new DataView(h.buffer).getUint32(4,true)+8;
+      if(declared>c.length || declared<44)continue;
+      waves.push({...c,wavBytes:declared});
+    }
+  }
+  return {count,waves};
+}
+function render(){
+  const q=element('filter').value.trim().toLowerCase();
+  const visible=resources.filter(r=>r.path.toLowerCase().includes(q));
+  const tbody=element('body');tbody.replaceChildren();
+  for(const r of visible.slice(0,350)){
+    const tr=document.createElement('tr');
+    tr.append(td(r.path),td(r.type),td(r.id),td(r.wavBytes+' B'));
+    const cell=document.createElement('td'),button=document.createElement('button');
+    button.textContent='Play';button.type='button';
+    button.onclick=async()=>{
+      button.disabled=true;
+      try{
+        if(audio){audio.pause();audio=null;}
+        if(lastURL){URL.revokeObjectURL(lastURL);lastURL=null;}
+        const raw=await readAt(r.start,r.wavBytes);
+        lastURL=URL.createObjectURL(new Blob([raw],{type:'audio/wav'}));
+        audio=new Audio(lastURL);
+        await audio.play();
+        element('status').textContent='Playing '+r.path+' '+r.id;
+      }catch(err){element('status').textContent='Playback failed: '+err.message;}
+      finally{button.disabled=false;}
+    };
+    cell.append(button);tr.append(cell);tbody.append(tr);
+  }
+}
+element('filter').addEventListener('input',render);
+element('disc').addEventListener('change',async function(){
+  disc=this.files[0];resources=[];element('results').hidden=true;
+  if(!disc)return;
+  try{
+    element('status').textContent='Reading ISO file manifest...';
+    const pvd=await readAt(16*sector,sector);
+    const view=new DataView(pvd.buffer);
+    if(pvd[0]!==1||new TextDecoder().decode(pvd.slice(1,6))!=='CD001')throw Error('Not ISO9660');
+    const label=new TextDecoder().decode(pvd.slice(40,72)).trim();
+    const roots=await entriesInDirectory(u32(view,156+2),u32(view,156+10),new Set());
+    const rsc=roots.filter(f=>f.path.toLowerCase().endsWith('.rsc'));
+    let count=0;
+    for(let i=0;i<rsc.length;i++){
+      const f=rsc[i];element('status').textContent=`Scanning ${i+1}/${rsc.length}: ${f.path}`;
+      const result=await scanRSC(f);count+=result.count;resources.push(...result.waves);
+    }
+    element('counts').textContent=`Volume ${label}; ${roots.length} files; ${rsc.length} RSC files; ${count} NE resources; ${resources.length} candidate RIFF/WAVE entries.`;
+    element('status').textContent='Scan complete. The page is a research tool only, not the original game.';
+    element('results').hidden=false;render();
+  }catch(error){element('status').textContent='Scan error: '+error.message;}
+});
+</script>
+</body>
+</html>
