@@ -24,7 +24,7 @@ textarea { width:100%; height:180px; margin-top:14px; font:12px monospace; backg
   <textarea id="out" readonly placeholder="Your data appears here. If the copy button doesn't work, select all of this text and copy it."></textarea>
 </div>
 <script>
-const KEYS = ['mlaHistory.v1', 'examSimulator_reviewBank_MLA', 'mlaSeen.v1', 'mlaFinalMock.v1', 'cheatQuiz.mla.v1', 'tripleShot.mla.v1', 'ruleOut.mla.v1', 'mlaConnections.v1', 'mlaExamVersion'];
+const KEYS = ['mlaReports.v1', 'mlaHistory.v1', 'examSimulator_reviewBank_MLA', 'mlaSeen.v1', 'mlaFinalMock.v1', 'cheatQuiz.mla.v1', 'tripleShot.mla.v1', 'ruleOut.mla.v1', 'mlaConnections.v1', 'mlaExamVersion'];
 function collect() {
   const out = { exported: new Date().toISOString() };
   for (const k of KEYS) {
