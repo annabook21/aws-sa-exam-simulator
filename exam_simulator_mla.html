@@ -1280,6 +1280,8 @@
             <div style="margin-top:16px;padding:14px;border:2px solid #7c3aed;border-radius:10px;">
                 <button class="btn" style="background:#7c3aed;" onclick="startExam(true)">📝 Exam Day Simulation (65 questions)</button>
                 <button class="btn" style="background:#b91c1c;margin-left:8px;" onclick="startExam('mock')">🏁 Final Mock (take once)</button>
+                <button class="btn" style="background:#0f766e;margin-left:8px;" onclick="startExam('bank')">🏦 Bank Round (10 original, doc-checked)</button>
+                <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Bank Round:</strong> 10 questions from the original MLA-C01 bank, only those whose community answer was checked against AWS documentation (123 in all). You never see a question again until every one has been shown; 20 minutes, so two minutes each. <span id="bankLeft"></span></p>
                 <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Final Mock:</strong> 40 held-out questions that never appear in practice (11 / 11 / 9 / 9), 90 minutes. Take it once, around Nov 9–10. Only the first attempt is a clean measure.</p>
                 <p style="font-size:0.85em;color:#6b7280;margin-top:8px;"><strong>Exam Day Simulation:</strong> the real C01 format. 65 questions, 130 minutes, domains weighted 18 / 17 / 14 / 16 like the guide (28 / 26 / 22 / 24%), with multiple choice, multiple response, ordering, matching and a case study. Questions you haven't seen come first. Mark how sure you are on each answer; the results show your score on unseen questions only and how often your "Sure" answers were actually right. No pass/fail verdict, just the numbers.</p>
             </div>
@@ -1755,6 +1757,7 @@ This notepad persists throughout your exam session."></textarea>
 
         // Initialize exam data when page loads
         window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(updateBankLeft, 0);
             // Initialize dark mode
             initDarkMode();
             
@@ -1789,6 +1792,14 @@ This notepad persists throughout your exam session."></textarea>
             isDiagnostic = diagnostic === true;
             isFinalMock = diagnostic === 'mock';
             const isWeakPractice = diagnostic === 'weak';
+            const isBankRound = diagnostic === 'bank';
+            if (isBankRound) {
+                document.getElementById('examVersion').value = 'c01';
+                document.getElementById('questionCount').value = '10';
+                document.getElementById('timeLimit').value = '20';
+                const fa = document.getElementById('focusArea').value;
+                if (fa === 'hard' || fa.startsWith('t')) document.getElementById('focusArea').value = 'all';
+            }
             if (isWeakPractice) {
                 document.getElementById('examVersion').value = 'c01';
                 document.getElementById('focusArea').value = 'all';
@@ -1848,6 +1859,20 @@ This notepad persists throughout your exam session."></textarea>
             if (isWeakPractice) {
                 selectedQuestions = buildWeakSpotSet(selectedQuestions);
                 document.getElementById('examTitle').textContent = 'Practice: My Weak Spots';
+            }
+
+            if (isBankRound) {
+                // Original C01 bank questions whose answer key was checked against AWS docs; unseen ones first,
+                // so no question repeats until all 123 have been shown (seen = finished rounds in this browser).
+                const seen = getSeenSet();
+                const bank = selectedQuestions.filter(isBankChecked);
+                const fresh = shuffle(bank.filter(q => !seen.has(q.number)));
+                const again = shuffle(bank.filter(q => seen.has(q.number)));
+                selectedQuestions = fresh.concat(again);
+                const need = 10, repeats = Math.max(0, need - fresh.length);
+                document.getElementById('examTitle').textContent = repeats
+                    ? `Bank Round (all ${bank.length} seen; ${repeats} of these are repeats)`
+                    : `Bank Round (${fresh.length} unseen before this round)`;
             }
 
             if (isDiagnostic) {
@@ -2518,6 +2543,13 @@ This notepad persists throughout your exam session."></textarea>
 
         // Questions seen in this simulator or in Triple Shot (same browser), so readiness checks can prefer new ones
         const SEEN_KEY = 'mlaSeen.v1';
+        function isBankChecked(q) { return q.number <= 145 && !q.origin && !q.mock && q.checkStatus === 'doc'; }
+        function updateBankLeft() {
+            const el = document.getElementById('bankLeft'); if (!el || typeof EXAM_DATA === 'undefined') return;
+            const seen = getSeenSet(); const bank = EXAM_DATA.filter(isBankChecked);
+            const left = bank.filter(q => !seen.has(q.number)).length;
+            el.textContent = left ? `Unseen right now: ${left} of ${bank.length}.` : `All ${bank.length} seen; rounds now repeat, least recently shown first.`;
+        }
         function getSeenSet() {
             const seen = new Set();
             try { (JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')).forEach(n => seen.add(n)); } catch (e) {}
@@ -2762,6 +2794,7 @@ This notepad persists throughout your exam session."></textarea>
             window.seenBeforeExam = seenBefore;
             window.diagnosticNewCount = examData.filter(q => !seenBefore.has(q.number)).length;
             markSeen(examData.map(q => q.number));
+            updateBankLeft();
             renderReadiness(detailedResults, correct);
             renderClaudeReport(detailedResults, correct, timeSpent);
 
