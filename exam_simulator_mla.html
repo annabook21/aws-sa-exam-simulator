@@ -2626,8 +2626,11 @@ This notepad persists throughout your exam session."></textarea>
         const DOMAIN_NAMES = {1: 'Data preparation (28%)', 2: 'Model development (26%)', 3: 'Deployment and orchestration (22%)', 4: 'Monitoring, maintenance, security (24%)'};
         function buildReportText(results, correct, timeSpent) {
             const t = results.length, pct = (100 * correct / t).toFixed(1);
-            const ans = r => r.userAnswer === null || r.userAnswer === undefined ? '-' : (Array.isArray(r.userAnswer) ? r.userAnswer.join('') : (typeof r.userAnswer === 'object' ? JSON.stringify(r.userAnswer) : String(r.userAnswer)));
-            const right = q => { const a = q.correct_answer; return Array.isArray(a) ? a.join('') : (typeof a === 'object' ? JSON.stringify(a) : String(a)); };
+            // matching questions keep the key in descriptions/features/tasks/use_cases, not in correct_answer
+            const matchTerms = q => q.descriptions ? q.descriptions.map(d => d.correct_term) : q.features ? q.features.map(f => f.correct_technique) : q.tasks ? q.tasks.map(x => x.correct_service) : q.use_cases ? q.use_cases.map(u => u.correct_task || u.correct_algorithm) : [];
+            const objVals = o => Object.keys(o).sort((a, b) => (parseInt(a.replace(/\D/g, '')) || 0) - (parseInt(b.replace(/\D/g, '')) || 0)).map(k => o[k]).join(';');
+            const ans = r => r.userAnswer === null || r.userAnswer === undefined ? '-' : (Array.isArray(r.userAnswer) ? r.userAnswer.join('') : (typeof r.userAnswer === 'object' ? objVals(r.userAnswer) : String(r.userAnswer)));
+            const right = q => { if (getQuestionType(q) === 'hotspot-match') return matchTerms(q).join(';'); const a = q.correct_answer; return Array.isArray(a) ? a.join('') : (a && typeof a === 'object' ? objVals(a) : String(a)); };
             const tally = (keyFn) => { const m = {}; results.forEach(r => { const k = keyFn(r); if (k === null || k === undefined || k === '') return; m[k] = m[k] || {c: 0, t: 0}; m[k].t++; if (r.isCorrect) m[k].c++; }); return m; };
             const byD = tally(r => r.question.domain), byT = tally(r => r.question.task);
             const fmt = (m, name) => Object.keys(m).sort().map(k => `${name(k)} ${m[k].c}/${m[k].t} (${Math.round(100 * m[k].c / m[k].t)}%)`).join(' | ');
