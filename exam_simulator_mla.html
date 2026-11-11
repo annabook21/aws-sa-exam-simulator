@@ -1307,6 +1307,7 @@
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                         </svg>
                         <span id="timeRemaining">00:00:00</span>
+                        <span id="qClock" title="time on this question" style="margin-left:12px;font-variant-numeric:tabular-nums;opacity:0.85;">Q 0:00</span>
                     </div>
                 </div>
             </div>
@@ -1929,6 +1930,20 @@ This notepad persists throughout your exam session."></textarea>
             buildQuestionGrid();
             currentQuestionIndex = 0;
             loadQuestion(0);
+            startQuestionClock();
+        }
+
+        // Per-question clock: shows seconds on the current question, red past two minutes (the exam's budget).
+        let qClockInterval = null;
+        function startQuestionClock() {
+            clearInterval(qClockInterval);
+            qClockInterval = setInterval(() => {
+                const el = document.getElementById('qClock'); if (!el) return;
+                const s = Math.round((questionTimes[currentQuestionIndex] || 0) + (qShownAt ? (Date.now() - qShownAt) / 1000 : 0));
+                el.textContent = `Q ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+                el.style.color = s >= 120 ? '#ef4444' : '';
+                el.style.fontWeight = s >= 120 ? '700' : '';
+            }, 1000);
         }
 
         function shuffle(array) {
@@ -2681,7 +2696,7 @@ This notepad persists throughout your exam session."></textarea>
             const flagged = results.filter(r => markedQuestions[r.index]).map(r => '#' + r.question.number).join(' ');
             const unanswered = results.filter(r => r.userAnswer === null || r.userAnswer === undefined).length;
             const lines = ['MLA REPORT v1',
-                `mode: ${document.getElementById('examTitle').textContent} | date: ${new Date().toISOString()} | score: ${correct}/${t} (${pct}%) | time: ${formatTime(timeSpent)} | unanswered: ${unanswered}`,
+                `mode: ${document.getElementById('examTitle').textContent} (${testMode === 'study' ? 'study mode, answering time only' : 'exam mode'}) | date: ${new Date().toISOString()} | score: ${correct}/${t} (${pct}%) | time: ${formatTime(timeSpent)} | unanswered: ${unanswered}`,
                 `domains: ${fmt(byD, k => 'D' + k + ' ' + (DOMAIN_NAMES[k] || ''))}`,
                 `tasks: ${fmt(byT, k => k + ' ' + (TASK_NAMES[k] || ''))}`,
                 `pace: avg ${avg}s/question | over 3 min: ${secs.filter(x => x > 180).length} | slowest: ${slow}`,
@@ -2734,6 +2749,7 @@ This notepad persists throughout your exam session."></textarea>
             }
 
             clearInterval(timerInterval);
+            clearInterval(qClockInterval);
             if (qShownAt) { questionTimes[currentQuestionIndex] = (questionTimes[currentQuestionIndex] || 0) + (Date.now() - qShownAt) / 1000; qShownAt = 0; }
 
             // Save marked questions to review bank
@@ -3076,6 +3092,7 @@ This notepad persists throughout your exam session."></textarea>
                 feedback.style.display = 'none';
                 return;
             }
+            if (qShownAt) { questionTimes[currentQuestionIndex] = (questionTimes[currentQuestionIndex] || 0) + (Date.now() - qShownAt) / 1000; qShownAt = 0; }
 
             const isCorrect = checkAnswer(question, userAnswer);
             const questionType = getQuestionType(question);
