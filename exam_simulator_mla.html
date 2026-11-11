@@ -2505,7 +2505,11 @@ This notepad persists throughout your exam session."></textarea>
                 versionSelect.value = saved;
                 versionSelect.dispatchEvent(new Event('change'));
             }
-            if (new URLSearchParams(location.search).get('practice') === 'weak') {
+            const practiceParam = new URLSearchParams(location.search).get('practice');
+            if (practiceParam === 'bank') {
+                window.addEventListener('load', () => setTimeout(() => startExam('bank'), 0));
+            }
+            if (practiceParam === 'weak') {
                 window.addEventListener('load', () => setTimeout(() => startExam('weak'), 0));
             }
             // Preset links from the study plan, e.g. ?version=c01&focus=t1.1&mode=study&count=10
