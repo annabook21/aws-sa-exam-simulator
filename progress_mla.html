@@ -58,7 +58,8 @@ const bar = (name, ok, n) => { const p = Math.round(ok / n * 100); return `<div 
 const practice = H.filter(r => !r.mock);
 if (!practice.length) {
   app.innerHTML = `<div class="card"><h2>No answers recorded yet</h2><p>Tracking starts now. Answer questions in the simulator (study or exam mode) and this page fills in automatically. Until there's enough data, the button below starts from your score report: Domain 2 training and metrics, then Domain 1.</p></div>
-    <a class="go" href="exam_simulator_mla.html?practice=weak">🎯 Practice my weak spots (20 questions)</a>`;
+    <a class="go" href="exam_simulator_mla.html?practice=weak">🎯 Practice my weak spots (20 questions)</a>
+    <a class="go" style="margin-top:8px" href="arcade_mla.html">Exam Round: the same questions, eight at a time</a>`;
 } else {
   const ok = practice.filter(r => r.ok).length;
   const week = practice.filter(r => r.at > Date.now() - 7 * 864e5).length;
@@ -90,6 +91,7 @@ if (!practice.length) {
     <div class="card"><h2>🎯 Your weakest areas right now</h2>
       ${weak.length ? weak.map(w => bar(label(w.k), w.n - w.miss, w.n)).join('') : '<p class="muted">Answer at least 3 questions in an area to rank it.</p>'}
       <a class="go" style="margin-top:12px" href="exam_simulator_mla.html?practice=weak">Practice my weak spots (20 questions)</a>
+      <a class="go" style="margin-top:8px" href="arcade_mla.html">Exam Round: the same questions, eight at a time</a>
       <p class="small muted">Each set mixes questions you got wrong and haven't answered right since with new questions from these areas. It updates after every set.</p>
     </div>
     <div class="card"><h2>By domain</h2>${[1, 2, 3, 4].filter(d => dom[d]).map(d => bar(DOMS[d], dom[d].ok, dom[d].n)).join('') || '<p class="muted">No data yet.</p>'}</div>

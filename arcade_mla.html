@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Round · MLA</title>
+<style>
+:root { --bg:#f4efe4; --card:#fffaf2; --ink:#2a241c; --muted:#6e6256; --line:#e2d3bc; --accent:#0f6e6e; --good:#1f7a45; --goodbg:#e5f6ec; --bad:#a33b32; --badbg:#fdeceb; color-scheme:light; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg:#1a1714; --card:#26211c; --ink:#f6efe4; --muted:#cbbba6; --line:#4a4036; --accent:#7dcec6; --good:#8ddeaf; --goodbg:#1a3326; --bad:#ffb1a8; --badbg:#3d2422; color-scheme:dark; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 Georgia, "Iowan Old Style", Palatino, serif; }
+.wrap { max-width:720px; margin:0 auto; padding:18px 16px 48px; }
+.top { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+h1 { font-size:1.45rem; margin:0; letter-spacing:-0.02em; }
+select { font:inherit; border:2px solid var(--line); background:var(--card); color:var(--ink); border-radius:10px; padding:8px 12px; }
+.bar { height:10px; background:var(--line); border-radius:99px; margin:14px 0; overflow:hidden; border:2px solid var(--line); }
+.bar span { display:block; height:100%; background:var(--accent); }
+.note { color:var(--muted); margin:0 0 12px; }
+.card { background:var(--card); border:3px solid var(--ink); border-radius:18px; padding:18px; box-shadow:4px 4px 0 var(--ink); }
+.label { color:var(--muted); font-size:.85rem; margin-bottom:4px; font-family:ui-sans-serif, system-ui, sans-serif; }
+.stem { font-size:1.08rem; margin:0 0 12px; }
+.opt { display:block; width:100%; text-align:left; font:inherit; padding:12px 14px; margin:8px 0; border-radius:12px; border:3px solid var(--ink); background:var(--card); color:var(--ink); cursor:pointer; }
+.opt b { font-family:ui-sans-serif, system-ui, sans-serif; }
+.opt:hover:not(:disabled) { background:#fff4d6; }
+.opt.on { outline:3px solid var(--accent); }
+.opt.right { border-color:var(--good); background:var(--goodbg); }
+.opt.wrong { border-color:var(--bad); background:var(--badbg); }
+.opt:disabled { cursor:default; }
+.why { margin-top:12px; padding:12px 14px; border-radius:12px; background:var(--goodbg); }
+.why.miss { background:var(--badbg); }
+.why b { display:block; margin-bottom:4px; font-family:ui-sans-serif, system-ui, sans-serif; }
+.next { margin-top:12px; width:100%; padding:12px; font:inherit; font-size:1.05rem; background:var(--accent); color:#fff; border:3px solid var(--ink); border-radius:12px; cursor:pointer; }
+.score, .small { color:var(--muted); font-size:.9rem; font-family:ui-sans-serif, system-ui, sans-serif; }
+.big { font-size:2.2rem; font-weight:700; }
+.done { text-align:center; }
+a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Exam Round</h1>
+    <select id="focus" aria-label="Which questions">
+      <option value="weak">Weak spots</option>
+      <option value="all">All questions</option>
+      <option value="1">Domain 1</option>
+      <option value="2">Domain 2</option>
+      <option value="3">Domain 3</option>
+      <option value="4">Domain 4</option>
+    </select>
+  </div>
+  <div class="bar"><span id="bar"></span></div>
+  <p class="note" id="note"></p>
+  <div id="app"></div>
+  <p class="small">These are the MLA practice questions already in this site, not a separate card deck. Keys A–E pick an answer. Enter locks in a multi-select or moves on. Misses are saved to <a href="progress_mla.html">My Progress</a>. <a href="exam_simulator_mla.html">Full simulator</a></p>
+</div>
+<script src="exam_data3.js"></script>
+<script src="exam_data3_c02.js"></script>
+<script src="exam_data3_c02b.js"></script>
+<script src="exam_data3_c02c.js"></script>
+<script src="exam_data3_c01gap.js"></script>
+<script src="exam_data3_c01hard.js"></script>
+<script src="exam_data3_c01gap2.js"></script>
+<script src="exam_data3_c01mock.js"></script>
+<script src="exam_data3_c01types.js"></script>
+<script src="exam_domains.js"></script>
+<script src="exam_c01_explanations.js"></script>
+<script src="activity/config.js"></script>
+<script src="activity/select.js"></script>
+<script src="activity/play.js"></script>
+</body>
+</html>
